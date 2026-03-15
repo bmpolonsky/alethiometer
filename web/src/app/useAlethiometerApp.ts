@@ -17,11 +17,19 @@ import type {
   ThemeMode,
 } from "../domain/types";
 
-interface PendingReading {
-  questionSymbols: number[];
-  answerSymbols: number[];
-  durationMs: number;
-  endsAt: number;
+interface ReadingStop {
+  symbolId: number;
+  startAngle: number;
+  stopAngle: number;
+  startTimeMs: number;
+  arriveTimeMs: number;
+  endTimeMs: number;
+}
+
+interface ReadingMotion {
+  startedAt: number;
+  totalDurationMs: number;
+  stops: ReadingStop[];
 }
 
 interface SaveReadingDraft {
@@ -73,6 +81,46 @@ function createRevealTrail(from: number, to: number) {
   return [...trail, to];
 }
 
+function forwardSymbolDistance(from: number, to: number) {
+  const normalized = wrapSymbolId(to - from);
+
+  return normalized === 0 ? 36 : normalized;
+}
+
+function buildReadingMotion(startSymbol: number, answerSymbols: number[]): ReadingMotion {
+  let currentSymbol = startSymbol;
+  let currentAngle = startSymbol * 10;
+  let currentTimeMs = 0;
+
+  const stops = answerSymbols.map((symbolId) => {
+    const distance = forwardSymbolDistance(currentSymbol, symbolId);
+    const angleDelta = distance * 10;
+    const moveDurationMs = Math.max(520, Math.round((distance / 36) * 2200));
+    const holdDurationMs = 1500;
+    const stopAngle = currentAngle + angleDelta;
+    const stop: ReadingStop = {
+      symbolId,
+      startAngle: currentAngle,
+      stopAngle,
+      startTimeMs: currentTimeMs,
+      arriveTimeMs: currentTimeMs + moveDurationMs,
+      endTimeMs: currentTimeMs + moveDurationMs + holdDurationMs,
+    };
+
+    currentSymbol = symbolId;
+    currentAngle = stopAngle;
+    currentTimeMs = stop.endTimeMs;
+
+    return stop;
+  });
+
+  return {
+    startedAt: performance.now(),
+    totalDurationMs: currentTimeMs,
+    stops,
+  };
+}
+
 function normalizeOptionalText(value?: string) {
   const normalized = value?.trim();
 
@@ -95,17 +143,15 @@ export function useAlethiometerApp() {
   const [activeHand, setActiveHand] = useState<HandId>("query-1");
   const [draftMeaningItems, setDraftMeaningItems] = useState<string[]>([]);
   const [newMeaningDraft, setNewMeaningDraft] = useState("");
+  const [isEditingMeanings, setIsEditingMeanings] = useState(false);
   const [answerSymbols, setAnswerSymbols] = useState<number[]>([]);
-  const [revealPlan, setRevealPlan] = useState<number[]>([]);
-  const [answerHandSymbolId, setAnswerHandSymbolId] = useState<number | null>(
-    null,
+  const [answerHandAngle, setAnswerHandAngle] = useState(
+    persisted.hands["query-3"] * 10,
   );
   const [status, setStatus] = useState<"idle" | "countdown" | "revealing">(
     "idle",
   );
-  const [pendingReading, setPendingReading] = useState<PendingReading | null>(
-    null,
-  );
+  const [readingMotion, setReadingMotion] = useState<ReadingMotion | null>(null);
   const [countdownProgress, setCountdownProgress] = useState(0);
   const [countdownSecondsLeft, setCountdownSecondsLeft] = useState(0);
   const [openedReadingId, setOpenedReadingId] = useState<string | null>(null);
@@ -130,101 +176,93 @@ export function useAlethiometerApp() {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
-  const finishCountdown = useEffectEvent(() => {
-    if (!pendingReading) {
-      return;
+  const completeReadingMotion = useEffectEvent((motion: ReadingMotion) => {
+    const finalStop = motion.stops.at(-1);
+
+    if (finalStop) {
+      setAnswerHandAngle(finalStop.stopAngle);
     }
 
-    setPendingReading(null);
+    setReadingMotion(null);
     setCountdownProgress(1);
     setCountdownSecondsLeft(0);
-    setRevealPlan(pendingReading.answerSymbols);
-    setAnswerSymbols([]);
-    setAnswerHandSymbolId(pendingReading.questionSymbols[2] ?? null);
-    setOpenedReadingId(null);
-    setStatus("revealing");
+    setStatus("idle");
   });
 
   useEffect(() => {
-    if (!pendingReading) {
+    if (!readingMotion) {
       return;
     }
 
     let frame = 0;
+    let revealedCount = 0;
 
-    const loop = () => {
-      const remainingMs = pendingReading.endsAt - Date.now();
+    const tick = () => {
+      const elapsedMs = performance.now() - readingMotion.startedAt;
+      const remainingMs = Math.max(readingMotion.totalDurationMs - elapsedMs, 0);
+      const currentStop =
+        readingMotion.stops.find((stop) => elapsedMs < stop.endTimeMs) ??
+        readingMotion.stops.at(-1);
 
-      if (remainingMs <= 0) {
-        finishCountdown();
+      if (!currentStop) {
+        completeReadingMotion(readingMotion);
         return;
       }
 
-      setCountdownProgress(1 - remainingMs / pendingReading.durationMs);
+      if (elapsedMs < currentStop.arriveTimeMs) {
+        const moveProgress =
+          currentStop.arriveTimeMs === currentStop.startTimeMs
+            ? 1
+            : Math.min(
+                Math.max(
+                  (elapsedMs - currentStop.startTimeMs) /
+                    (currentStop.arriveTimeMs - currentStop.startTimeMs),
+                  0,
+                ),
+                1,
+              );
+
+        setAnswerHandAngle(
+          currentStop.startAngle + (currentStop.stopAngle - currentStop.startAngle) * moveProgress,
+        );
+      } else {
+        setAnswerHandAngle(currentStop.stopAngle);
+
+        while (
+          revealedCount < readingMotion.stops.length &&
+          elapsedMs >= readingMotion.stops[revealedCount]!.arriveTimeMs
+        ) {
+          const revealedSymbol = readingMotion.stops[revealedCount]!.symbolId;
+
+          startTransition(() => {
+            setAnswerSymbols((current) => [...current, revealedSymbol]);
+            setSelectedSymbolId(revealedSymbol);
+          });
+          revealedCount += 1;
+        }
+      }
+
+      setCountdownProgress(
+        readingMotion.totalDurationMs > 0
+          ? Math.min(elapsedMs / readingMotion.totalDurationMs, 1)
+          : 1,
+      );
       setCountdownSecondsLeft(Math.ceil(remainingMs / 1000));
-      frame = window.requestAnimationFrame(loop);
+
+      if (elapsedMs >= readingMotion.totalDurationMs) {
+        completeReadingMotion(readingMotion);
+        return;
+      }
+
+      frame = window.requestAnimationFrame(tick);
     };
 
-    frame = window.requestAnimationFrame(loop);
+    frame = window.requestAnimationFrame(tick);
 
     return () => {
       window.cancelAnimationFrame(frame);
     };
-  }, [finishCountdown, pendingReading]);
-
-  useEffect(() => {
-    if (status !== "revealing") {
-      return;
-    }
-
-    if (answerSymbols.length >= revealPlan.length) {
-      const settleTimeout = window.setTimeout(() => {
-        setStatus("idle");
-      }, 680);
-
-      return () => {
-        window.clearTimeout(settleTimeout);
-      };
-    }
-
-    const nextSymbol = revealPlan[answerSymbols.length];
-
-    if (nextSymbol == null) {
-      return;
-    }
-
-    const previousSymbol =
-      answerSymbols.at(-1) ??
-      hands["query-3"] ??
-      hands["query-2"] ??
-      hands["query-1"];
-    const trail = createRevealTrail(previousSymbol, nextSymbol);
-    const timeouts: number[] = [];
-
-    trail.forEach((symbolId, index) => {
-      const timeout = window.setTimeout(() => {
-        setAnswerHandSymbolId(symbolId);
-      }, index * 180);
-
-      timeouts.push(timeout);
-    });
-
-    const revealDelay = trail.length * 180 + 260;
-    const commitDelay = revealDelay + 320;
-
-    timeouts.push(
-      window.setTimeout(() => {
-        startTransition(() => {
-          setAnswerSymbols((current) => [...current, nextSymbol]);
-          setSelectedSymbolId(nextSymbol);
-        });
-      }, commitDelay),
-    );
-
-    return () => {
-      timeouts.forEach((timeout) => window.clearTimeout(timeout));
-    };
-  }, [answerSymbols, hands, revealPlan, status]);
+  }, [completeReadingMotion, readingMotion]);
 
   function patchPersisted(patch: Partial<PersistedState>) {
     setPersisted((current) => ({
@@ -234,10 +272,8 @@ export function useAlethiometerApp() {
   }
 
   function clearCurrentAnswer() {
-    setPendingReading(null);
-    setRevealPlan([]);
     setAnswerSymbols([]);
-    setAnswerHandSymbolId(null);
+    setReadingMotion(null);
     setCountdownProgress(0);
     setCountdownSecondsLeft(0);
     setOpenedReadingId(null);
@@ -251,11 +287,34 @@ export function useAlethiometerApp() {
     }));
   }
 
+  function flushMeaningDraft(symbolId: number) {
+    if (!isEditingMeanings) {
+      return;
+    }
+
+    const nextItems = newMeaningDraft.trim()
+      ? [...draftMeaningItems, newMeaningDraft]
+      : draftMeaningItems;
+
+    persistDraftMeaning(symbolId, nextItems);
+    setDraftMeaningItems([]);
+    setNewMeaningDraft("");
+    setIsEditingMeanings(false);
+  }
+
   function chooseSymbol(symbolId: number) {
+    if (symbolId !== selectedSymbolId) {
+      flushMeaningDraft(selectedSymbolId);
+    }
+
     setSelectedSymbolId(symbolId);
   }
 
   function inspectSymbol(symbolId: number) {
+    if (symbolId !== selectedSymbolId) {
+      flushMeaningDraft(selectedSymbolId);
+    }
+
     setSelectedSymbolId(symbolId);
   }
 
@@ -323,19 +382,13 @@ export function useAlethiometerApp() {
       hands["query-3"],
     ];
     const generated = createReading(questionSymbols);
-    const durationMs = generated.waitSeconds * 1000;
+    const motion = buildReadingMotion(questionSymbols[2], generated.answerSymbols);
 
-    setPendingReading({
-      questionSymbols,
-      answerSymbols: generated.answerSymbols,
-      durationMs,
-      endsAt: Date.now() + durationMs,
-    });
-    setRevealPlan(generated.answerSymbols);
+    setReadingMotion(motion);
     setAnswerSymbols([]);
-    setAnswerHandSymbolId(null);
+    setAnswerHandAngle(questionSymbols[2] * 10);
     setCountdownProgress(0);
-    setCountdownSecondsLeft(generated.waitSeconds);
+    setCountdownSecondsLeft(Math.ceil(motion.totalDurationMs / 1000));
     setOpenedReadingId(null);
     setStatus("countdown");
   }
@@ -377,12 +430,11 @@ export function useAlethiometerApp() {
       "query-2": entry.questionSymbols[1] ?? hands["query-2"],
       "query-3": entry.questionSymbols[2] ?? hands["query-3"],
     });
-    setPendingReading(null);
+    setReadingMotion(null);
     setCountdownProgress(0);
     setCountdownSecondsLeft(0);
-    setRevealPlan(entry.answerSymbols);
     setAnswerSymbols(entry.answerSymbols);
-    setAnswerHandSymbolId(entry.answerSymbols.at(-1) ?? null);
+    setAnswerHandAngle((entry.answerSymbols.at(-1) ?? entry.questionSymbols[2] ?? 0) * 10);
     setSelectedSymbolId(entry.answerSymbols[0] ?? entry.questionSymbols[0] ?? 0);
     setOpenedReadingId(entry.id);
     setStatus("idle");
@@ -443,18 +495,13 @@ export function useAlethiometerApp() {
   }
 
   function closeLexicon() {
-    const nextItems = newMeaningDraft.trim()
-      ? [...draftMeaningItems, newMeaningDraft]
-      : draftMeaningItems;
-
-    persistDraftMeaning(selectedSymbolId, nextItems);
-    setDraftMeaningItems([]);
-    setNewMeaningDraft("");
+    flushMeaningDraft(selectedSymbolId);
   }
 
   function openLexicon() {
     setDraftMeaningItems([...personalMeaningItems]);
     setNewMeaningDraft("");
+    setIsEditingMeanings(true);
   }
 
   return {
@@ -467,11 +514,12 @@ export function useAlethiometerApp() {
     currentSymbol,
     defaultMeaningItems,
     personalMeaningItems,
+    isEditingMeanings,
     draftMeaningItems,
     newMeaningDraft,
     journal,
     answerSymbols,
-    answerHandSymbolId,
+    answerHandAngle,
     countdownProgress,
     countdownSecondsLeft,
     symbolCatalog,

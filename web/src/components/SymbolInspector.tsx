@@ -1,3 +1,4 @@
+import { formatBaseMeaningItem } from "../domain/meanings";
 import type { Locale, SymbolEntry } from "../domain/types";
 
 interface SymbolInspectorProps {
@@ -54,7 +55,7 @@ export function SymbolInspector({
             <p className="meaning-label">{copy.defaultMeaning}</p>
             <ul className="meaning-list">
               {defaultMeaningItems.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item}>{formatBaseMeaningItem(item)}</li>
               ))}
             </ul>
           </div>

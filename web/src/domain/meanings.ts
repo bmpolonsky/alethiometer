@@ -25,3 +25,13 @@ export function sanitizeMeaningItems(value: unknown): string[] {
     value.filter((item): item is string => typeof item === "string"),
   );
 }
+
+export function formatBaseMeaningItem(item: string) {
+  const normalized = item.trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  return normalized.charAt(0).toLocaleLowerCase() + normalized.slice(1);
+}

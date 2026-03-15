@@ -8,9 +8,7 @@ import {
 
 interface DialProps {
   hands: Record<HandId, number>;
-  activeHand: HandId;
-  answerHandSymbolId: number | null;
-  countdownProgress: number;
+  answerHandAngle: number;
   interactive: boolean;
   onInspectSymbol: (symbolId: number) => void;
   onFocusHand: (handId: HandId) => void;
@@ -91,10 +89,6 @@ const wheelConfigs: Array<{
   { handId: "query-3", offsetX: 243, offsetY: 148, rotationDeg: 120 },
 ];
 
-function normalizeAngleDifference(target: number, current: number) {
-  return ((((target - current) % 360) + 540) % 360) - 180;
-}
-
 function renderAtlasCrop(
   frame: { x: number; y: number; width: number; height: number },
   offsetX: number,
@@ -114,9 +108,7 @@ function renderAtlasCrop(
 
 export function Dial({
   hands,
-  activeHand,
-  answerHandSymbolId,
-  countdownProgress,
+  answerHandAngle,
   interactive,
   onInspectSymbol,
   onFocusHand,
@@ -142,13 +134,8 @@ export function Dial({
     "query-2": hands["query-2"] * 10,
     "query-3": hands["query-3"] * 10,
   });
-  const [displayAnswerAngle, setDisplayAnswerAngle] = useState(
-    answerHandSymbolId != null ? answerHandSymbolId * 10 : 0,
-  );
-  const answerAngleRef = useRef(displayAnswerAngle);
   const glareX = Math.round(DIAL_GEOMETRY.centerX - atlasFrames.glare.pivotX);
   const glareY = Math.round(DIAL_GEOMETRY.centerY - atlasFrames.glare.pivotY);
-  const circumference = 2 * Math.PI * DIAL_GEOMETRY.progressRadius;
   const targetAngles = useMemo(
     () => ({
       "query-1": hands["query-1"] * 10,
@@ -161,46 +148,6 @@ export function Dial({
   useEffect(() => {
     setDisplayAngles(targetAngles);
   }, [targetAngles]);
-
-  useEffect(() => {
-    answerAngleRef.current = displayAnswerAngle;
-  }, [displayAnswerAngle]);
-
-  useEffect(() => {
-    if (answerHandSymbolId == null) {
-      return;
-    }
-
-    let frame = 0;
-    const target = answerHandSymbolId * 10;
-    const from = answerAngleRef.current;
-    const diff = normalizeAngleDifference(target, from);
-    const duration = 430;
-    const startedAt = performance.now();
-
-    const tick = () => {
-      const elapsed = performance.now() - startedAt;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const nextAngle = from + diff * eased;
-
-      answerAngleRef.current = nextAngle;
-      setDisplayAnswerAngle(nextAngle);
-
-      if (progress < 1) {
-        frame = window.requestAnimationFrame(tick);
-      } else {
-        answerAngleRef.current = target;
-        setDisplayAnswerAngle(target);
-      }
-    };
-
-    frame = window.requestAnimationFrame(tick);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-    };
-  }, [answerHandSymbolId]);
 
   function inspectByPointer(clientX: number, clientY: number) {
     const svg = svgRef.current;
@@ -328,11 +275,6 @@ export function Dial({
               />
             </clipPath>
           ))}
-          <radialGradient id="countdown-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(255,242,204,0.42)" />
-            <stop offset="70%" stopColor="rgba(255,242,204,0.08)" />
-            <stop offset="100%" stopColor="rgba(255,242,204,0)" />
-          </radialGradient>
           <filter id="hand-shadow" x="-50%" y="-50%" width="200%" height="200%">
             <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="rgba(0,0,0,0.34)" />
           </filter>
@@ -342,34 +284,6 @@ export function Dial({
         </defs>
 
         <g clipPath="url(#dial-device-clip)">{renderAtlasCrop(atlasFrames.device, 0, 0)}</g>
-
-        <circle
-          cx={DIAL_GEOMETRY.centerX}
-          cy={DIAL_GEOMETRY.centerY}
-          r={DIAL_GEOMETRY.progressRadius}
-          fill="url(#countdown-glow)"
-          opacity={0.78}
-        />
-        <circle
-          cx={DIAL_GEOMETRY.centerX}
-          cy={DIAL_GEOMETRY.centerY}
-          r={DIAL_GEOMETRY.progressRadius}
-          fill="none"
-          stroke="rgba(255, 246, 211, 0.12)"
-          strokeWidth="4"
-        />
-        <circle
-          cx={DIAL_GEOMETRY.centerX}
-          cy={DIAL_GEOMETRY.centerY}
-          r={DIAL_GEOMETRY.progressRadius}
-          fill="none"
-          stroke="rgba(255, 239, 190, 0.84)"
-          strokeWidth="4"
-          strokeDasharray={circumference}
-          strokeDashoffset={circumference * (1 - countdownProgress)}
-          strokeLinecap="round"
-          transform={`rotate(-90 ${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY})`}
-        />
 
         {Array.from({ length: 36 }, (_, symbolId) => {
           const startAngle = symbolId * 10 - 5;
@@ -417,7 +331,7 @@ export function Dial({
         })}
 
         <g
-          transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${displayAnswerAngle})`}
+          transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${answerHandAngle})`}
           filter="url(#answer-glow)"
           opacity={0.98}
         >

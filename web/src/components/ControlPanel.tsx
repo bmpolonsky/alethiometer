@@ -8,7 +8,6 @@ interface ControlPanelProps {
     ask: string;
     saveReading: string;
     countdownStatus: string;
-    revealStatus: string;
     answerTitle: string;
     answerPlaceholder: string;
   };
@@ -19,7 +18,7 @@ interface ControlPanelProps {
   status: "idle" | "countdown" | "revealing";
   canSaveReading: boolean;
   answerSymbols: number[];
-  onFocusHand: (handId: HandId) => void;
+  onOpenPicker: (handId: HandId) => void;
   onAsk: () => void;
   onSaveReading: () => void;
   onInspectSymbol: (symbolId: number) => void;
@@ -35,17 +34,13 @@ export function ControlPanel({
   status,
   canSaveReading,
   answerSymbols,
-  onFocusHand,
+  onOpenPicker,
   onAsk,
   onSaveReading,
   onInspectSymbol,
 }: ControlPanelProps) {
   const statusText =
-    status === "countdown"
-      ? `${copy.countdownStatus} ${countdownSecondsLeft}s`
-      : status === "revealing"
-        ? copy.revealStatus
-        : null;
+    status === "countdown" ? `${copy.countdownStatus} ${countdownSecondsLeft}s` : null;
   const hasAnswer = answerSymbols.length > 0;
 
   return (
@@ -61,7 +56,7 @@ export function ControlPanel({
                 <button
                   key={handId}
                   className={`selection-card ${activeHand === handId ? "is-active" : ""}`}
-                  onClick={() => onFocusHand(handId)}
+                  onClick={() => onOpenPicker(handId)}
                   type="button"
                 >
                   <img alt="" className="selection-card-image" src={symbol?.imageSrc} />
@@ -119,12 +114,6 @@ export function ControlPanel({
             {copy.saveReading}
           </button>
         </div>
-      </div>
-
-      <div className="status-row">
-        <p className={`status-inline ${statusText && hasAnswer ? "" : "is-hidden"}`}>
-          {statusText ?? copy.answerPlaceholder}
-        </p>
       </div>
     </section>
   );

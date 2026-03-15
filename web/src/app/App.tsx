@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { ControlPanel } from "../components/ControlPanel";
 import { Dial } from "../components/Dial";
 import { MenuDropdown } from "../components/MenuDropdown";
+import { QuestionSymbolPicker } from "../components/QuestionSymbolPicker";
 import { ReferencePanel } from "../components/ReferencePanel";
 import { SaveReadingDialog } from "../components/SaveReadingDialog";
 import { SettingsDrawer } from "../components/SettingsDrawer";
 import { SymbolInspector } from "../components/SymbolInspector";
 import { uiText } from "../domain/uiText";
-import type { MenuSection } from "../domain/types";
+import type { HandId, MenuSection } from "../domain/types";
 import { useAlethiometerApp } from "./useAlethiometerApp";
 
 export function App() {
@@ -18,6 +19,7 @@ export function App() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [saveQuestionText, setSaveQuestionText] = useState("");
   const [saveAnswerText, setSaveAnswerText] = useState("");
+  const [pickerHand, setPickerHand] = useState<HandId | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -38,17 +40,9 @@ export function App() {
     };
   }, [menuExpanded]);
 
-  function closeLexiconIfNeeded(nextSection: MenuSection | null) {
-    if (drawerSection === "lexicon" && nextSection !== "lexicon") {
-      app.closeLexicon();
-    }
-  }
-
   function openDrawer(section: MenuSection) {
-    closeLexiconIfNeeded(section);
-
-    if (section === "lexicon") {
-      app.openLexicon();
+    if (section !== "symbols") {
+      app.closeLexicon();
     }
 
     setDrawerSection(section);
@@ -56,8 +50,14 @@ export function App() {
   }
 
   function closeDrawer() {
-    closeLexiconIfNeeded(null);
+    app.closeLexicon();
     setDrawerSection(null);
+  }
+
+  function openSymbolEditor() {
+    setDrawerSection("symbols");
+    setMenuExpanded(false);
+    app.openLexicon();
   }
 
   function beginSaveReading() {
@@ -78,6 +78,24 @@ export function App() {
 
   function inspectSymbolFromDrawer(symbolId: number) {
     app.inspectSymbol(symbolId);
+  }
+
+  function openQuestionPicker(handId: HandId) {
+    app.focusHand(handId);
+    setPickerHand(handId);
+  }
+
+  function closeQuestionPicker() {
+    setPickerHand(null);
+  }
+
+  function applyQuestionSymbol(symbolId: number) {
+    if (!pickerHand) {
+      return;
+    }
+
+    app.setHandSymbol(pickerHand, symbolId);
+    setPickerHand(null);
   }
 
   function openReadingFromDrawer(entry: (typeof app.journal)[number]) {
@@ -110,7 +128,7 @@ export function App() {
             hands={app.hands}
             locale={app.locale}
             onAsk={app.askAlethiometer}
-            onFocusHand={app.focusHand}
+            onOpenPicker={openQuestionPicker}
             onInspectSymbol={app.inspectSymbol}
             onSaveReading={beginSaveReading}
             status={app.status}
@@ -119,9 +137,7 @@ export function App() {
 
           <div className="panel instrument-panel">
             <Dial
-              activeHand={app.activeHand}
-              answerHandSymbolId={app.answerHandSymbolId}
-              countdownProgress={app.countdownProgress}
+              answerHandAngle={app.answerHandAngle}
               hands={app.hands}
               interactive={app.status === "idle"}
               onFocusHand={app.focusHand}
@@ -160,7 +176,7 @@ export function App() {
             copy={copy}
             defaultMeaningItems={app.defaultMeaningItems}
             locale={app.locale}
-            onOpenLexicon={() => openDrawer("lexicon")}
+            onOpenLexicon={openSymbolEditor}
             personalMeaningItems={app.personalMeaningItems}
             symbol={app.currentSymbol}
           />
@@ -176,16 +192,18 @@ export function App() {
         copy={copy}
         defaultMeaningItems={app.defaultMeaningItems}
         draftMeaningItems={app.draftMeaningItems}
+        isEditingMeanings={app.isEditingMeanings}
         journal={app.journal}
         locale={app.locale}
         newMeaningDraft={app.newMeaningDraft}
         onAddMeaning={app.addDraftMeaningItem}
+        onCloseLexicon={app.closeLexicon}
         onClose={closeDrawer}
         onDeleteReading={app.deleteReading}
         onDraftChange={app.updateDraftMeaningItem}
         onInspectSymbol={inspectSymbolFromDrawer}
         onNewMeaningDraftChange={app.updateNewMeaningDraft}
-        onOpenLexicon={() => openDrawer("lexicon")}
+        onOpenLexicon={app.openLexicon}
         onOpenReading={openReadingFromDrawer}
         onRemoveMeaning={app.removeDraftMeaningItem}
         onSetLocale={app.setLocale}
@@ -208,6 +226,17 @@ export function App() {
         onSave={confirmSaveReading}
         open={saveDialogOpen}
         questionText={saveQuestionText}
+      />
+
+      <QuestionSymbolPicker
+        copy={copy}
+        currentSymbolId={pickerHand ? app.hands[pickerHand] : null}
+        handId={pickerHand}
+        locale={app.locale}
+        onClose={closeQuestionPicker}
+        onSelect={applyQuestionSymbol}
+        open={pickerHand != null}
+        symbols={app.symbolCatalog}
       />
     </div>
   );
