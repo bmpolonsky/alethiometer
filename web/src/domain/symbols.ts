@@ -35,7 +35,7 @@ const symbolSeeds: SymbolSeed[] = [
     imageFile: "Marionette.jpg",
     title: { ru: "Марионетка", en: "Marionette" },
     meanings: {
-      ru: ["Повиновение", "Покорность", "Учтивость"],
+      ru: ["Повиновение", "Покорность", "Грация"],
       en: ["Obedience", "Submission", "Grace"],
     },
   },
@@ -49,7 +49,7 @@ const symbolSeeds: SymbolSeed[] = [
   },
   {
     imageFile: "Caidron_crucible.jpg",
-    title: { ru: "Котел (тигель)", en: "Cauldron (crucible)" },
+    title: { ru: "Тигель", en: "Crucible" },
     meanings: {
       ru: ["Алхимия", "Ремесло", "Приобретенная мудрость"],
       en: ["Alchemy", "Craft", "Achieved wisdom"],
@@ -99,7 +99,7 @@ const symbolSeeds: SymbolSeed[] = [
     imageFile: "Madonna.jpg",
     title: { ru: "Богоматерь", en: "Madonna" },
     meanings: {
-      ru: ["Материнство", "Женское", "Поклонение"],
+      ru: ["Материнство", "Женское начало", "Поклонение"],
       en: ["Motherhood", "The feminine", "Worship"],
     },
   },
@@ -163,7 +163,7 @@ const symbolSeeds: SymbolSeed[] = [
     imageFile: "Chameleon.jpg",
     title: { ru: "Хамелеон", en: "Chameleon" },
     meanings: {
-      ru: ["Воздух", "Скупость", "Терпение"],
+      ru: ["Воздух", "Жадность", "Терпение"],
       en: ["Air", "Greed", "Patience"],
     },
   },
@@ -195,7 +195,7 @@ const symbolSeeds: SymbolSeed[] = [
     imageFile: "Globe.jpg",
     title: { ru: "Глобус", en: "Globe" },
     meanings: {
-      ru: ["Политика", "Независимость", "Известность"],
+      ru: ["Политика", "Независимость", "Слава"],
       en: ["Politics", "Sovereignty", "Fame"],
     },
   },
@@ -241,7 +241,7 @@ const symbolSeeds: SymbolSeed[] = [
   },
   {
     imageFile: "Crocodile_caiman.jpg",
-    title: { ru: "Крокодил (кайман)", en: "Crocodile (caiman)" },
+    title: { ru: "Крокодил", en: "Crocodile" },
     meanings: {
       ru: ["Америка", "Ненасытность", "Предприимчивость"],
       en: ["America", "Rapacity", "Enterprise"],
@@ -249,7 +249,7 @@ const symbolSeeds: SymbolSeed[] = [
   },
   {
     imageFile: "Baby.jpg",
-    title: { ru: "Ребенок", en: "Baby" },
+    title: { ru: "Ребёнок", en: "Baby" },
     meanings: {
       ru: ["Будущее", "Податливость", "Беспомощность"],
       en: ["The future", "Malleability", "Helplessness"],
@@ -275,7 +275,7 @@ const symbolSeeds: SymbolSeed[] = [
     imageFile: "Tree.jpg",
     title: { ru: "Дерево", en: "Tree" },
     meanings: {
-      ru: ["Неколебимость", "Укрытие", "Плодородие"],
+      ru: ["Стойкость", "Укрытие", "Плодородие"],
       en: ["Firmness", "Shelter", "Fertility"],
     },
   },
@@ -283,7 +283,7 @@ const symbolSeeds: SymbolSeed[] = [
     imageFile: "Wild_man.jpg",
     title: { ru: "Дикарь", en: "Wild man" },
     meanings: {
-      ru: ["Варвар", "Мужское", "Похоть"],
+      ru: ["Варвар", "Мужское начало", "Похоть"],
       en: ["Wild man", "The masculine", "Lust"],
     },
   },
