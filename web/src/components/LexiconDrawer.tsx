@@ -6,15 +6,21 @@ interface LexiconDrawerProps {
   symbol: SymbolEntry;
   copy: {
     lexiconTitle: string;
+    defaultMeaning: string;
+    personalMeaning: string;
     personalHint: string;
-    saveMeaning: string;
-    resetMeaning: string;
+    addMeaning: string;
+    deleteMeaning: string;
+    newMeaningPlaceholder: string;
     close: string;
   };
-  draftMeaning: string;
-  onDraftChange: (value: string) => void;
-  onSaveMeaning: () => void;
-  onResetMeaning: () => void;
+  defaultMeaningItems: string[];
+  draftMeaningItems: string[];
+  newMeaningDraft: string;
+  onDraftChange: (index: number, value: string) => void;
+  onNewMeaningDraftChange: (value: string) => void;
+  onAddMeaning: () => void;
+  onRemoveMeaning: (index: number) => void;
   onClose: () => void;
 }
 
@@ -23,10 +29,13 @@ export function LexiconDrawer({
   locale,
   symbol,
   copy,
-  draftMeaning,
+  defaultMeaningItems,
+  draftMeaningItems,
+  newMeaningDraft,
   onDraftChange,
-  onSaveMeaning,
-  onResetMeaning,
+  onNewMeaningDraftChange,
+  onAddMeaning,
+  onRemoveMeaning,
   onClose,
 }: LexiconDrawerProps) {
   if (!open) {
@@ -50,19 +59,65 @@ export function LexiconDrawer({
         </div>
 
         <p className="panel-copy">{copy.personalHint}</p>
-        <textarea
-          className="meaning-editor drawer-editor"
-          value={draftMeaning}
-          onChange={(event) => onDraftChange(event.target.value)}
-        />
 
-        <div className="meaning-actions">
-          <button className="secondary-action" onClick={onSaveMeaning} type="button">
-            {copy.saveMeaning}
-          </button>
-          <button className="ghost-action" onClick={onResetMeaning} type="button">
-            {copy.resetMeaning}
-          </button>
+        <div className="drawer-meaning-sections">
+          <section className="drawer-meaning-section">
+            <p className="meaning-label">{copy.defaultMeaning}</p>
+            <ul className="meaning-list drawer-fixed-list">
+              {defaultMeaningItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="drawer-meaning-section">
+            <p className="meaning-label">{copy.personalMeaning}</p>
+
+            <div className="drawer-item-list">
+              {draftMeaningItems.map((item, index) => (
+                <div className="drawer-item-row" key={`${item}-${index}`}>
+                  <span className="drawer-item-bullet" aria-hidden="true">
+                    •
+                  </span>
+                <input
+                  className="drawer-item-input"
+                  onChange={(event) => onDraftChange(index, event.target.value)}
+                  type="text"
+                  value={item}
+                />
+                  <button
+                    className="ghost-action small-action"
+                    onClick={() => onRemoveMeaning(index)}
+                    type="button"
+                  >
+                    {copy.deleteMeaning}
+                  </button>
+                </div>
+              ))}
+
+              <div className="drawer-item-row is-new">
+                <span className="drawer-item-bullet" aria-hidden="true">
+                  +
+                </span>
+                <input
+                  className="drawer-item-input"
+                  onChange={(event) => onNewMeaningDraftChange(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      onAddMeaning();
+                    }
+                  }}
+                  placeholder={copy.newMeaningPlaceholder}
+                  type="text"
+                  value={newMeaningDraft}
+                />
+                <button className="secondary-action small-action" onClick={onAddMeaning} type="button">
+                  {copy.addMeaning}
+                </button>
+              </div>
+            </div>
+          </section>
         </div>
       </aside>
     </div>

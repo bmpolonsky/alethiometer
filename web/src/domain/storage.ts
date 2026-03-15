@@ -1,4 +1,5 @@
-import type { HandId, Locale, PersistedState } from "./types";
+import { normalizePersistedMeaningItems } from "./meanings";
+import type { HandId, Locale, PersistedState, SavedReading } from "./types";
 
 const STORAGE_KEY = "alethiometer-web-state-v1";
 
@@ -18,6 +19,49 @@ function sanitizeSymbolId(value: unknown, fallback: number) {
   return Math.max(0, Math.min(35, Math.round(value)));
 }
 
+function sanitizeSymbolList(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter((item): item is number => typeof item === "number" && !Number.isNaN(item))
+    .map((item) => sanitizeSymbolId(item, 0))
+    .slice(0, 5);
+}
+
+function sanitizeOptionalText(value: unknown) {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+
+  return normalized || undefined;
+}
+
+function sanitizeJournalEntry(value: unknown): SavedReading | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const entry = value as Partial<SavedReading> & { note?: unknown };
+
+  if (typeof entry.id !== "string" || typeof entry.createdAt !== "string") {
+    return null;
+  }
+
+  return {
+    id: entry.id,
+    createdAt: entry.createdAt,
+    locale: isLocale(entry.locale ?? "") ? (entry.locale as Locale) : "en",
+    questionSymbols: sanitizeSymbolList(entry.questionSymbols).slice(0, 3),
+    answerSymbols: sanitizeSymbolList(entry.answerSymbols),
+    questionText: sanitizeOptionalText(entry.questionText),
+    answerText: sanitizeOptionalText(entry.answerText ?? entry.note),
+  };
+}
+
 export function resolveBrowserLocale(input?: string): Locale {
   return input?.toLowerCase().startsWith("ru") ? "ru" : "en";
 }
@@ -26,7 +70,6 @@ export function createDefaultState(locale: Locale): PersistedState {
   return {
     locale,
     theme: "dawn",
-    density: "normal",
     hands: {
       "query-1": 5,
       "query-2": 13,
@@ -63,16 +106,32 @@ export function loadState(locale: Locale): PersistedState {
       }
     });
 
+    const nextCustomMeanings = {
+      ru: Object.fromEntries(
+        Object.entries(parsed.customMeanings?.ru ?? {}).map(([symbolId, items]) => [
+          symbolId,
+          normalizePersistedMeaningItems(items),
+        ]),
+      ),
+      en: Object.fromEntries(
+        Object.entries(parsed.customMeanings?.en ?? {}).map(([symbolId, items]) => [
+          symbolId,
+          normalizePersistedMeaningItems(items),
+        ]),
+      ),
+    };
+
     return {
       locale: isLocale(parsed.locale ?? "") ? parsed.locale! : fallback.locale,
       theme: parsed.theme === "night" ? "night" : fallback.theme,
-      density: parsed.density === "large" ? "large" : fallback.density,
       hands: nextHands,
-      customMeanings: {
-        ru: parsed.customMeanings?.ru ?? {},
-        en: parsed.customMeanings?.en ?? {},
-      },
-      journal: Array.isArray(parsed.journal) ? parsed.journal.slice(0, 12) : [],
+      customMeanings: nextCustomMeanings,
+      journal: Array.isArray(parsed.journal)
+        ? parsed.journal
+            .map((entry) => sanitizeJournalEntry(entry))
+            .filter((entry): entry is SavedReading => entry != null)
+            .slice(0, 16)
+        : [],
     };
   } catch {
     return fallback;

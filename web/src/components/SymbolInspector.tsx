@@ -6,15 +6,12 @@ interface SymbolInspectorProps {
     symbolTitle: string;
     defaultMeaning: string;
     personalMeaning: string;
-    noPersonalMeaning: string;
+    emptyPersonalMeaning: string;
     editMeaning: string;
-    customBadge: string;
   };
   symbol: SymbolEntry;
-  symbolId: number;
-  defaultMeaning: string;
-  personalMeaning: string | null;
-  hasCustomMeaning: boolean;
+  defaultMeaningItems: string[];
+  personalMeaningItems: string[];
   onOpenLexicon: () => void;
 }
 
@@ -22,10 +19,8 @@ export function SymbolInspector({
   locale,
   copy,
   symbol,
-  symbolId,
-  defaultMeaning,
-  personalMeaning,
-  hasCustomMeaning,
+  defaultMeaningItems,
+  personalMeaningItems,
   onOpenLexicon,
 }: SymbolInspectorProps) {
   return (
@@ -34,36 +29,49 @@ export function SymbolInspector({
         <p className="panel-kicker">{copy.symbolTitle}</p>
       </div>
 
-      <div className="symbol-header">
-        <div className="symbol-identity is-standalone">
-          <div
-            className="symbol-badge"
-          >
+      <div className="symbol-reading-grid">
+        <div className="symbol-visual">
+          <div className="symbol-badge large">
             <img alt="" className="symbol-badge-image" src={symbol.imageSrc} />
           </div>
-          <div className="symbol-copy">
-            <p className="panel-kicker">{String(symbolId + 1).padStart(2, "0")}</p>
-            <h2>{symbol.title[locale]}</h2>
+        </div>
+
+        <div className="symbol-reading-copy">
+          <div className="symbol-title-row">
+            <h2 className="symbol-name">{symbol.title[locale]}</h2>
+            <button
+              aria-label={copy.editMeaning}
+              className="ghost-action symbol-edit-icon"
+              onClick={onOpenLexicon}
+              title={copy.editMeaning}
+              type="button"
+            >
+              <span aria-hidden="true">✎</span>
+            </button>
+          </div>
+
+          <div className="meaning-section first">
+            <p className="meaning-label">{copy.defaultMeaning}</p>
+            <ul className="meaning-list">
+              {defaultMeaningItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="meaning-section">
+            <p className="meaning-label">{copy.personalMeaning}</p>
+            {personalMeaningItems.length > 0 ? (
+              <ul className="meaning-list personal">
+                {personalMeaningItems.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="subtle">{copy.emptyPersonalMeaning}</p>
+            )}
           </div>
         </div>
-      </div>
-
-      <div className="meaning-block">
-        <p className="meaning-label">{copy.defaultMeaning}</p>
-        <p className="meaning-body">{defaultMeaning}</p>
-      </div>
-
-      <div className="meaning-block">
-        <div className="meaning-header">
-          <p className="meaning-label">{copy.personalMeaning}</p>
-          {hasCustomMeaning ? <span className="custom-chip">{copy.customBadge}</span> : null}
-        </div>
-        <p className="meaning-body">
-          {personalMeaning ?? copy.noPersonalMeaning}
-        </p>
-        <button className="secondary-action inline-action" onClick={onOpenLexicon} type="button">
-          {copy.editMeaning}
-        </button>
       </div>
     </section>
   );

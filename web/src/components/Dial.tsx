@@ -25,6 +25,10 @@ const ATLAS_SIZE = {
 const ATLAS_HREF = "/assets/graphics-lib.png";
 
 const atlasFrames = {
+  arrow1: { x: 0, y: 0, width: 37, height: 221, pivotX: 17.2, pivotY: 138.3 },
+  arrow2: { x: 37, y: 0, width: 31, height: 232, pivotX: 14.25, pivotY: 143.6 },
+  arrow3: { x: 68, y: 0, width: 17, height: 224, pivotX: 8.35, pivotY: 162.1 },
+  arrow4: { x: 85, y: 0, width: 26, height: 254, pivotX: 12.5, pivotY: 163.4 },
   device: { x: 111, y: 0, width: 549, height: 593, pivotX: 274.5, pivotY: 313.15 },
   glare: { x: 199, y: 593, width: 316, height: 316, pivotX: 158.45, pivotY: 159.4 },
   wheelIdle: { x: 660, y: 0, width: 199, height: 103, pivotX: 101.65, pivotY: 92 },
@@ -34,7 +38,7 @@ const atlasFrames = {
 const handAssets: Record<
   HandId | "answer",
   {
-    href: string;
+    frame: { x: number; y: number; width: number; height: number; pivotX: number; pivotY: number };
     width: number;
     height: number;
     pivotX: number;
@@ -43,36 +47,36 @@ const handAssets: Record<
   }
 > = {
   "query-1": {
-    href: "/assets/arrow1.png",
-    width: 53,
-    height: 313,
-    pivotX: 24.63,
-    pivotY: 195.81,
-    scale: 0.7,
+    frame: atlasFrames.arrow1,
+    width: atlasFrames.arrow1.width,
+    height: atlasFrames.arrow1.height,
+    pivotX: atlasFrames.arrow1.pivotX,
+    pivotY: atlasFrames.arrow1.pivotY,
+    scale: 0.94,
   },
   "query-2": {
-    href: "/assets/arrow2.png",
-    width: 43,
-    height: 318,
-    pivotX: 19.78,
-    pivotY: 196.72,
-    scale: 0.725,
+    frame: atlasFrames.arrow2,
+    width: atlasFrames.arrow2.width,
+    height: atlasFrames.arrow2.height,
+    pivotX: atlasFrames.arrow2.pivotX,
+    pivotY: atlasFrames.arrow2.pivotY,
+    scale: 0.94,
   },
   "query-3": {
-    href: "/assets/arrow3.png",
-    width: 26,
-    height: 329,
-    pivotX: 12.77,
-    pivotY: 238.14,
-    scale: 0.67,
+    frame: atlasFrames.arrow3,
+    width: atlasFrames.arrow3.width,
+    height: atlasFrames.arrow3.height,
+    pivotX: atlasFrames.arrow3.pivotX,
+    pivotY: atlasFrames.arrow3.pivotY,
+    scale: 0.96,
   },
   answer: {
-    href: "/assets/arrow4.png",
-    width: 42,
-    height: 394,
-    pivotX: 20.19,
-    pivotY: 253.64,
-    scale: 0.635,
+    frame: atlasFrames.arrow4,
+    width: atlasFrames.arrow4.width,
+    height: atlasFrames.arrow4.height,
+    pivotX: atlasFrames.arrow4.pivotX,
+    pivotY: atlasFrames.arrow4.pivotY,
+    scale: 0.96,
   },
 };
 
@@ -397,34 +401,36 @@ export function Dial({
               key={handId}
               transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${displayAngles[handId]})`}
               filter="url(#hand-shadow)"
-              opacity={activeHand === handId ? 1 : 0.84}
+              opacity={1}
             >
-              <image
-                href={asset.href}
+              <svg
                 x={-asset.pivotX * asset.scale}
                 y={-asset.pivotY * asset.scale}
                 width={asset.width * asset.scale}
                 height={asset.height * asset.scale}
-              />
+                viewBox={`0 0 ${asset.frame.width} ${asset.frame.height}`}
+              >
+                {renderAtlasCrop(asset.frame, 0, 0)}
+              </svg>
             </g>
           );
         })}
 
-        {answerHandSymbolId != null ? (
-          <g
-            transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${displayAnswerAngle})`}
-            filter="url(#answer-glow)"
-            opacity={0.98}
+        <g
+          transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${displayAnswerAngle})`}
+          filter="url(#answer-glow)"
+          opacity={0.98}
+        >
+          <svg
+            x={-handAssets.answer.pivotX * handAssets.answer.scale}
+            y={-handAssets.answer.pivotY * handAssets.answer.scale}
+            width={handAssets.answer.width * handAssets.answer.scale}
+            height={handAssets.answer.height * handAssets.answer.scale}
+            viewBox={`0 0 ${handAssets.answer.frame.width} ${handAssets.answer.frame.height}`}
           >
-            <image
-              href={handAssets.answer.href}
-              x={-handAssets.answer.pivotX * handAssets.answer.scale}
-              y={-handAssets.answer.pivotY * handAssets.answer.scale}
-              width={handAssets.answer.width * handAssets.answer.scale}
-              height={handAssets.answer.height * handAssets.answer.scale}
-            />
-          </g>
-        ) : null}
+            {renderAtlasCrop(handAssets.answer.frame, 0, 0)}
+          </svg>
+        </g>
 
         {wheelConfigs.map(({ handId, offsetX, offsetY, rotationDeg }) => {
           const frame =
@@ -490,16 +496,7 @@ export function Dial({
             </g>
           );
         })}
-
-        <image
-          href="/assets/center.png"
-          x={DIAL_GEOMETRY.centerX - 17.5}
-          y={DIAL_GEOMETRY.centerY - 17.5}
-          width="35"
-          height="35"
-        />
-
-        <g clipPath="url(#dial-glare-clip)" opacity="0.82">
+        <g clipPath="url(#dial-glare-clip)" opacity="1">
           {renderAtlasCrop(atlasFrames.glare, glareX, glareY)}
         </g>
       </svg>

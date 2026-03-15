@@ -1,125 +1,223 @@
-import type { HandId, Locale } from "./types";
+import type { Locale } from "./types";
+
+interface HelpSection {
+  title: string;
+  items: string[];
+}
 
 interface UiText {
   questionTitle: string;
-  questionHint: string;
-  handLabels: Record<HandId, string>;
   ask: string;
   saveReading: string;
+  saveReadingTitle: string;
+  saveReadingQuestionLabel: string;
+  saveReadingQuestionPlaceholder: string;
+  saveReadingAnswerLabel: string;
+  saveReadingAnswerPlaceholder: string;
+  confirmSaveReading: string;
+  cancel: string;
   countdownStatus: string;
   revealStatus: string;
   symbolTitle: string;
   defaultMeaning: string;
   personalMeaning: string;
-  noPersonalMeaning: string;
+  emptyPersonalMeaning: string;
   editMeaning: string;
-  personalLexicon: string;
   personalHint: string;
-  customBadge: string;
-  saveMeaning: string;
-  resetMeaning: string;
+  addMeaning: string;
+  deleteMeaning: string;
+  newMeaningPlaceholder: string;
   close: string;
-  lexiconTitle: string;
   settingsTitle: string;
   settingsButton: string;
+  settingsSection: string;
+  symbolsSection: string;
+  archiveSection: string;
+  helpSection: string;
   language: string;
   theme: string;
-  density: string;
   dawn: string;
   night: string;
-  normal: string;
-  large: string;
   guidanceTitle: string;
+  guidancePreview: string;
   journalTitle: string;
+  catalogTitle: string;
+  catalogHint: string;
+  lexiconTitle: string;
+  lexiconSymbolLabel: string;
+  archiveHint: string;
   emptyJournal: string;
   answerTitle: string;
+  answerPlaceholder: string;
   openSaved: string;
   savedAt: string;
+  deleteSaved: string;
+  answerSummaryLabel: string;
+  helpIntro: string;
+  helpSections: HelpSection[];
 }
 
 export const uiText: Record<Locale, UiText> = {
   ru: {
-    questionTitle: "Текущий вопрос",
-    questionHint:
-      "Выбери три символа и подтяни нужные колесики на самом приборе.",
-    handLabels: {
-      "query-1": "Большая стрелка",
-      "query-2": "Средняя стрелка",
-      "query-3": "Малая стрелка",
-    },
-    ask: "Спросить прибор",
+    questionTitle: "Вопрос",
+    ask: "Спросить",
     saveReading: "Сохранить ответ",
+    saveReadingTitle: "Сохранить чтение",
+    saveReadingQuestionLabel: "Формулировка вопроса",
+    saveReadingQuestionPlaceholder: "Коротко: что именно спрашивалось",
+    saveReadingAnswerLabel: "Формулировка ответа",
+    saveReadingAnswerPlaceholder: "Как ты сейчас читаешь полученный ответ",
+    confirmSaveReading: "Сохранить",
+    cancel: "Отмена",
     countdownStatus: "Прибор слушает и обдумывает.",
-    revealStatus: "Ответ проявляется по знакам.",
-    symbolTitle: "Чтение символа",
-    defaultMeaning: "Базовые значения",
-    personalMeaning: "Личные трактовки",
-    noPersonalMeaning: "Для этого символа пока нет личных трактовок.",
-    editMeaning: "Редактировать словарь",
-    personalLexicon: "Личный словарь",
+    revealStatus: "Ответ разворачивается по знакам.",
+    symbolTitle: "Значение",
+    defaultMeaning: "Базовые",
+    personalMeaning: "Личные",
+    emptyPersonalMeaning: "Пока нет личных трактовок.",
+    editMeaning: "Редактировать",
     personalHint:
-      "Здесь можно переписать трактовку под свой опыт чтения алетиометра. Это отдельный слой, не часть самого ритуала вопроса.",
-    customBadge: "свое",
-    saveMeaning: "Сохранить толкование",
-    resetMeaning: "Вернуть базовое",
+      "Базовые значения остаются опорой. Личные трактовки хранятся отдельными пунктами и редактируются независимо.",
+    addMeaning: "Добавить",
+    deleteMeaning: "Удалить",
+    newMeaningPlaceholder: "Новая личная трактовка",
     close: "Закрыть",
-    lexiconTitle: "Редактирование словаря",
-    settingsTitle: "Настройки",
-    settingsButton: "Настройки",
+    settingsTitle: "Меню",
+    settingsButton: "Меню",
+    settingsSection: "Настройки",
+    symbolsSection: "Символы",
+    archiveSection: "Архив",
+    helpSection: "Справка",
     language: "Язык",
     theme: "Тема",
-    density: "Размер текста",
     dawn: "Светлая",
     night: "Ночная",
-    normal: "Обычный",
-    large: "Крупный",
-    guidanceTitle: "Как читать ответ",
-    journalTitle: "Сохраненные ответы",
+    guidanceTitle: "Как читать",
+    guidancePreview:
+      "Три символа задают вопрос, ответ приходит цепочкой, а смысл рождается из твоего собственного словаря.",
+    journalTitle: "Архив",
+    catalogTitle: "Все символы",
+    catalogHint:
+      "Здесь можно открыть любой знак, посмотреть базовые смыслы и перейти к редактированию личных трактовок.",
+    lexiconTitle: "Словарь символа",
+    lexiconSymbolLabel: "Редактируемый символ",
+    archiveHint:
+      "Сохраненные чтения держат формулировку вопроса, цепочку ответа и твою собственную формулировку смысла.",
     emptyJournal: "Пока ни одного сохраненного ответа.",
-    answerTitle: "Ответ прибора",
+    answerTitle: "Ответ",
+    answerPlaceholder: "Ответ проявится здесь после паузы.",
     openSaved: "Открыть",
     savedAt: "Сохранено",
+    deleteSaved: "Удалить",
+    answerSummaryLabel: "Смысл ответа",
+    helpIntro:
+      "Алетиометр лучше работает как образный прибор: он не произносит фразу, а собирает направление из знаков, ритма и твоего словаря.",
+    helpSections: [
+      {
+        title: "Как задавать вопрос",
+        items: [
+          "Выбери три символа, которые точнее всего описывают саму ситуацию, а не желаемый ответ.",
+          "Сформулируй вопрос коротко и держи мысль в голове, пока прибор молчит.",
+          "Если вопрос выходит рыхлым, сначала уточни его смысл, а уже потом запускай чтение.",
+        ],
+      },
+      {
+        title: "Как читать ответ",
+        items: [
+          "Ответ приходит цепочкой знаков: важен не только каждый символ, но и порядок их появления.",
+          "Сначала прочитай базовые значения, затем добавь свои личные ассоциации и контекст вопроса.",
+          "Не пытайся переводить ответ в буквальное предложение слишком рано: алетиометр говорит образами.",
+        ],
+      },
+      {
+        title: "Как вести словарь",
+        items: [
+          "Базовые трактовки остаются фиксированной опорой и не редактируются.",
+          "Личные значения лучше хранить короткими отдельными пунктами, чтобы их было легко перестраивать со временем.",
+          "После сохраненного чтения полезно оставлять заметку: позже по архиву видно, как менялся собственный язык символов.",
+        ],
+      },
+    ],
   },
   en: {
-    questionTitle: "Current question",
-    questionHint:
-      "Choose three symbols and tune the rollers directly on the instrument.",
-    handLabels: {
-      "query-1": "Large hand",
-      "query-2": "Middle hand",
-      "query-3": "Small hand",
-    },
-    ask: "Consult the instrument",
+    questionTitle: "Question",
+    ask: "Ask",
     saveReading: "Save reading",
+    saveReadingTitle: "Save reading",
+    saveReadingQuestionLabel: "Question wording",
+    saveReadingQuestionPlaceholder: "Briefly: what exactly was being asked",
+    saveReadingAnswerLabel: "Answer wording",
+    saveReadingAnswerPlaceholder: "How you currently read the answer",
+    confirmSaveReading: "Save",
+    cancel: "Cancel",
     countdownStatus: "The instrument is listening and thinking.",
-    revealStatus: "The answer is revealing itself symbol by symbol.",
-    symbolTitle: "Symbol reading",
-    defaultMeaning: "Default meaning",
-    personalMeaning: "Personal meanings",
-    noPersonalMeaning: "No personal meanings have been saved for this symbol yet.",
-    editMeaning: "Edit lexicon",
-    personalLexicon: "Personal lexicon",
+    revealStatus: "The answer is unfolding through signs.",
+    symbolTitle: "Meaning",
+    defaultMeaning: "Default",
+    personalMeaning: "Personal",
+    emptyPersonalMeaning: "No personal meanings yet.",
+    editMeaning: "Edit",
     personalHint:
-      "Rewrite the meaning as your own reading vocabulary develops. This lives outside the main asking flow.",
-    customBadge: "custom",
-    saveMeaning: "Save meaning",
-    resetMeaning: "Restore default",
+      "Default meanings stay fixed as reference. Personal meanings live as separate entries and can be edited independently.",
+    addMeaning: "Add",
+    deleteMeaning: "Delete",
+    newMeaningPlaceholder: "New personal meaning",
     close: "Close",
-    lexiconTitle: "Lexicon editor",
-    settingsTitle: "Settings",
-    settingsButton: "Settings",
+    settingsTitle: "Menu",
+    settingsButton: "Menu",
+    settingsSection: "Settings",
+    symbolsSection: "Symbols",
+    archiveSection: "Archive",
+    helpSection: "Help",
     language: "Language",
     theme: "Theme",
-    density: "Text size",
     dawn: "Dawn",
     night: "Night",
-    normal: "Normal",
-    large: "Large",
-    guidanceTitle: "How to read an answer",
-    journalTitle: "Saved readings",
+    guidanceTitle: "How to read",
+    guidancePreview:
+      "Three symbols frame the question, the answer arrives as a chain, and the meaning grows out of your own lexicon.",
+    journalTitle: "Archive",
+    catalogTitle: "All symbols",
+    catalogHint:
+      "Browse every sign here, review the default meanings, and jump into editing your personal interpretations.",
+    lexiconTitle: "Symbol lexicon",
+    lexiconSymbolLabel: "Editing symbol",
+    archiveHint:
+      "Saved readings keep the question wording, the answer chain, and your own short formulation of what it meant.",
     emptyJournal: "No saved readings yet.",
-    answerTitle: "Instrument answer",
+    answerTitle: "Answer",
+    answerPlaceholder: "The answer will appear here after the pause.",
     openSaved: "Open",
     savedAt: "Saved",
+    deleteSaved: "Delete",
+    answerSummaryLabel: "Reading",
+    helpIntro:
+      "The alethiometer works best as a symbolic instrument: it does not speak in literal sentences, but in signs, pacing, and the vocabulary you build around them.",
+    helpSections: [
+      {
+        title: "Framing the question",
+        items: [
+          "Choose three symbols that describe the situation itself, not the answer you wish to hear.",
+          "Keep the wording short and hold the thought while the instrument stays silent.",
+          "If the question feels vague, refine it first and only then begin the reading.",
+        ],
+      },
+      {
+        title: "Reading the answer",
+        items: [
+          "The answer arrives as a sequence of signs, so both the symbols and their order matter.",
+          "Read the default meanings first, then layer in your own personal associations and the context of the question.",
+          "Do not force the answer into a literal sentence too early. The alethiometer speaks in images.",
+        ],
+      },
+      {
+        title: "Keeping a lexicon",
+        items: [
+          "Default meanings remain fixed as a stable reference point.",
+          "Personal meanings work best as short separate entries that can evolve over time.",
+          "Adding notes to saved readings helps you see how your own symbolic language changes in practice.",
+        ],
+      },
+    ],
   },
 };
