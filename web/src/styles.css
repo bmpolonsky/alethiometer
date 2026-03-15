@@ -65,7 +65,11 @@ button {
 
 .app-shell {
   height: 100vh;
-  padding: 0.7rem 0.9rem 1rem;
+  padding:
+    calc(0.7rem + env(safe-area-inset-top))
+    calc(0.9rem + env(safe-area-inset-right))
+    calc(1rem + env(safe-area-inset-bottom))
+    calc(0.9rem + env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -77,8 +81,8 @@ button {
   justify-content: space-between;
   gap: 1rem;
   width: 100%;
-  max-width: none;
-  margin: 0 0 0.65rem;
+  max-width: 1380px;
+  margin: 0 auto 0.65rem;
 }
 
 .topbar-title {
@@ -325,7 +329,14 @@ button {
 }
 
 .question-row {
-  width: max-content;
+  width: 100%;
+}
+
+.question-row .selection-card {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 4.7rem;
+  max-width: 5.6rem;
 }
 
 .answer-row {
@@ -366,6 +377,9 @@ button {
     var(--surface-glass);
   color: inherit;
   text-align: center;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
 }
 
 .selection-card.is-active,
@@ -404,6 +418,7 @@ button {
   font-size: 0.77rem;
   line-height: 1.05;
   font-weight: 500;
+  overflow-wrap: anywhere;
   text-wrap: balance;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -412,10 +427,10 @@ button {
 .band-actions {
   display: grid;
   gap: 0.45rem;
-  align-content: center;
+  align-content: start;
   justify-items: stretch;
-  min-width: 8.6rem;
-  padding-top: 1.5rem;
+  min-width: 9.2rem;
+  padding-top: 0.8rem;
 }
 
 .drawer-item-input,
@@ -440,6 +455,12 @@ button {
   align-self: start;
 }
 
+.control-actions.band-actions {
+  display: grid;
+  align-content: start;
+  justify-items: stretch;
+}
+
 .primary-action,
 .secondary-action,
 .ghost-action,
@@ -449,7 +470,7 @@ button {
   border-radius: 1rem;
   background: var(--surface-strong);
   color: inherit;
-  transition: transform 160ms ease, border-color 160ms ease, opacity 160ms ease;
+  transition: border-color 160ms ease, background 160ms ease, opacity 160ms ease;
 }
 
 .primary-action:hover,
@@ -458,7 +479,31 @@ button {
 .saved-symbol-chip:hover,
 .catalog-item:hover,
 .selection-card:hover {
-  transform: translateY(-1px);
+  border-color: rgba(185, 135, 67, 0.4);
+}
+
+.secondary-action:hover,
+.ghost-action:hover,
+.saved-reading-item button:hover,
+.saved-symbol-chip:hover,
+.catalog-item:hover {
+  background:
+    linear-gradient(135deg, rgba(248, 219, 171, 0.16), rgba(255, 255, 255, 0)),
+    var(--surface-strong);
+}
+
+.selection-card:hover {
+  background:
+    linear-gradient(135deg, rgba(248, 219, 171, 0.16), rgba(255, 255, 255, 0)),
+    var(--surface-glass);
+}
+
+.primary-action:hover {
+  border-color: rgba(186, 133, 66, 0.48);
+  background:
+    linear-gradient(135deg, rgba(255, 238, 196, 0.62), rgba(255, 238, 196, 0.08)),
+    linear-gradient(180deg, rgba(213, 172, 104, 0.16), rgba(167, 121, 61, 0.22)),
+    var(--surface-strong);
 }
 
 .primary-action {
@@ -484,6 +529,102 @@ button {
   font-size: 0.88rem;
 }
 
+.picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 24;
+  display: grid;
+  place-items: center;
+  padding:
+    calc(1rem + env(safe-area-inset-top))
+    calc(1rem + env(safe-area-inset-right))
+    calc(1rem + env(safe-area-inset-bottom))
+    calc(1rem + env(safe-area-inset-left));
+  background: rgba(16, 13, 10, 0.28);
+  backdrop-filter: blur(8px);
+}
+
+.picker-panel {
+  width: min(100%, 44rem);
+  max-height: min(78vh, 46rem);
+  padding: 1rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 1.3rem;
+  background:
+    linear-gradient(180deg, rgba(255, 248, 238, 0.97), rgba(241, 232, 219, 0.9)),
+    var(--surface);
+  box-shadow: 0 24px 60px rgba(34, 24, 11, 0.16);
+  overflow: auto;
+}
+
+:root[data-theme="night"] .picker-panel {
+  background:
+    linear-gradient(180deg, rgba(79, 63, 49, 0.96), rgba(56, 46, 37, 0.92)),
+    var(--surface);
+}
+
+.picker-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.picker-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.picker-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: center;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 1rem;
+  background: var(--surface-glass);
+  color: inherit;
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.picker-item:hover,
+.picker-item.is-active {
+  border-color: rgba(185, 135, 67, 0.42);
+  background:
+    linear-gradient(135deg, rgba(248, 219, 171, 0.16), rgba(255, 255, 255, 0)),
+    var(--surface-glass);
+}
+
+.picker-item-image {
+  width: 2.55rem;
+  height: 4.32rem;
+  object-fit: contain;
+  object-position: center;
+  padding: 0.08rem;
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.picker-item-copy {
+  display: grid;
+  gap: 0.16rem;
+  min-width: 0;
+}
+
+.picker-item-copy strong {
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.picker-item-copy span {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
 .inline-action {
   width: fit-content;
 }
@@ -498,18 +639,6 @@ button {
   cursor: not-allowed;
 }
 
-.status-row {
-  min-height: 0.9rem;
-}
-
-.status-inline {
-  margin: 0;
-  color: var(--text-soft);
-  font-size: 0.84rem;
-  line-height: 1.35;
-}
-
-.status-inline.is-hidden,
 .save-answer-button.is-hidden {
   visibility: hidden;
 }
@@ -968,6 +1097,10 @@ button {
   gap: 0.55rem;
 }
 
+.catalog-inline-editor {
+  margin-top: 0.15rem;
+}
+
 .drawer-item-row {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -1128,7 +1261,11 @@ button {
 
 @media (max-width: 760px) {
   .app-shell {
-    padding: 0.85rem;
+    padding:
+      calc(0.85rem + env(safe-area-inset-top))
+      calc(0.85rem + env(safe-area-inset-right))
+      calc(0.85rem + env(safe-area-inset-bottom))
+      calc(0.85rem + env(safe-area-inset-left));
   }
 
   .topbar {
@@ -1187,6 +1324,11 @@ button {
     height: 5.65rem;
   }
 
+  .question-row .selection-card {
+    min-width: 0;
+    max-width: none;
+  }
+
   .selection-card-image {
     width: 1.95rem;
     height: 3.3rem;
@@ -1217,6 +1359,11 @@ button {
     display: none;
   }
 
+  .picker-panel {
+    width: min(100%, 38rem);
+    max-height: min(82vh, 40rem);
+  }
+
   .mobile-reference-actions {
     display: flex;
     flex-wrap: wrap;
@@ -1233,6 +1380,10 @@ button {
   .catalog-detail,
   .archive-item {
     padding: 0.75rem;
+  }
+
+  .picker-header {
+    display: grid;
   }
 
   .archive-item-actions,

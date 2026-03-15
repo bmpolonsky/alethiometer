@@ -1,6 +1,5 @@
 import { ArchivePanel } from "./ArchivePanel";
 import { HelpPanel } from "./HelpPanel";
-import { LexiconPanel } from "./LexiconPanel";
 import { SettingsPanel } from "./SettingsPanel";
 import { SymbolCatalogPanel } from "./SymbolCatalogPanel";
 import type {
@@ -22,6 +21,7 @@ interface SettingsDrawerProps {
   personalMeaningItems: string[];
   draftMeaningItems: string[];
   newMeaningDraft: string;
+  isEditingMeanings: boolean;
   journal: SavedReading[];
   openedReadingId: string | null;
   copy: {
@@ -44,9 +44,8 @@ interface SettingsDrawerProps {
     addMeaning: string;
     deleteMeaning: string;
     newMeaningPlaceholder: string;
+    doneEditing: string;
     close: string;
-    lexiconTitle: string;
-    lexiconSymbolLabel: string;
     journalTitle: string;
     archiveHint: string;
     emptyJournal: string;
@@ -68,6 +67,7 @@ interface SettingsDrawerProps {
   onSetLocale: (locale: Locale) => void;
   onSetTheme: (theme: ThemeMode) => void;
   onOpenLexicon: () => void;
+  onCloseLexicon: () => void;
   onOpenReading: (entry: SavedReading) => void;
   onDeleteReading: (readingId: string) => void;
   onDraftChange: (index: number, value: string) => void;
@@ -87,6 +87,7 @@ export function SettingsDrawer({
   personalMeaningItems,
   draftMeaningItems,
   newMeaningDraft,
+  isEditingMeanings,
   journal,
   openedReadingId,
   copy,
@@ -95,6 +96,7 @@ export function SettingsDrawer({
   onSetLocale,
   onSetTheme,
   onOpenLexicon,
+  onCloseLexicon,
   onOpenReading,
   onDeleteReading,
   onDraftChange,
@@ -113,9 +115,7 @@ export function SettingsDrawer({
         ? copy.symbolsSection
         : section === "archive"
           ? copy.archiveSection
-          : section === "help"
-            ? copy.helpSection
-            : copy.lexiconTitle;
+          : copy.helpSection;
 
   const drawerClassName =
     section === "symbols"
@@ -151,27 +151,20 @@ export function SettingsDrawer({
           <SymbolCatalogPanel
             copy={copy}
             defaultMeaningItems={defaultMeaningItems}
-            locale={locale}
-            onInspectSymbol={onInspectSymbol}
-            onOpenLexicon={onOpenLexicon}
-            personalMeaningItems={personalMeaningItems}
-            symbol={symbol}
-            symbols={symbols}
-          />
-        ) : null}
-
-        {section === "lexicon" ? (
-          <LexiconPanel
-            copy={copy}
-            defaultMeaningItems={defaultMeaningItems}
             draftMeaningItems={draftMeaningItems}
+            isEditingMeanings={isEditingMeanings}
             locale={locale}
             newMeaningDraft={newMeaningDraft}
             onAddMeaning={onAddMeaning}
+            onCloseLexicon={onCloseLexicon}
             onDraftChange={onDraftChange}
+            onInspectSymbol={onInspectSymbol}
             onNewMeaningDraftChange={onNewMeaningDraftChange}
+            onOpenLexicon={onOpenLexicon}
             onRemoveMeaning={onRemoveMeaning}
+            personalMeaningItems={personalMeaningItems}
             symbol={symbol}
+            symbols={symbols}
           />
         ) : null}
 

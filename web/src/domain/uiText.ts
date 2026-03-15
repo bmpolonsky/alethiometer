@@ -17,12 +17,12 @@ interface UiText {
   confirmSaveReading: string;
   cancel: string;
   countdownStatus: string;
-  revealStatus: string;
   symbolTitle: string;
   defaultMeaning: string;
   personalMeaning: string;
   emptyPersonalMeaning: string;
   editMeaning: string;
+  doneEditing: string;
   personalHint: string;
   addMeaning: string;
   deleteMeaning: string;
@@ -53,6 +53,8 @@ interface UiText {
   savedAt: string;
   deleteSaved: string;
   answerSummaryLabel: string;
+  chooseSymbolTitle: string;
+  chooseSymbolHint: string;
   helpIntro: string;
   helpSections: HelpSection[];
 }
@@ -70,12 +72,12 @@ export const uiText: Record<Locale, UiText> = {
     confirmSaveReading: "Сохранить",
     cancel: "Отмена",
     countdownStatus: "Прибор слушает и обдумывает.",
-    revealStatus: "Ответ разворачивается по знакам.",
     symbolTitle: "Значение",
     defaultMeaning: "Базовые",
     personalMeaning: "Личные",
     emptyPersonalMeaning: "Пока нет личных трактовок.",
     editMeaning: "Редактировать",
+    doneEditing: "Готово",
     personalHint:
       "Базовые значения остаются опорой. Личные трактовки хранятся отдельными пунктами и редактируются независимо.",
     addMeaning: "Добавить",
@@ -110,6 +112,8 @@ export const uiText: Record<Locale, UiText> = {
     savedAt: "Сохранено",
     deleteSaved: "Удалить",
     answerSummaryLabel: "Смысл ответа",
+    chooseSymbolTitle: "Выбери символ",
+    chooseSymbolHint: "Прокрути список и выбери знак для текущей позиции вопроса.",
     helpIntro:
       "Алетиометр лучше работает как образный прибор: он не произносит фразу, а собирает направление из знаков, ритма и твоего словаря.",
     helpSections: [
@@ -151,12 +155,12 @@ export const uiText: Record<Locale, UiText> = {
     confirmSaveReading: "Save",
     cancel: "Cancel",
     countdownStatus: "The instrument is listening and thinking.",
-    revealStatus: "The answer is unfolding through signs.",
     symbolTitle: "Meaning",
     defaultMeaning: "Default",
     personalMeaning: "Personal",
     emptyPersonalMeaning: "No personal meanings yet.",
     editMeaning: "Edit",
+    doneEditing: "Done",
     personalHint:
       "Default meanings stay fixed as reference. Personal meanings live as separate entries and can be edited independently.",
     addMeaning: "Add",
@@ -191,6 +195,8 @@ export const uiText: Record<Locale, UiText> = {
     savedAt: "Saved",
     deleteSaved: "Delete",
     answerSummaryLabel: "Reading",
+    chooseSymbolTitle: "Choose a symbol",
+    chooseSymbolHint: "Scroll through the list and pick the sign for this question slot.",
     helpIntro:
       "The alethiometer works best as a symbolic instrument: it does not speak in literal sentences, but in signs, pacing, and the vocabulary you build around them.",
     helpSections: [

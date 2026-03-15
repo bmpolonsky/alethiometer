@@ -1,3 +1,4 @@
+import { formatBaseMeaningItem } from "../domain/meanings";
 import type { Locale, SymbolEntry } from "../domain/types";
 
 interface SymbolCatalogPanelProps {
@@ -6,6 +7,9 @@ interface SymbolCatalogPanelProps {
   symbol: SymbolEntry;
   defaultMeaningItems: string[];
   personalMeaningItems: string[];
+  draftMeaningItems: string[];
+  newMeaningDraft: string;
+  isEditingMeanings: boolean;
   copy: {
     catalogTitle: string;
     catalogHint: string;
@@ -13,9 +17,18 @@ interface SymbolCatalogPanelProps {
     personalMeaning: string;
     emptyPersonalMeaning: string;
     editMeaning: string;
+    addMeaning: string;
+    deleteMeaning: string;
+    newMeaningPlaceholder: string;
+    doneEditing: string;
   };
   onInspectSymbol: (symbolId: number) => void;
   onOpenLexicon: () => void;
+  onCloseLexicon: () => void;
+  onDraftChange: (index: number, value: string) => void;
+  onNewMeaningDraftChange: (value: string) => void;
+  onAddMeaning: () => void;
+  onRemoveMeaning: (index: number) => void;
 }
 
 export function SymbolCatalogPanel({
@@ -24,9 +37,17 @@ export function SymbolCatalogPanel({
   symbol,
   defaultMeaningItems,
   personalMeaningItems,
+  draftMeaningItems,
+  newMeaningDraft,
+  isEditingMeanings,
   copy,
   onInspectSymbol,
   onOpenLexicon,
+  onCloseLexicon,
+  onDraftChange,
+  onNewMeaningDraftChange,
+  onAddMeaning,
+  onRemoveMeaning,
 }: SymbolCatalogPanelProps) {
   return (
     <section className="catalog-panel">
@@ -47,7 +68,12 @@ export function SymbolCatalogPanel({
               <img alt="" className="catalog-item-image" src={entry.imageSrc} />
               <span className="catalog-item-copy">
                 <strong>{entry.title[locale]}</strong>
-                <span>{entry.meanings[locale].slice(0, 3).join(", ")}</span>
+                <span>
+                  {entry.meanings[locale]
+                    .slice(0, 3)
+                    .map(formatBaseMeaningItem)
+                    .join(", ")}
+                </span>
               </span>
             </button>
           ))}
@@ -62,10 +88,10 @@ export function SymbolCatalogPanel({
               <h3 className="drawer-symbol-title">{symbol.title[locale]}</h3>
               <button
                 className="ghost-action small-action inline-action"
-                onClick={onOpenLexicon}
+                onClick={isEditingMeanings ? onCloseLexicon : onOpenLexicon}
                 type="button"
               >
-                {copy.editMeaning}
+                {isEditingMeanings ? copy.doneEditing : copy.editMeaning}
               </button>
             </div>
           </div>
@@ -74,14 +100,67 @@ export function SymbolCatalogPanel({
             <p className="meaning-label">{copy.defaultMeaning}</p>
             <ul className="meaning-list">
               {defaultMeaningItems.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item}>{formatBaseMeaningItem(item)}</li>
               ))}
             </ul>
           </div>
 
           <div className="meaning-section">
             <p className="meaning-label">{copy.personalMeaning}</p>
-            {personalMeaningItems.length > 0 ? (
+            {isEditingMeanings ? (
+              <div className="drawer-item-list catalog-inline-editor">
+                {draftMeaningItems.length > 0 ? (
+                  draftMeaningItems.map((item, index) => (
+                    <div className="drawer-item-row" key={`${item}-${index}`}>
+                      <span className="drawer-item-bullet" aria-hidden="true">
+                        •
+                      </span>
+                      <input
+                        className="drawer-item-input"
+                        onChange={(event) => onDraftChange(index, event.target.value)}
+                        type="text"
+                        value={item}
+                      />
+                      <button
+                        className="ghost-action small-action"
+                        onClick={() => onRemoveMeaning(index)}
+                        type="button"
+                      >
+                        {copy.deleteMeaning}
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="subtle">{copy.emptyPersonalMeaning}</p>
+                )}
+
+                <div className="drawer-item-row is-new">
+                  <span className="drawer-item-bullet" aria-hidden="true">
+                    +
+                  </span>
+                  <input
+                    className="drawer-item-input"
+                    onChange={(event) => onNewMeaningDraftChange(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        onAddMeaning();
+                      }
+                    }}
+                    placeholder={copy.newMeaningPlaceholder}
+                    type="text"
+                    value={newMeaningDraft}
+                  />
+                  <button
+                    className="secondary-action small-action"
+                    onClick={onAddMeaning}
+                    type="button"
+                  >
+                    {copy.addMeaning}
+                  </button>
+                </div>
+              </div>
+            ) : personalMeaningItems.length > 0 ? (
               <ul className="meaning-list personal">
                 {personalMeaningItems.map((item) => (
                   <li key={item}>{item}</li>
