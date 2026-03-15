@@ -1,4 +1,4 @@
-import { normalizePersistedMeaningItems } from "./meanings";
+import { sanitizeMeaningItems } from "./meanings";
 import type { HandId, Locale, PersistedState, SavedReading } from "./types";
 
 const STORAGE_KEY = "alethiometer-web-state-v1";
@@ -110,13 +110,13 @@ export function loadState(locale: Locale): PersistedState {
       ru: Object.fromEntries(
         Object.entries(parsed.customMeanings?.ru ?? {}).map(([symbolId, items]) => [
           symbolId,
-          normalizePersistedMeaningItems(items),
+          sanitizeMeaningItems(items),
         ]),
       ),
       en: Object.fromEntries(
         Object.entries(parsed.customMeanings?.en ?? {}).map(([symbolId, items]) => [
           symbolId,
-          normalizePersistedMeaningItems(items),
+          sanitizeMeaningItems(items),
         ]),
       ),
     };
