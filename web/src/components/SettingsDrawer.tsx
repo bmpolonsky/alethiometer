@@ -1,84 +1,193 @@
+import { ArchivePanel } from "./ArchivePanel";
+import { HelpPanel } from "./HelpPanel";
+import { LexiconPanel } from "./LexiconPanel";
+import { SettingsPanel } from "./SettingsPanel";
+import { SymbolCatalogPanel } from "./SymbolCatalogPanel";
 import type {
   Locale,
+  MenuSection,
   SavedReading,
-  TextDensity,
+  SymbolEntry,
   ThemeMode,
 } from "../domain/types";
-import { SettingsPanel } from "./SettingsPanel";
 
 interface SettingsDrawerProps {
   open: boolean;
   locale: Locale;
   theme: ThemeMode;
-  density: TextDensity;
+  section: MenuSection;
+  symbols: SymbolEntry[];
+  symbol: SymbolEntry;
+  defaultMeaningItems: string[];
+  personalMeaningItems: string[];
+  draftMeaningItems: string[];
+  newMeaningDraft: string;
   journal: SavedReading[];
+  openedReadingId: string | null;
   copy: {
     settingsTitle: string;
+    catalogTitle: string;
+    catalogHint: string;
+    settingsSection: string;
+    symbolsSection: string;
+    archiveSection: string;
+    helpSection: string;
     language: string;
     theme: string;
-    density: string;
     dawn: string;
     night: string;
-    normal: string;
-    large: string;
-    guidanceTitle: string;
+    defaultMeaning: string;
+    personalMeaning: string;
+    emptyPersonalMeaning: string;
+    editMeaning: string;
+    personalHint: string;
+    addMeaning: string;
+    deleteMeaning: string;
+    newMeaningPlaceholder: string;
+    close: string;
+    lexiconTitle: string;
+    lexiconSymbolLabel: string;
     journalTitle: string;
+    archiveHint: string;
     emptyJournal: string;
     openSaved: string;
+    deleteSaved: string;
     savedAt: string;
-    close: string;
+    questionTitle: string;
+    answerTitle: string;
+    answerSummaryLabel: string;
+    guidanceTitle: string;
+    helpIntro: string;
+    helpSections: Array<{
+      title: string;
+      items: string[];
+    }>;
   };
   onClose: () => void;
+  onInspectSymbol: (symbolId: number) => void;
   onSetLocale: (locale: Locale) => void;
   onSetTheme: (theme: ThemeMode) => void;
-  onSetDensity: (density: TextDensity) => void;
+  onOpenLexicon: () => void;
   onOpenReading: (entry: SavedReading) => void;
+  onDeleteReading: (readingId: string) => void;
+  onDraftChange: (index: number, value: string) => void;
+  onNewMeaningDraftChange: (value: string) => void;
+  onAddMeaning: () => void;
+  onRemoveMeaning: (index: number) => void;
 }
 
 export function SettingsDrawer({
   open,
   locale,
   theme,
-  density,
+  section,
+  symbols,
+  symbol,
+  defaultMeaningItems,
+  personalMeaningItems,
+  draftMeaningItems,
+  newMeaningDraft,
   journal,
+  openedReadingId,
   copy,
   onClose,
+  onInspectSymbol,
   onSetLocale,
   onSetTheme,
-  onSetDensity,
+  onOpenLexicon,
   onOpenReading,
+  onDeleteReading,
+  onDraftChange,
+  onNewMeaningDraftChange,
+  onAddMeaning,
+  onRemoveMeaning,
 }: SettingsDrawerProps) {
   if (!open) {
     return null;
   }
 
+  const title =
+    section === "settings"
+      ? copy.settingsSection
+      : section === "symbols"
+        ? copy.symbolsSection
+        : section === "archive"
+          ? copy.archiveSection
+          : section === "help"
+            ? copy.helpSection
+            : copy.lexiconTitle;
+
+  const drawerClassName =
+    section === "symbols"
+      ? "drawer-panel drawer-panel-wide"
+      : section === "archive"
+        ? "drawer-panel drawer-panel-medium"
+        : "drawer-panel drawer-panel-narrow";
+
   return (
     <div className="drawer-backdrop" onClick={onClose} role="presentation">
-      <aside
-        className="drawer-panel settings-drawer"
-        onClick={(event) => event.stopPropagation()}
-      >
+      <aside className={drawerClassName} onClick={(event) => event.stopPropagation()}>
         <div className="drawer-header">
           <div>
             <p className="panel-kicker">{copy.settingsTitle}</p>
-            <h2 className="drawer-title">{copy.settingsTitle}</h2>
+            <h2 className="drawer-title">{title}</h2>
           </div>
           <button className="ghost-action" onClick={onClose} type="button">
             {copy.close}
           </button>
         </div>
 
-        <SettingsPanel
-          copy={copy}
-          density={density}
-          journal={journal}
-          locale={locale}
-          onOpenReading={onOpenReading}
-          onSetDensity={onSetDensity}
-          onSetLocale={onSetLocale}
-          onSetTheme={onSetTheme}
-          theme={theme}
-        />
+        {section === "settings" ? (
+          <SettingsPanel
+            copy={copy}
+            locale={locale}
+            onSetLocale={onSetLocale}
+            onSetTheme={onSetTheme}
+            theme={theme}
+          />
+        ) : null}
+
+        {section === "symbols" ? (
+          <SymbolCatalogPanel
+            copy={copy}
+            defaultMeaningItems={defaultMeaningItems}
+            locale={locale}
+            onInspectSymbol={onInspectSymbol}
+            onOpenLexicon={onOpenLexicon}
+            personalMeaningItems={personalMeaningItems}
+            symbol={symbol}
+            symbols={symbols}
+          />
+        ) : null}
+
+        {section === "lexicon" ? (
+          <LexiconPanel
+            copy={copy}
+            defaultMeaningItems={defaultMeaningItems}
+            draftMeaningItems={draftMeaningItems}
+            locale={locale}
+            newMeaningDraft={newMeaningDraft}
+            onAddMeaning={onAddMeaning}
+            onDraftChange={onDraftChange}
+            onNewMeaningDraftChange={onNewMeaningDraftChange}
+            onRemoveMeaning={onRemoveMeaning}
+            symbol={symbol}
+          />
+        ) : null}
+
+        {section === "archive" ? (
+          <ArchivePanel
+            copy={copy}
+            journal={journal}
+            locale={locale}
+            onDeleteReading={onDeleteReading}
+            onOpenReading={onOpenReading}
+            openedReadingId={openedReadingId}
+            symbols={symbols}
+          />
+        ) : null}
+
+        {section === "help" ? <HelpPanel copy={copy} /> : null}
       </aside>
     </div>
   );

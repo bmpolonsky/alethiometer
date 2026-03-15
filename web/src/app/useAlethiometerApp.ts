@@ -1,24 +1,19 @@
-import {
-  startTransition,
-  useEffect,
-  useEffectEvent,
-  useState,
-} from "react";
+import { startTransition, useEffect, useEffectEvent, useState } from "react";
 import { createReading } from "../domain/engine";
-import { symbolCatalog } from "../domain/symbols";
+import { normalizeMeaningItems } from "../domain/meanings";
 import {
   createDefaultState,
   loadState,
   resolveBrowserLocale,
   saveState,
 } from "../domain/storage";
+import { symbolCatalog } from "../domain/symbols";
 import { HAND_ORDER } from "../domain/types";
 import type {
   HandId,
   Locale,
   PersistedState,
   SavedReading,
-  TextDensity,
   ThemeMode,
 } from "../domain/types";
 
@@ -29,12 +24,59 @@ interface PendingReading {
   endsAt: number;
 }
 
+interface SaveReadingDraft {
+  questionText?: string;
+  answerText?: string;
+}
+
+const EMPTY_MEANINGS: string[] = [];
+
 function createEntryId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
 
   return `reading-${Date.now()}`;
+}
+
+function wrapSymbolId(value: number) {
+  return ((value % 36) + 36) % 36;
+}
+
+function shortestSymbolStep(from: number, to: number) {
+  const forward = wrapSymbolId(to - from);
+  const backward = forward - 36;
+
+  return Math.abs(forward) <= Math.abs(backward) ? forward : backward;
+}
+
+function createRevealTrail(from: number, to: number) {
+  const step = shortestSymbolStep(from, to);
+  const distance = Math.abs(step);
+
+  if (distance <= 1) {
+    return [to];
+  }
+
+  const trailLength = Math.min(4, Math.max(2, Math.round(distance / 4)));
+  const trail: number[] = [];
+
+  for (let index = 1; index <= trailLength; index += 1) {
+    const progress = index / (trailLength + 1);
+    const symbolId = wrapSymbolId(from + Math.round(step * progress));
+
+    if (symbolId !== to && trail.at(-1) !== symbolId) {
+      trail.push(symbolId);
+    }
+  }
+
+  return [...trail, to];
+}
+
+function normalizeOptionalText(value?: string) {
+  const normalized = value?.trim();
+
+  return normalized || undefined;
 }
 
 export function useAlethiometerApp() {
@@ -51,7 +93,8 @@ export function useAlethiometerApp() {
     persisted.hands["query-1"],
   );
   const [activeHand, setActiveHand] = useState<HandId>("query-1");
-  const [draftMeaning, setDraftMeaning] = useState("");
+  const [draftMeaningItems, setDraftMeaningItems] = useState<string[]>([]);
+  const [newMeaningDraft, setNewMeaningDraft] = useState("");
   const [answerSymbols, setAnswerSymbols] = useState<number[]>([]);
   const [revealPlan, setRevealPlan] = useState<number[]>([]);
   const [answerHandSymbolId, setAnswerHandSymbolId] = useState<number | null>(
@@ -65,20 +108,19 @@ export function useAlethiometerApp() {
   );
   const [countdownProgress, setCountdownProgress] = useState(0);
   const [countdownSecondsLeft, setCountdownSecondsLeft] = useState(0);
-  const [isLexiconOpen, setIsLexiconOpen] = useState(false);
+  const [openedReadingId, setOpenedReadingId] = useState<string | null>(null);
 
   const locale = persisted.locale;
   const theme = persisted.theme;
-  const density = persisted.density;
   const hands = persisted.hands;
   const journal = persisted.journal;
   const customMeanings = persisted.customMeanings;
+  const localeCustomMeanings = customMeanings[locale];
 
   const currentSymbol = symbolCatalog[selectedSymbolId] ?? symbolCatalog[0]!;
-  const activeMeaning =
-    customMeanings[locale][String(selectedSymbolId)] ??
-    currentSymbol.meanings[locale];
-  const personalMeaning = customMeanings[locale][String(selectedSymbolId)] ?? null;
+  const defaultMeaningItems = currentSymbol.meanings[locale];
+  const personalMeaningItems =
+    localeCustomMeanings[String(selectedSymbolId)] ?? EMPTY_MEANINGS;
 
   useEffect(() => {
     saveState(persisted);
@@ -86,12 +128,7 @@ export function useAlethiometerApp() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    document.documentElement.dataset.density = density;
-  }, [theme, density]);
-
-  useEffect(() => {
-    setDraftMeaning(activeMeaning);
-  }, [activeMeaning, locale, selectedSymbolId]);
+  }, [theme]);
 
   const finishCountdown = useEffectEvent(() => {
     if (!pendingReading) {
@@ -103,7 +140,8 @@ export function useAlethiometerApp() {
     setCountdownSecondsLeft(0);
     setRevealPlan(pendingReading.answerSymbols);
     setAnswerSymbols([]);
-    setAnswerHandSymbolId(pendingReading.answerSymbols[0] ?? null);
+    setAnswerHandSymbolId(pendingReading.questionSymbols[2] ?? null);
+    setOpenedReadingId(null);
     setStatus("revealing");
   });
 
@@ -142,7 +180,7 @@ export function useAlethiometerApp() {
     if (answerSymbols.length >= revealPlan.length) {
       const settleTimeout = window.setTimeout(() => {
         setStatus("idle");
-      }, 520);
+      }, 680);
 
       return () => {
         window.clearTimeout(settleTimeout);
@@ -150,29 +188,60 @@ export function useAlethiometerApp() {
     }
 
     const nextSymbol = revealPlan[answerSymbols.length];
-    setAnswerHandSymbolId(nextSymbol ?? null);
 
-    const revealTimeout = window.setTimeout(() => {
-      if (nextSymbol == null) {
-        return;
-      }
+    if (nextSymbol == null) {
+      return;
+    }
 
-      startTransition(() => {
-        setAnswerSymbols((current) => [...current, nextSymbol]);
-        setSelectedSymbolId(nextSymbol);
-      });
-    }, 920);
+    const previousSymbol =
+      answerSymbols.at(-1) ??
+      hands["query-3"] ??
+      hands["query-2"] ??
+      hands["query-1"];
+    const trail = createRevealTrail(previousSymbol, nextSymbol);
+    const timeouts: number[] = [];
+
+    trail.forEach((symbolId, index) => {
+      const timeout = window.setTimeout(() => {
+        setAnswerHandSymbolId(symbolId);
+      }, index * 180);
+
+      timeouts.push(timeout);
+    });
+
+    const revealDelay = trail.length * 180 + 260;
+    const commitDelay = revealDelay + 320;
+
+    timeouts.push(
+      window.setTimeout(() => {
+        startTransition(() => {
+          setAnswerSymbols((current) => [...current, nextSymbol]);
+          setSelectedSymbolId(nextSymbol);
+        });
+      }, commitDelay),
+    );
 
     return () => {
-      window.clearTimeout(revealTimeout);
+      timeouts.forEach((timeout) => window.clearTimeout(timeout));
     };
-  }, [answerSymbols, revealPlan, status]);
+  }, [answerSymbols, hands, revealPlan, status]);
 
   function patchPersisted(patch: Partial<PersistedState>) {
     setPersisted((current) => ({
       ...current,
       ...patch,
     }));
+  }
+
+  function clearCurrentAnswer() {
+    setPendingReading(null);
+    setRevealPlan([]);
+    setAnswerSymbols([]);
+    setAnswerHandSymbolId(null);
+    setCountdownProgress(0);
+    setCountdownSecondsLeft(0);
+    setOpenedReadingId(null);
+    setStatus("idle");
   }
 
   function updateHands(nextHands: PersistedState["hands"]) {
@@ -196,7 +265,11 @@ export function useAlethiometerApp() {
   }
 
   function assignSymbolToHand(symbolId: number, handId: HandId) {
-    const nextSymbol = ((symbolId % 36) + 36) % 36;
+    const nextSymbol = wrapSymbolId(symbolId);
+
+    if (status === "idle" && (answerSymbols.length > 0 || openedReadingId != null)) {
+      clearCurrentAnswer();
+    }
 
     updateHands({
       ...hands,
@@ -211,8 +284,12 @@ export function useAlethiometerApp() {
   }
 
   function nudgeHand(handId: HandId, direction: number) {
+    if (status === "idle" && (answerSymbols.length > 0 || openedReadingId != null)) {
+      clearCurrentAnswer();
+    }
+
     setPersisted((current) => {
-      const nextSymbol = ((current.hands[handId] + direction) % 36 + 36) % 36;
+      const nextSymbol = wrapSymbolId(current.hands[handId] + direction);
 
       setActiveHand(handId);
       setSelectedSymbolId(nextSymbol);
@@ -233,10 +310,6 @@ export function useAlethiometerApp() {
 
   function setTheme(nextTheme: ThemeMode) {
     patchPersisted({ theme: nextTheme });
-  }
-
-  function setDensity(nextDensity: TextDensity) {
-    patchPersisted({ density: nextDensity });
   }
 
   function askAlethiometer() {
@@ -263,10 +336,11 @@ export function useAlethiometerApp() {
     setAnswerHandSymbolId(null);
     setCountdownProgress(0);
     setCountdownSecondsLeft(generated.waitSeconds);
+    setOpenedReadingId(null);
     setStatus("countdown");
   }
 
-  function saveCurrentReading() {
+  function saveCurrentReading(draft: SaveReadingDraft) {
     if (status !== "idle" || answerSymbols.length === 0) {
       return;
     }
@@ -277,12 +351,24 @@ export function useAlethiometerApp() {
       locale,
       questionSymbols: HAND_ORDER.map((handId) => hands[handId]),
       answerSymbols: [...answerSymbols],
+      questionText: normalizeOptionalText(draft.questionText),
+      answerText: normalizeOptionalText(draft.answerText),
     };
 
     setPersisted((current) => ({
       ...current,
-      journal: [entry, ...current.journal].slice(0, 12),
+      journal: [entry, ...current.journal].slice(0, 16),
     }));
+    setOpenedReadingId(entry.id);
+  }
+
+  function deleteReading(readingId: string) {
+    setPersisted((current) => ({
+      ...current,
+      journal: current.journal.filter((entry) => entry.id !== readingId),
+    }));
+
+    setOpenedReadingId((current) => (current === readingId ? null : current));
   }
 
   function openReading(entry: SavedReading) {
@@ -298,71 +384,99 @@ export function useAlethiometerApp() {
     setAnswerSymbols(entry.answerSymbols);
     setAnswerHandSymbolId(entry.answerSymbols.at(-1) ?? null);
     setSelectedSymbolId(entry.answerSymbols[0] ?? entry.questionSymbols[0] ?? 0);
+    setOpenedReadingId(entry.id);
     setStatus("idle");
   }
 
-  function updateDraftMeaning(value: string) {
-    setDraftMeaning(value);
+  function updateDraftMeaningItem(index: number, value: string) {
+    setDraftMeaningItems((current) =>
+      current.map((item, itemIndex) => (itemIndex === index ? value : item)),
+    );
   }
 
-  function saveMeaning() {
-    const normalized = draftMeaning.trim();
+  function updateNewMeaningDraft(value: string) {
+    setNewMeaningDraft(value);
+  }
+
+  function addDraftMeaningItem() {
+    const normalized = newMeaningDraft.trim();
 
     if (!normalized) {
-      resetMeaning();
-      setIsLexiconOpen(false);
       return;
     }
 
-    const nextCustom = {
-      ...customMeanings,
-      [locale]: {
-        ...customMeanings[locale],
-        [String(selectedSymbolId)]: normalized,
-      },
-    };
-
-    patchPersisted({ customMeanings: nextCustom });
-    setIsLexiconOpen(false);
+    setDraftMeaningItems((current) => [...current, normalized]);
+    setNewMeaningDraft("");
   }
 
-  function resetMeaning() {
-    const nextLocaleMeanings = { ...customMeanings[locale] };
-    delete nextLocaleMeanings[String(selectedSymbolId)];
+  function removeDraftMeaningItem(index: number) {
+    setDraftMeaningItems((current) =>
+      current.filter((_, itemIndex) => itemIndex !== index),
+    );
+  }
+
+  function persistDraftMeaning(symbolId: number, items: string[]) {
+    const normalized = normalizeMeaningItems(items);
+
+    if (normalized.length === 0) {
+      const nextLocaleMeanings = { ...customMeanings[locale] };
+      delete nextLocaleMeanings[String(symbolId)];
+
+      patchPersisted({
+        customMeanings: {
+          ...customMeanings,
+          [locale]: nextLocaleMeanings,
+        },
+      });
+      return;
+    }
 
     patchPersisted({
       customMeanings: {
         ...customMeanings,
-        [locale]: nextLocaleMeanings,
+        [locale]: {
+          ...customMeanings[locale],
+          [String(symbolId)]: normalized,
+        },
       },
     });
-    setDraftMeaning(currentSymbol.meanings[locale]);
+  }
+
+  function closeLexicon() {
+    const nextItems = newMeaningDraft.trim()
+      ? [...draftMeaningItems, newMeaningDraft]
+      : draftMeaningItems;
+
+    persistDraftMeaning(selectedSymbolId, nextItems);
+    setDraftMeaningItems([]);
+    setNewMeaningDraft("");
+  }
+
+  function openLexicon() {
+    setDraftMeaningItems([...personalMeaningItems]);
+    setNewMeaningDraft("");
   }
 
   return {
     locale,
     theme,
-    density,
     hands,
     activeHand,
     status,
     selectedSymbolId,
     currentSymbol,
-    defaultMeaning: currentSymbol.meanings[locale],
-    activeMeaning,
-    personalMeaning,
-    draftMeaning,
+    defaultMeaningItems,
+    personalMeaningItems,
+    draftMeaningItems,
+    newMeaningDraft,
     journal,
     answerSymbols,
     answerHandSymbolId,
     countdownProgress,
     countdownSecondsLeft,
     symbolCatalog,
+    openedReadingId,
     canSaveReading: status === "idle" && answerSymbols.length > 0,
-    isLexiconOpen,
-    hasCustomMeaning:
-      customMeanings[locale][String(selectedSymbolId)] != null &&
-      customMeanings[locale][String(selectedSymbolId)] !== "",
     chooseSymbol,
     inspectSymbol,
     focusHand,
@@ -371,14 +485,15 @@ export function useAlethiometerApp() {
     nudgeHand,
     setLocale,
     setTheme,
-    setDensity,
     askAlethiometer,
     saveCurrentReading,
+    deleteReading,
     openReading,
-    updateDraftMeaning,
-    saveMeaning,
-    resetMeaning,
-    openLexicon: () => setIsLexiconOpen(true),
-    closeLexicon: () => setIsLexiconOpen(false),
+    updateDraftMeaningItem,
+    updateNewMeaningDraft,
+    addDraftMeaningItem,
+    removeDraftMeaningItem,
+    openLexicon,
+    closeLexicon,
   };
 }
