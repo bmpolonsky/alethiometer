@@ -19,7 +19,7 @@ interface SettingsDrawerProps {
   symbol: SymbolEntry;
   defaultMeaningItems: string[];
   personalMeaningItems: string[];
-  draftMeaningItems: string[];
+  allMeaningItemsBySymbol: Record<string, string[]>;
   newMeaningDraft: string;
   isEditingMeanings: boolean;
   journal: SavedReading[];
@@ -55,6 +55,8 @@ interface SettingsDrawerProps {
     questionTitle: string;
     answerTitle: string;
     answerSummaryLabel: string;
+  };
+  help: {
     guidanceTitle: string;
     helpIntro: string;
     helpSections: Array<{
@@ -70,7 +72,7 @@ interface SettingsDrawerProps {
   onCloseLexicon: () => void;
   onOpenReading: (entry: SavedReading) => void;
   onDeleteReading: (readingId: string) => void;
-  onDraftChange: (index: number, value: string) => void;
+  onMeaningChange: (index: number, value: string) => void;
   onNewMeaningDraftChange: (value: string) => void;
   onAddMeaning: () => void;
   onRemoveMeaning: (index: number) => void;
@@ -85,12 +87,13 @@ export function SettingsDrawer({
   symbol,
   defaultMeaningItems,
   personalMeaningItems,
-  draftMeaningItems,
+  allMeaningItemsBySymbol,
   newMeaningDraft,
   isEditingMeanings,
   journal,
   openedReadingId,
   copy,
+  help,
   onClose,
   onInspectSymbol,
   onSetLocale,
@@ -99,7 +102,7 @@ export function SettingsDrawer({
   onCloseLexicon,
   onOpenReading,
   onDeleteReading,
-  onDraftChange,
+  onMeaningChange,
   onNewMeaningDraftChange,
   onAddMeaning,
   onRemoveMeaning,
@@ -151,13 +154,13 @@ export function SettingsDrawer({
           <SymbolCatalogPanel
             copy={copy}
             defaultMeaningItems={defaultMeaningItems}
-            draftMeaningItems={draftMeaningItems}
             isEditingMeanings={isEditingMeanings}
             locale={locale}
             newMeaningDraft={newMeaningDraft}
+            allMeaningItemsBySymbol={allMeaningItemsBySymbol}
             onAddMeaning={onAddMeaning}
             onCloseLexicon={onCloseLexicon}
-            onDraftChange={onDraftChange}
+            onMeaningChange={onMeaningChange}
             onInspectSymbol={onInspectSymbol}
             onNewMeaningDraftChange={onNewMeaningDraftChange}
             onOpenLexicon={onOpenLexicon}
@@ -180,7 +183,7 @@ export function SettingsDrawer({
           />
         ) : null}
 
-        {section === "help" ? <HelpPanel copy={copy} /> : null}
+        {section === "help" ? <HelpPanel help={help} /> : null}
       </aside>
     </div>
   );

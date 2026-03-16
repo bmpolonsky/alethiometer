@@ -7,6 +7,7 @@ interface QuestionSymbolPickerProps {
   handId: HandId | null;
   currentSymbolId: number | null;
   symbols: SymbolEntry[];
+  personalMeaningItemsBySymbol: Record<string, string[]>;
   copy: {
     chooseSymbolTitle: string;
     chooseSymbolHint: string;
@@ -22,6 +23,7 @@ export function QuestionSymbolPicker({
   handId,
   currentSymbolId,
   symbols,
+  personalMeaningItemsBySymbol,
   copy,
   onClose,
   onSelect,
@@ -60,7 +62,10 @@ export function QuestionSymbolPicker({
               <span className="picker-item-copy">
                 <strong>{symbol.title[locale]}</strong>
                 <span>
-                  {symbol.meanings[locale].map(formatBaseMeaningItem).join(", ")}
+                  {[
+                    ...symbol.meanings[locale].map(formatBaseMeaningItem),
+                    ...(personalMeaningItemsBySymbol[String(symbol.id)] ?? []),
+                  ].join(", ")}
                 </span>
               </span>
             </button>

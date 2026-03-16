@@ -64,6 +64,7 @@ button {
 }
 
 .app-shell {
+  position: relative;
   height: 100vh;
   padding:
     calc(0.7rem + env(safe-area-inset-top))
@@ -88,11 +89,12 @@ button {
 .topbar.is-meditative {
   max-width: none;
   margin: 0;
+  padding: 0.15rem 0.2rem 0 0.2rem;
   justify-content: end;
   position: absolute;
-  top: calc(0.7rem + env(safe-area-inset-top));
-  right: calc(0.9rem + env(safe-area-inset-right));
-  left: calc(0.9rem + env(safe-area-inset-left));
+  top: 0;
+  right: 0;
+  left: 0;
   z-index: 6;
   pointer-events: none;
 }
@@ -350,11 +352,12 @@ button {
   display: grid;
   grid-template-columns: max-content 1px minmax(15rem, 1fr) auto;
   gap: 0.7rem;
-  align-items: stretch;
+  align-items: start;
 }
 
 .selection-group {
   display: grid;
+  grid-template-rows: auto 1fr;
   gap: 0.42rem;
   min-width: 0;
 }
@@ -391,7 +394,7 @@ button {
 .answer-row.is-empty {
   border: 1px dashed var(--line-strong);
   border-radius: 1rem;
-  padding: 0.28rem 0.5rem;
+  padding: 0.36rem 0.5rem;
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -475,7 +478,12 @@ button {
   align-content: start;
   justify-items: stretch;
   min-width: 9.2rem;
-  padding-top: 0.8rem;
+  grid-template-rows: auto auto auto;
+  padding-top: 0;
+}
+
+.action-kicker {
+  visibility: hidden;
 }
 
 .drawer-item-input,
@@ -487,6 +495,10 @@ button {
   background: rgba(255, 255, 255, 0.15);
   color: inherit;
   font: inherit;
+}
+
+.drawer-item-input-new {
+  grid-column: 1 / span 2;
 }
 
 .control-actions {
@@ -504,6 +516,19 @@ button {
   display: grid;
   align-content: start;
   justify-items: stretch;
+}
+
+.reference-flow {
+  margin-top: 0.22rem;
+}
+
+.dial-center-progress {
+  fill: rgba(255, 236, 169, 0.08);
+  stroke: rgba(255, 236, 169, 0.78);
+  stroke-width: 2;
+  pointer-events: none;
+  transform-origin: center;
+  transition: opacity 180ms ease, r 180ms ease;
 }
 
 .primary-action,

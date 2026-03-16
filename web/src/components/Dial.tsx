@@ -10,9 +10,11 @@ interface DialProps {
   hands: Record<HandId, number>;
   answerHandAngle: number;
   interactive: boolean;
+  meditativeMode?: boolean;
   onInspectSymbol: (symbolId: number) => void;
   onFocusHand: (handId: HandId) => void;
   onNudgeHand: (handId: HandId, direction: number) => void;
+  onAsk?: () => void;
 }
 
 const ATLAS_SIZE = {
@@ -23,10 +25,10 @@ const ATLAS_SIZE = {
 const ATLAS_HREF = "/assets/graphics-lib.png";
 
 const atlasFrames = {
-  arrow1: { x: 0, y: 0, width: 37, height: 221, pivotX: 17.2, pivotY: 138.3 },
-  arrow2: { x: 37, y: 0, width: 31, height: 232, pivotX: 14.25, pivotY: 143.6 },
-  arrow3: { x: 68, y: 0, width: 17, height: 224, pivotX: 8.35, pivotY: 162.1 },
-  arrow4: { x: 85, y: 0, width: 26, height: 254, pivotX: 12.5, pivotY: 163.4 },
+  arrow1: { x: 0, y: 0, width: 37, height: 221, pivotX: 17.2, pivotY: 160 },
+  arrow2: { x: 37, y: 0, width: 31, height: 232, pivotX: 14.25, pivotY: 160 },
+  arrow3: { x: 68, y: 0, width: 17, height: 224, pivotX: 8.35, pivotY: 160 },
+  arrow4: { x: 85, y: 0, width: 26, height: 254, pivotX: 12.5, pivotY: 160 },
   device: { x: 111, y: 0, width: 549, height: 593, pivotX: 274.5, pivotY: 313.15 },
   glare: { x: 199, y: 593, width: 316, height: 316, pivotX: 158.45, pivotY: 159.4 },
   wheelIdle: { x: 660, y: 0, width: 199, height: 103, pivotX: 101.65, pivotY: 92 },
@@ -44,7 +46,7 @@ const handAssets: Record<
     scale: number;
   }
 > = {
-  "query-1": {
+  first: {
     frame: atlasFrames.arrow1,
     width: atlasFrames.arrow1.width,
     height: atlasFrames.arrow1.height,
@@ -52,7 +54,7 @@ const handAssets: Record<
     pivotY: atlasFrames.arrow1.pivotY,
     scale: 0.94,
   },
-  "query-2": {
+  second: {
     frame: atlasFrames.arrow2,
     width: atlasFrames.arrow2.width,
     height: atlasFrames.arrow2.height,
@@ -60,7 +62,7 @@ const handAssets: Record<
     pivotY: atlasFrames.arrow2.pivotY,
     scale: 0.94,
   },
-  "query-3": {
+  third: {
     frame: atlasFrames.arrow3,
     width: atlasFrames.arrow3.width,
     height: atlasFrames.arrow3.height,
@@ -84,9 +86,9 @@ const wheelConfigs: Array<{
   offsetY: number;
   rotationDeg: number;
 }> = [
-  { handId: "query-1", offsetX: -245, offsetY: 145, rotationDeg: -120 },
-  { handId: "query-2", offsetX: 3, offsetY: -289, rotationDeg: 0 },
-  { handId: "query-3", offsetX: 243, offsetY: 148, rotationDeg: 120 },
+  { handId: "first", offsetX: -245, offsetY: 145, rotationDeg: -120 },
+  { handId: "second", offsetX: 3, offsetY: -289, rotationDeg: 0 },
+  { handId: "third", offsetX: 243, offsetY: 148, rotationDeg: 120 },
 ];
 
 function renderAtlasCrop(
@@ -110,9 +112,11 @@ export function Dial({
   hands,
   answerHandAngle,
   interactive,
+  meditativeMode = false,
   onInspectSymbol,
   onFocusHand,
   onNudgeHand,
+  onAsk,
 }: DialProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const dragStateRef = useRef<{
@@ -125,22 +129,29 @@ export function Dial({
   } | null>(null);
   const [draggingHand, setDraggingHand] = useState<HandId | null>(null);
   const [wheelFramePhase, setWheelFramePhase] = useState<Record<HandId, 0 | 1>>({
-    "query-1": 0,
-    "query-2": 0,
-    "query-3": 0,
+    first: 0,
+    second: 0,
+    third: 0,
   });
   const [displayAngles, setDisplayAngles] = useState<Record<HandId, number>>({
-    "query-1": hands["query-1"] * 10,
-    "query-2": hands["query-2"] * 10,
-    "query-3": hands["query-3"] * 10,
+    first: hands.first * 10,
+    second: hands.second * 10,
+    third: hands.third * 10,
   });
+  const [centerHoldProgress, setCenterHoldProgress] = useState(0);
+  const holdStateRef = useRef<{
+    pointerId: number;
+    startedAt: number;
+    frame: number;
+    completed: boolean;
+  } | null>(null);
   const glareX = Math.round(DIAL_GEOMETRY.centerX - atlasFrames.glare.pivotX);
   const glareY = Math.round(DIAL_GEOMETRY.centerY - atlasFrames.glare.pivotY);
   const targetAngles = useMemo(
     () => ({
-      "query-1": hands["query-1"] * 10,
-      "query-2": hands["query-2"] * 10,
-      "query-3": hands["query-3"] * 10,
+      first: hands.first * 10,
+      second: hands.second * 10,
+      third: hands.third * 10,
     }),
     [hands],
   );
@@ -148,6 +159,53 @@ export function Dial({
   useEffect(() => {
     setDisplayAngles(targetAngles);
   }, [targetAngles]);
+
+  function cancelCenterHold() {
+    const holdState = holdStateRef.current;
+
+    if (holdState?.frame) {
+      window.cancelAnimationFrame(holdState.frame);
+    }
+
+    holdStateRef.current = null;
+    setCenterHoldProgress(0);
+  }
+
+  function startCenterHold(pointerId: number, target: SVGCircleElement) {
+    if (!meditativeMode || !interactive || !onAsk) {
+      return;
+    }
+
+    const durationMs = 1200;
+
+    const holdState = {
+      pointerId,
+      startedAt: performance.now(),
+      frame: 0,
+      completed: false,
+    };
+
+    const tick = () => {
+      const nextProgress = Math.min((performance.now() - holdState.startedAt) / durationMs, 1);
+
+      setCenterHoldProgress(nextProgress);
+
+      if (nextProgress >= 1) {
+        holdState.completed = true;
+        holdStateRef.current = holdState;
+        onAsk();
+        return;
+      }
+
+      holdState.frame = window.requestAnimationFrame(tick);
+      holdStateRef.current = holdState;
+    };
+
+    cancelCenterHold();
+    holdStateRef.current = holdState;
+    target.setPointerCapture(pointerId);
+    holdState.frame = window.requestAnimationFrame(tick);
+  }
 
   function inspectByPointer(clientX: number, clientY: number) {
     const svg = svgRef.current;
@@ -237,9 +295,9 @@ export function Dial({
     dragStateRef.current = null;
     setDraggingHand(null);
     setWheelFramePhase({
-      "query-1": 0,
-      "query-2": 0,
-      "query-3": 0,
+      first: 0,
+      second: 0,
+      third: 0,
     });
   }
 
@@ -307,7 +365,7 @@ export function Dial({
           );
         })}
 
-        {(["query-1", "query-2", "query-3"] as HandId[]).map((handId) => {
+        {(["first", "second", "third"] as HandId[]).map((handId) => {
           const asset = handAssets[handId];
 
           return (
@@ -345,6 +403,58 @@ export function Dial({
             {renderAtlasCrop(handAssets.answer.frame, 0, 0)}
           </svg>
         </g>
+
+        {meditativeMode ? (
+          <g className="dial-center-trigger">
+            <circle
+              className={`dial-center-hold ${centerHoldProgress > 0 ? "is-holding" : ""}`}
+              cx={DIAL_GEOMETRY.centerX}
+              cy={DIAL_GEOMETRY.centerY}
+              r={56}
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+              onPointerCancel={(event) => {
+                if (holdStateRef.current?.pointerId === event.pointerId) {
+                  event.stopPropagation();
+                  cancelCenterHold();
+                }
+              }}
+              onPointerDown={(event) => {
+                event.stopPropagation();
+                startCenterHold(event.pointerId, event.currentTarget);
+              }}
+              onPointerLeave={(event) => {
+                if (holdStateRef.current?.pointerId === event.pointerId) {
+                  event.stopPropagation();
+                  cancelCenterHold();
+                }
+              }}
+              onPointerUp={(event) => {
+                if (holdStateRef.current?.pointerId === event.pointerId) {
+                  event.stopPropagation();
+                  if (holdStateRef.current?.completed) {
+                    holdStateRef.current = null;
+                    setCenterHoldProgress(0);
+                  } else {
+                    cancelCenterHold();
+                  }
+                }
+              }}
+              opacity={0.001}
+            />
+            <circle
+              className="dial-center-progress"
+              cx={DIAL_GEOMETRY.centerX}
+              cy={DIAL_GEOMETRY.centerY}
+              r={52}
+              style={{
+                opacity: centerHoldProgress > 0 ? 0.85 : 0.16,
+                transform: `translate(${DIAL_GEOMETRY.centerX}px, ${DIAL_GEOMETRY.centerY}px) scale(${0.92 + centerHoldProgress * 0.1}) translate(${-DIAL_GEOMETRY.centerX}px, ${-DIAL_GEOMETRY.centerY}px)`,
+              }}
+            />
+          </g>
+        ) : null}
 
         {wheelConfigs.map(({ handId, offsetX, offsetY, rotationDeg }) => {
           const frame =

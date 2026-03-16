@@ -1,4 +1,4 @@
-import type { Locale, LocalizedText, SymbolEntry } from "./types";
+import type { LocalizedText, SymbolEntry } from "./types";
 
 interface SymbolSeed {
   imageFile: string;
@@ -312,16 +312,3 @@ export const symbolCatalog: SymbolEntry[] = symbolSeeds.map((symbol, index) => (
   title: symbol.title,
   meanings: symbol.meanings,
 }));
-
-export const guidanceText: Record<Locale, string[]> = {
-  ru: [
-    "Выбери три символа, которые лучше всего описывают вопрос, и мысленно держи формулировку, пока прибор молчит.",
-    "После паузы ответ проявится цепочкой знаков. Читай их как образный язык, а не как буквальный текст.",
-    "Стандартные значения можно переписывать под себя: личный словарь и есть главное умение работы с алетиометром.",
-  ],
-  en: [
-    "Choose three symbols that best frame the question and keep the thought in mind while the instrument stays silent.",
-    "After a short pause the answer appears as a sequence of signs. Read it as a symbolic language, not a literal sentence.",
-    "You can reshape the default meanings into your own lexicon. That personal vocabulary is part of the craft.",
-  ],
-};

@@ -7,15 +7,14 @@ interface ControlPanelProps {
     questionTitle: string;
     ask: string;
     saveReading: string;
-    countdownStatus: string;
+    listeningStatus: string;
     answerTitle: string;
     answerPlaceholder: string;
   };
   symbols: SymbolEntry[];
   hands: Record<HandId, number>;
   activeHand: HandId;
-  countdownSecondsLeft: number;
-  status: "idle" | "countdown" | "revealing";
+  status: "idle" | "listening";
   canSaveReading: boolean;
   answerSymbols: number[];
   onOpenPicker: (handId: HandId) => void;
@@ -30,7 +29,6 @@ export function ControlPanel({
   symbols,
   hands,
   activeHand,
-  countdownSecondsLeft,
   status,
   canSaveReading,
   answerSymbols,
@@ -39,8 +37,7 @@ export function ControlPanel({
   onSaveReading,
   onInspectSymbol,
 }: ControlPanelProps) {
-  const statusText =
-    status === "countdown" ? `${copy.countdownStatus} ${countdownSecondsLeft}s` : null;
+  const statusText = status === "listening" ? copy.listeningStatus : null;
   const hasAnswer = answerSymbols.length > 0;
 
   return (
@@ -102,6 +99,9 @@ export function ControlPanel({
         </div>
 
         <div className="control-actions compact band-actions">
+          <p className="panel-kicker action-kicker" aria-hidden="true">
+            actions
+          </p>
           <button className="primary-action" disabled={status !== "idle"} onClick={onAsk} type="button">
             {copy.ask}
           </button>

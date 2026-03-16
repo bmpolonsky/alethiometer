@@ -1,14 +1,13 @@
 export type Locale = "ru" | "en";
 export type ThemeMode = "dawn" | "night";
-export type HandId = "query-1" | "query-2" | "query-3";
+export type HandId = "first" | "second" | "third";
 export type MenuSection =
   | "settings"
   | "symbols"
-  | "lexicon"
   | "archive"
   | "help";
 
-export const HAND_ORDER: HandId[] = ["query-1", "query-2", "query-3"];
+export const HAND_ORDER: HandId[] = ["first", "second", "third"];
 
 export interface LocalizedText<T = string> {
   ru: T;
@@ -33,6 +32,13 @@ export interface SavedReading {
   answerText?: string;
 }
 
+export interface ActiveReadingSnapshot {
+  answerSymbols: number[];
+  answerHandAngle: number;
+  selectedSymbolId: number;
+  openedReadingId: string | null;
+}
+
 export interface PersistedState {
   locale: Locale;
   theme: ThemeMode;
@@ -40,4 +46,5 @@ export interface PersistedState {
   hands: Record<HandId, number>;
   customMeanings: Record<Locale, Record<string, string[]>>;
   journal: SavedReading[];
+  activeReading: ActiveReadingSnapshot;
 }

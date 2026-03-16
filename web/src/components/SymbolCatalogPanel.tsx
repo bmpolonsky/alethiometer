@@ -7,7 +7,7 @@ interface SymbolCatalogPanelProps {
   symbol: SymbolEntry;
   defaultMeaningItems: string[];
   personalMeaningItems: string[];
-  draftMeaningItems: string[];
+  allMeaningItemsBySymbol: Record<string, string[]>;
   newMeaningDraft: string;
   isEditingMeanings: boolean;
   copy: {
@@ -25,7 +25,7 @@ interface SymbolCatalogPanelProps {
   onInspectSymbol: (symbolId: number) => void;
   onOpenLexicon: () => void;
   onCloseLexicon: () => void;
-  onDraftChange: (index: number, value: string) => void;
+  onMeaningChange: (index: number, value: string) => void;
   onNewMeaningDraftChange: (value: string) => void;
   onAddMeaning: () => void;
   onRemoveMeaning: (index: number) => void;
@@ -37,14 +37,14 @@ export function SymbolCatalogPanel({
   symbol,
   defaultMeaningItems,
   personalMeaningItems,
-  draftMeaningItems,
+  allMeaningItemsBySymbol,
   newMeaningDraft,
   isEditingMeanings,
   copy,
   onInspectSymbol,
   onOpenLexicon,
   onCloseLexicon,
-  onDraftChange,
+  onMeaningChange,
   onNewMeaningDraftChange,
   onAddMeaning,
   onRemoveMeaning,
@@ -69,10 +69,10 @@ export function SymbolCatalogPanel({
               <span className="catalog-item-copy">
                 <strong>{entry.title[locale]}</strong>
                 <span>
-                  {entry.meanings[locale]
-                    .slice(0, 3)
-                    .map(formatBaseMeaningItem)
-                    .join(", ")}
+                  {[
+                    ...entry.meanings[locale].map(formatBaseMeaningItem),
+                    ...(allMeaningItemsBySymbol[String(entry.id)] ?? []),
+                  ].join(", ")}
                 </span>
               </span>
             </button>
@@ -109,15 +109,17 @@ export function SymbolCatalogPanel({
             <p className="meaning-label">{copy.personalMeaning}</p>
             {isEditingMeanings ? (
               <div className="drawer-item-list catalog-inline-editor">
-                {draftMeaningItems.length > 0 ? (
-                  draftMeaningItems.map((item, index) => (
-                    <div className="drawer-item-row" key={`${item}-${index}`}>
+                {personalMeaningItems.length > 0 ? (
+                  personalMeaningItems.map((item, index) => (
+                    <div className="drawer-item-row" key={index}>
                       <span className="drawer-item-bullet" aria-hidden="true">
                         •
                       </span>
                       <input
                         className="drawer-item-input"
-                        onChange={(event) => onDraftChange(index, event.target.value)}
+                        onChange={(event) =>
+                          onMeaningChange(index, event.target.value)
+                        }
                         type="text"
                         value={item}
                       />
@@ -130,16 +132,11 @@ export function SymbolCatalogPanel({
                       </button>
                     </div>
                   ))
-                ) : (
-                  <p className="subtle">{copy.emptyPersonalMeaning}</p>
-                )}
+                ) : null}
 
                 <div className="drawer-item-row is-new">
-                  <span className="drawer-item-bullet" aria-hidden="true">
-                    +
-                  </span>
                   <input
-                    className="drawer-item-input"
+                    className="drawer-item-input drawer-item-input-new"
                     onChange={(event) => onNewMeaningDraftChange(event.target.value)}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
