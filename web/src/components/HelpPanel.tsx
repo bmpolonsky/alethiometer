@@ -1,5 +1,5 @@
 interface HelpPanelProps {
-  copy: {
+  help: {
     guidanceTitle: string;
     helpIntro: string;
     helpSections: Array<{
@@ -9,16 +9,16 @@ interface HelpPanelProps {
   };
 }
 
-export function HelpPanel({ copy }: HelpPanelProps) {
+export function HelpPanel({ help }: HelpPanelProps) {
   return (
     <section className="help-panel">
       <div className="panel-heading compact">
-        <p className="panel-kicker">{copy.guidanceTitle}</p>
-        <p className="panel-copy">{copy.helpIntro}</p>
+        <p className="panel-kicker">{help.guidanceTitle}</p>
+        <p className="panel-copy">{help.helpIntro}</p>
       </div>
 
       <div className="help-sections">
-        {copy.helpSections.map((section) => (
+        {help.helpSections.map((section) => (
           <section className="help-section" key={section.title}>
             <h3 className="help-section-title">{section.title}</h3>
             <ul className="meaning-list guidance-bullets">

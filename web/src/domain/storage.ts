@@ -1,5 +1,11 @@
 import { sanitizeMeaningItems } from "./meanings";
-import type { HandId, Locale, PersistedState, SavedReading } from "./types";
+import type {
+  ActiveReadingSnapshot,
+  HandId,
+  Locale,
+  PersistedState,
+  SavedReading,
+} from "./types";
 
 const STORAGE_KEY = "alethiometer-web-state-v1";
 
@@ -8,7 +14,7 @@ function isLocale(value: string): value is Locale {
 }
 
 function isHandId(value: string): value is HandId {
-  return value === "query-1" || value === "query-2" || value === "query-3";
+  return value === "first" || value === "second" || value === "third";
 }
 
 function sanitizeSymbolId(value: unknown, fallback: number) {
@@ -38,6 +44,30 @@ function sanitizeOptionalText(value: unknown) {
   const normalized = value.trim();
 
   return normalized || undefined;
+}
+
+function sanitizeActiveReading(value: unknown, fallbackHands: Record<HandId, number>): ActiveReadingSnapshot {
+  if (!value || typeof value !== "object") {
+    return {
+      answerSymbols: [],
+      answerHandAngle: fallbackHands.third * 10,
+      selectedSymbolId: fallbackHands.first,
+      openedReadingId: null,
+    };
+  }
+
+  const reading = value as Partial<ActiveReadingSnapshot>;
+
+  return {
+    answerSymbols: sanitizeSymbolList(reading.answerSymbols),
+    answerHandAngle:
+      typeof reading.answerHandAngle === "number" && !Number.isNaN(reading.answerHandAngle)
+        ? reading.answerHandAngle
+        : fallbackHands.third * 10,
+    selectedSymbolId: sanitizeSymbolId(reading.selectedSymbolId, fallbackHands.first),
+    openedReadingId:
+      typeof reading.openedReadingId === "string" ? reading.openedReadingId : null,
+  };
 }
 
 function sanitizeJournalEntry(value: unknown): SavedReading | null {
@@ -72,15 +102,21 @@ export function createDefaultState(locale: Locale): PersistedState {
     theme: "dawn",
     meditativeMode: false,
     hands: {
-      "query-1": 5,
-      "query-2": 13,
-      "query-3": 28,
+      first: 5,
+      second: 13,
+      third: 28,
     },
     customMeanings: {
       ru: {},
       en: {},
     },
     journal: [],
+    activeReading: {
+      answerSymbols: [],
+      answerHandAngle: 28 * 10,
+      selectedSymbolId: 5,
+      openedReadingId: null,
+    },
   };
 }
 
@@ -103,7 +139,10 @@ export function loadState(locale: Locale): PersistedState {
 
     Object.entries(parsed.hands ?? {}).forEach(([handId, symbolId]) => {
       if (isHandId(handId)) {
-        nextHands[handId] = sanitizeSymbolId(symbolId, fallback.hands[handId]);
+        nextHands[handId] = sanitizeSymbolId(
+          symbolId,
+          fallback.hands[handId],
+        );
       }
     });
 
@@ -137,6 +176,7 @@ export function loadState(locale: Locale): PersistedState {
             .filter((entry): entry is SavedReading => entry != null)
             .slice(0, 16)
         : [],
+      activeReading: sanitizeActiveReading(parsed.activeReading, nextHands),
     };
   } catch {
     return fallback;

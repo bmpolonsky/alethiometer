@@ -32,7 +32,6 @@ export function MenuDropdown({
     symbols: copy.symbolsSection,
     archive: copy.archiveSection,
     help: copy.helpSection,
-    lexicon: "",
   };
 
   return (
