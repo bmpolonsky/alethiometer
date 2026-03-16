@@ -1,4 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  graphicsSpritesheetFrames,
+  graphicsSpritesheetHref,
+  graphicsSpritesheetSize,
+} from "../domain/graphicsSpritesheet";
 import type { HandId } from "../domain/types";
 import {
   DIAL_GEOMETRY,
@@ -17,23 +22,7 @@ interface DialProps {
   onAsk?: () => void;
 }
 
-const ATLAS_SIZE = {
-  width: 1024,
-  height: 1024,
-};
-
-const ATLAS_HREF = "/assets/graphics-lib.png";
-
-const atlasFrames = {
-  arrow1: { x: 0, y: 0, width: 37, height: 221, pivotX: 17.2, pivotY: 160 },
-  arrow2: { x: 37, y: 0, width: 31, height: 232, pivotX: 14.25, pivotY: 160 },
-  arrow3: { x: 68, y: 0, width: 17, height: 224, pivotX: 8.35, pivotY: 160 },
-  arrow4: { x: 85, y: 0, width: 26, height: 254, pivotX: 12.5, pivotY: 160 },
-  device: { x: 111, y: 0, width: 549, height: 593, pivotX: 274.5, pivotY: 313.15 },
-  glare: { x: 199, y: 593, width: 316, height: 316, pivotX: 158.45, pivotY: 159.4 },
-  wheelIdle: { x: 660, y: 0, width: 199, height: 103, pivotX: 101.65, pivotY: 92 },
-  wheelActive: { x: 0, y: 593, width: 199, height: 103, pivotX: 101.65, pivotY: 92 },
-};
+const spritesheetFrames = graphicsSpritesheetFrames;
 
 const handAssets: Record<
   HandId | "answer",
@@ -47,35 +36,35 @@ const handAssets: Record<
   }
 > = {
   first: {
-    frame: atlasFrames.arrow1,
-    width: atlasFrames.arrow1.width,
-    height: atlasFrames.arrow1.height,
-    pivotX: atlasFrames.arrow1.pivotX,
-    pivotY: atlasFrames.arrow1.pivotY,
+    frame: spritesheetFrames.arrow1,
+    width: spritesheetFrames.arrow1.width,
+    height: spritesheetFrames.arrow1.height,
+    pivotX: spritesheetFrames.arrow1.pivotX,
+    pivotY: spritesheetFrames.arrow1.pivotY,
     scale: 0.94,
   },
   second: {
-    frame: atlasFrames.arrow2,
-    width: atlasFrames.arrow2.width,
-    height: atlasFrames.arrow2.height,
-    pivotX: atlasFrames.arrow2.pivotX,
-    pivotY: atlasFrames.arrow2.pivotY,
+    frame: spritesheetFrames.arrow2,
+    width: spritesheetFrames.arrow2.width,
+    height: spritesheetFrames.arrow2.height,
+    pivotX: spritesheetFrames.arrow2.pivotX,
+    pivotY: spritesheetFrames.arrow2.pivotY,
     scale: 0.94,
   },
   third: {
-    frame: atlasFrames.arrow3,
-    width: atlasFrames.arrow3.width,
-    height: atlasFrames.arrow3.height,
-    pivotX: atlasFrames.arrow3.pivotX,
-    pivotY: atlasFrames.arrow3.pivotY,
+    frame: spritesheetFrames.arrow3,
+    width: spritesheetFrames.arrow3.width,
+    height: spritesheetFrames.arrow3.height,
+    pivotX: spritesheetFrames.arrow3.pivotX,
+    pivotY: spritesheetFrames.arrow3.pivotY,
     scale: 0.96,
   },
   answer: {
-    frame: atlasFrames.arrow4,
-    width: atlasFrames.arrow4.width,
-    height: atlasFrames.arrow4.height,
-    pivotX: atlasFrames.arrow4.pivotX,
-    pivotY: atlasFrames.arrow4.pivotY,
+    frame: spritesheetFrames.arrow4,
+    width: spritesheetFrames.arrow4.width,
+    height: spritesheetFrames.arrow4.height,
+    pivotX: spritesheetFrames.arrow4.pivotX,
+    pivotY: spritesheetFrames.arrow4.pivotY,
     scale: 0.96,
   },
 };
@@ -91,18 +80,18 @@ const wheelConfigs: Array<{
   { handId: "third", offsetX: 243, offsetY: 148, rotationDeg: 120 },
 ];
 
-function renderAtlasCrop(
+function renderSpritesheetCrop(
   frame: { x: number; y: number; width: number; height: number },
   offsetX: number,
   offsetY: number,
 ) {
   return (
     <image
-      href={ATLAS_HREF}
+      href={graphicsSpritesheetHref}
       x={Math.round(-frame.x + offsetX)}
       y={Math.round(-frame.y + offsetY)}
-      width={ATLAS_SIZE.width}
-      height={ATLAS_SIZE.height}
+      width={graphicsSpritesheetSize.width}
+      height={graphicsSpritesheetSize.height}
       preserveAspectRatio="none"
     />
   );
@@ -145,8 +134,8 @@ export function Dial({
     frame: number;
     completed: boolean;
   } | null>(null);
-  const glareX = Math.round(DIAL_GEOMETRY.centerX - atlasFrames.glare.pivotX);
-  const glareY = Math.round(DIAL_GEOMETRY.centerY - atlasFrames.glare.pivotY);
+  const glareX = Math.round(DIAL_GEOMETRY.centerX - spritesheetFrames.glare.pivotX);
+  const glareY = Math.round(DIAL_GEOMETRY.centerY - spritesheetFrames.glare.pivotY);
   const targetAngles = useMemo(
     () => ({
       first: hands.first * 10,
@@ -311,23 +300,28 @@ export function Dial({
       >
         <defs>
           <clipPath id="dial-device-clip">
-            <rect x="0" y="0" width={atlasFrames.device.width} height={atlasFrames.device.height} />
+            <rect
+              x="0"
+              y="0"
+              width={spritesheetFrames.device.width}
+              height={spritesheetFrames.device.height}
+            />
           </clipPath>
           <clipPath id="dial-glare-clip">
             <rect
               x={glareX}
               y={glareY}
-              width={atlasFrames.glare.width}
-              height={atlasFrames.glare.height}
+              width={spritesheetFrames.glare.width}
+              height={spritesheetFrames.glare.height}
             />
           </clipPath>
           {wheelConfigs.map(({ handId }) => (
             <clipPath id={`dial-wheel-clip-${handId}`} key={`clip-${handId}`}>
               <rect
-                x={-atlasFrames.wheelIdle.pivotX}
-                y={-atlasFrames.wheelIdle.pivotY}
-                width={atlasFrames.wheelIdle.width}
-                height={atlasFrames.wheelIdle.height}
+                x={-spritesheetFrames.wheelIdle.pivotX}
+                y={-spritesheetFrames.wheelIdle.pivotY}
+                width={spritesheetFrames.wheelIdle.width}
+                height={spritesheetFrames.wheelIdle.height}
                 rx="12"
                 ry="12"
               />
@@ -341,7 +335,9 @@ export function Dial({
           </filter>
         </defs>
 
-        <g clipPath="url(#dial-device-clip)">{renderAtlasCrop(atlasFrames.device, 0, 0)}</g>
+        <g clipPath="url(#dial-device-clip)">
+          {renderSpritesheetCrop(spritesheetFrames.device, 0, 0)}
+        </g>
 
         {Array.from({ length: 36 }, (_, symbolId) => {
           const startAngle = symbolId * 10 - 5;
@@ -382,7 +378,7 @@ export function Dial({
                 height={asset.height * asset.scale}
                 viewBox={`0 0 ${asset.frame.width} ${asset.frame.height}`}
               >
-                {renderAtlasCrop(asset.frame, 0, 0)}
+                {renderSpritesheetCrop(asset.frame, 0, 0)}
               </svg>
             </g>
           );
@@ -400,7 +396,7 @@ export function Dial({
             height={handAssets.answer.height * handAssets.answer.scale}
             viewBox={`0 0 ${handAssets.answer.frame.width} ${handAssets.answer.frame.height}`}
           >
-            {renderAtlasCrop(handAssets.answer.frame, 0, 0)}
+            {renderSpritesheetCrop(handAssets.answer.frame, 0, 0)}
           </svg>
         </g>
 
@@ -459,8 +455,8 @@ export function Dial({
         {wheelConfigs.map(({ handId, offsetX, offsetY, rotationDeg }) => {
           const frame =
             draggingHand === handId && wheelFramePhase[handId] === 1
-              ? atlasFrames.wheelActive
-              : atlasFrames.wheelIdle;
+              ? spritesheetFrames.wheelActive
+              : spritesheetFrames.wheelIdle;
           const wheelX = DIAL_GEOMETRY.centerX + offsetX;
           const wheelY = DIAL_GEOMETRY.centerY + offsetY;
 
@@ -471,7 +467,7 @@ export function Dial({
               transform={`translate(${wheelX} ${wheelY}) rotate(${rotationDeg})`}
             >
               <g clipPath={`url(#dial-wheel-clip-${handId})`}>
-                {renderAtlasCrop(frame, -frame.pivotX, -frame.pivotY)}
+                {renderSpritesheetCrop(frame, -frame.pivotX, -frame.pivotY)}
               </g>
               <rect
                 className="dial-wheel-hit"
@@ -521,7 +517,7 @@ export function Dial({
           );
         })}
         <g clipPath="url(#dial-glare-clip)" opacity="1">
-          {renderAtlasCrop(atlasFrames.glare, glareX, glareY)}
+          {renderSpritesheetCrop(spritesheetFrames.glare, glareX, glareY)}
         </g>
       </svg>
     </div>
