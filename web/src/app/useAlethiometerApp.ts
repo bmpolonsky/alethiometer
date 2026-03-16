@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useEffectEvent, useState } from "react";
+import { startTransition, useEffect, useEffectEvent, useRef, useState } from "react";
 import { createReading } from "../domain/engine";
 import { normalizeMeaningItems } from "../domain/meanings";
 import {
@@ -95,7 +95,7 @@ function buildReadingMotion(startSymbol: number, answerSymbols: number[]): Readi
   const stops = answerSymbols.map((symbolId) => {
     const distance = forwardSymbolDistance(currentSymbol, symbolId);
     const angleDelta = distance * 10;
-    const moveDurationMs = Math.max(520, Math.round((distance / 36) * 2200));
+    const moveDurationMs = Math.max(260, Math.round((distance / 36) * 7200));
     const holdDurationMs = 1500;
     const stopAngle = currentAngle + angleDelta;
     const stop: ReadingStop = {
@@ -155,9 +155,11 @@ export function useAlethiometerApp() {
   const [countdownProgress, setCountdownProgress] = useState(0);
   const [countdownSecondsLeft, setCountdownSecondsLeft] = useState(0);
   const [openedReadingId, setOpenedReadingId] = useState<string | null>(null);
+  const revealedStopCountRef = useRef(0);
 
   const locale = persisted.locale;
   const theme = persisted.theme;
+  const meditativeMode = persisted.meditativeMode;
   const hands = persisted.hands;
   const journal = persisted.journal;
   const customMeanings = persisted.customMeanings;
@@ -184,6 +186,7 @@ export function useAlethiometerApp() {
     }
 
     setReadingMotion(null);
+    revealedStopCountRef.current = 0;
     setCountdownProgress(1);
     setCountdownSecondsLeft(0);
     setStatus("idle");
@@ -195,7 +198,6 @@ export function useAlethiometerApp() {
     }
 
     let frame = 0;
-    let revealedCount = 0;
 
     const tick = () => {
       const elapsedMs = performance.now() - readingMotion.startedAt;
@@ -229,16 +231,19 @@ export function useAlethiometerApp() {
         setAnswerHandAngle(currentStop.stopAngle);
 
         while (
-          revealedCount < readingMotion.stops.length &&
-          elapsedMs >= readingMotion.stops[revealedCount]!.arriveTimeMs
+          revealedStopCountRef.current < readingMotion.stops.length &&
+          elapsedMs >= readingMotion.stops[revealedStopCountRef.current]!.arriveTimeMs
         ) {
-          const revealedSymbol = readingMotion.stops[revealedCount]!.symbolId;
+          const revealedIndex = revealedStopCountRef.current;
+          const revealedSymbol = readingMotion.stops[revealedIndex]!.symbolId;
 
           startTransition(() => {
-            setAnswerSymbols((current) => [...current, revealedSymbol]);
+            setAnswerSymbols((current) =>
+              current.length > revealedIndex ? current : [...current, revealedSymbol],
+            );
             setSelectedSymbolId(revealedSymbol);
           });
-          revealedCount += 1;
+          revealedStopCountRef.current += 1;
         }
       }
 
@@ -274,6 +279,7 @@ export function useAlethiometerApp() {
   function clearCurrentAnswer() {
     setAnswerSymbols([]);
     setReadingMotion(null);
+    revealedStopCountRef.current = 0;
     setCountdownProgress(0);
     setCountdownSecondsLeft(0);
     setOpenedReadingId(null);
@@ -371,6 +377,10 @@ export function useAlethiometerApp() {
     patchPersisted({ theme: nextTheme });
   }
 
+  function setMeditativeMode(nextValue: boolean) {
+    patchPersisted({ meditativeMode: nextValue });
+  }
+
   function askAlethiometer() {
     if (status !== "idle") {
       return;
@@ -384,6 +394,7 @@ export function useAlethiometerApp() {
     const generated = createReading(questionSymbols);
     const motion = buildReadingMotion(questionSymbols[2], generated.answerSymbols);
 
+    revealedStopCountRef.current = 0;
     setReadingMotion(motion);
     setAnswerSymbols([]);
     setAnswerHandAngle(questionSymbols[2] * 10);
@@ -431,6 +442,7 @@ export function useAlethiometerApp() {
       "query-3": entry.questionSymbols[2] ?? hands["query-3"],
     });
     setReadingMotion(null);
+    revealedStopCountRef.current = entry.answerSymbols.length;
     setCountdownProgress(0);
     setCountdownSecondsLeft(0);
     setAnswerSymbols(entry.answerSymbols);
@@ -507,6 +519,7 @@ export function useAlethiometerApp() {
   return {
     locale,
     theme,
+    meditativeMode,
     hands,
     activeHand,
     status,
@@ -533,6 +546,7 @@ export function useAlethiometerApp() {
     nudgeHand,
     setLocale,
     setTheme,
+    setMeditativeMode,
     askAlethiometer,
     saveCurrentReading,
     deleteReading,

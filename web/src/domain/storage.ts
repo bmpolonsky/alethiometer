@@ -70,6 +70,7 @@ export function createDefaultState(locale: Locale): PersistedState {
   return {
     locale,
     theme: "dawn",
+    meditativeMode: false,
     hands: {
       "query-1": 5,
       "query-2": 13,
@@ -124,6 +125,10 @@ export function loadState(locale: Locale): PersistedState {
     return {
       locale: isLocale(parsed.locale ?? "") ? parsed.locale! : fallback.locale,
       theme: parsed.theme === "night" ? "night" : fallback.theme,
+      meditativeMode:
+        typeof parsed.meditativeMode === "boolean"
+          ? parsed.meditativeMode
+          : fallback.meditativeMode,
       hands: nextHands,
       customMeanings: nextCustomMeanings,
       journal: Array.isArray(parsed.journal)

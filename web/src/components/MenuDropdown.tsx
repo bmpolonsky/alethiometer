@@ -5,12 +5,16 @@ interface MenuDropdownProps {
   copy: {
     settingsButton: string;
     settingsSection: string;
+    meditativeMode: string;
+    immersiveModeOff: string;
     symbolsSection: string;
     archiveSection: string;
     helpSection: string;
   };
+  meditativeMode: boolean;
   onToggle: () => void;
   onSelect: (section: MenuSection) => void;
+  onToggleMeditativeMode: () => void;
 }
 
 const sections: MenuSection[] = ["settings", "symbols", "archive", "help"];
@@ -18,8 +22,10 @@ const sections: MenuSection[] = ["settings", "symbols", "archive", "help"];
 export function MenuDropdown({
   open,
   copy,
+  meditativeMode,
   onToggle,
   onSelect,
+  onToggleMeditativeMode,
 }: MenuDropdownProps) {
   const labels: Record<MenuSection, string> = {
     settings: copy.settingsSection,
@@ -37,6 +43,13 @@ export function MenuDropdown({
 
       {open ? (
         <div className="menu-dropdown-panel">
+          <button
+            className="menu-dropdown-item"
+            onClick={onToggleMeditativeMode}
+            type="button"
+          >
+            {meditativeMode ? copy.immersiveModeOff : copy.meditativeMode}
+          </button>
           {sections.map((section) => (
             <button
               className="menu-dropdown-item"

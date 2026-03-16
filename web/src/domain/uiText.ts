@@ -31,6 +31,8 @@ interface UiText {
   settingsTitle: string;
   settingsButton: string;
   settingsSection: string;
+  meditativeMode: string;
+  immersiveModeOff: string;
   symbolsSection: string;
   archiveSection: string;
   helpSection: string;
@@ -87,6 +89,8 @@ export const uiText: Record<Locale, UiText> = {
     settingsTitle: "Меню",
     settingsButton: "Меню",
     settingsSection: "Настройки",
+    meditativeMode: "Медитативный режим",
+    immersiveModeOff: "Обычный режим",
     symbolsSection: "Символы",
     archiveSection: "Архив",
     helpSection: "Справка",
@@ -170,6 +174,8 @@ export const uiText: Record<Locale, UiText> = {
     settingsTitle: "Menu",
     settingsButton: "Menu",
     settingsSection: "Settings",
+    meditativeMode: "Meditative mode",
+    immersiveModeOff: "Standard mode",
     symbolsSection: "Symbols",
     archiveSection: "Archive",
     helpSection: "Help",
