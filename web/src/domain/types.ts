@@ -36,6 +36,7 @@ export interface SavedReading {
 export interface PersistedState {
   locale: Locale;
   theme: ThemeMode;
+  meditativeMode: boolean;
   hands: Record<HandId, number>;
   customMeanings: Record<Locale, Record<string, string[]>>;
   journal: SavedReading[];

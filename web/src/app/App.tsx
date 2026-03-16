@@ -6,6 +6,7 @@ import { QuestionSymbolPicker } from "../components/QuestionSymbolPicker";
 import { ReferencePanel } from "../components/ReferencePanel";
 import { SaveReadingDialog } from "../components/SaveReadingDialog";
 import { SettingsDrawer } from "../components/SettingsDrawer";
+import { SymbolMeaningDrawer } from "../components/SymbolMeaningDrawer";
 import { SymbolInspector } from "../components/SymbolInspector";
 import { uiText } from "../domain/uiText";
 import type { HandId, MenuSection } from "../domain/types";
@@ -20,6 +21,7 @@ export function App() {
   const [saveQuestionText, setSaveQuestionText] = useState("");
   const [saveAnswerText, setSaveAnswerText] = useState("");
   const [pickerHand, setPickerHand] = useState<HandId | null>(null);
+  const [meditativeDrawerOpen, setMeditativeDrawerOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -47,6 +49,7 @@ export function App() {
 
     setDrawerSection(section);
     setMenuExpanded(false);
+    setMeditativeDrawerOpen(false);
   }
 
   function closeDrawer() {
@@ -58,6 +61,17 @@ export function App() {
     setDrawerSection("symbols");
     setMenuExpanded(false);
     app.openLexicon();
+    setMeditativeDrawerOpen(false);
+  }
+
+  function toggleMeditativeMode() {
+    const nextValue = !app.meditativeMode;
+
+    app.setMeditativeMode(nextValue);
+    setMenuExpanded(false);
+    setDrawerSection(null);
+    setPickerHand(null);
+    setMeditativeDrawerOpen(false);
   }
 
   function beginSaveReading() {
@@ -78,6 +92,14 @@ export function App() {
 
   function inspectSymbolFromDrawer(symbolId: number) {
     app.inspectSymbol(symbolId);
+  }
+
+  function inspectSymbolFromDial(symbolId: number) {
+    app.chooseSymbol(symbolId);
+
+    if (app.meditativeMode) {
+      setMeditativeDrawerOpen(true);
+    }
   }
 
   function openQuestionPicker(handId: HandId) {
@@ -105,43 +127,47 @@ export function App() {
 
   return (
     <div className="app-shell">
-      <header className="topbar">
-        <h1 className="topbar-title">ALETHIOMETER</h1>
+      <header className={`topbar ${app.meditativeMode ? "is-meditative" : ""}`}>
+        {app.meditativeMode ? null : <h1 className="topbar-title">ALETHIOMETER</h1>}
         <div ref={menuRef}>
           <MenuDropdown
             copy={copy}
+            meditativeMode={app.meditativeMode}
             onSelect={openDrawer}
+            onToggleMeditativeMode={toggleMeditativeMode}
             onToggle={() => setMenuExpanded((current) => !current)}
             open={menuExpanded}
           />
         </div>
       </header>
 
-      <main className="workspace">
+      <main className={`workspace ${app.meditativeMode ? "is-meditative" : ""}`}>
         <section className="instrument-column">
-          <ControlPanel
-            activeHand={app.activeHand}
-            answerSymbols={app.answerSymbols}
-            canSaveReading={app.canSaveReading}
-            copy={copy}
-            countdownSecondsLeft={app.countdownSecondsLeft}
-            hands={app.hands}
-            locale={app.locale}
-            onAsk={app.askAlethiometer}
-            onOpenPicker={openQuestionPicker}
-            onInspectSymbol={app.inspectSymbol}
-            onSaveReading={beginSaveReading}
-            status={app.status}
-            symbols={app.symbolCatalog}
-          />
+          {app.meditativeMode ? null : (
+            <ControlPanel
+              activeHand={app.activeHand}
+              answerSymbols={app.answerSymbols}
+              canSaveReading={app.canSaveReading}
+              copy={copy}
+              countdownSecondsLeft={app.countdownSecondsLeft}
+              hands={app.hands}
+              locale={app.locale}
+              onAsk={app.askAlethiometer}
+              onOpenPicker={openQuestionPicker}
+              onInspectSymbol={app.inspectSymbol}
+              onSaveReading={beginSaveReading}
+              status={app.status}
+              symbols={app.symbolCatalog}
+            />
+          )}
 
-          <div className="panel instrument-panel">
+          <div className={`panel instrument-panel ${app.meditativeMode ? "is-meditative" : ""}`}>
             <Dial
               answerHandAngle={app.answerHandAngle}
               hands={app.hands}
               interactive={app.status === "idle"}
               onFocusHand={app.focusHand}
-              onInspectSymbol={app.chooseSymbol}
+              onInspectSymbol={inspectSymbolFromDial}
               onNudgeHand={app.nudgeHand}
             />
           </div>
@@ -171,21 +197,20 @@ export function App() {
           </div>
         </section>
 
-        <aside className="sidebar-column">
-          <SymbolInspector
-            copy={copy}
-            defaultMeaningItems={app.defaultMeaningItems}
-            locale={app.locale}
-            onOpenLexicon={openSymbolEditor}
-            personalMeaningItems={app.personalMeaningItems}
-            symbol={app.currentSymbol}
-          />
+        {app.meditativeMode ? null : (
+          <aside className="sidebar-column">
+            <SymbolInspector
+              copy={copy}
+              defaultMeaningItems={app.defaultMeaningItems}
+              locale={app.locale}
+              onOpenLexicon={openSymbolEditor}
+              personalMeaningItems={app.personalMeaningItems}
+              symbol={app.currentSymbol}
+            />
 
-          <ReferencePanel
-            copy={copy}
-            onOpenHelp={() => openDrawer("help")}
-          />
-        </aside>
+            <ReferencePanel copy={copy} onOpenHelp={() => openDrawer("help")} />
+          </aside>
+        )}
       </main>
 
       <SettingsDrawer
@@ -237,6 +262,16 @@ export function App() {
         onSelect={applyQuestionSymbol}
         open={pickerHand != null}
         symbols={app.symbolCatalog}
+      />
+
+      <SymbolMeaningDrawer
+        copy={copy}
+        defaultMeaningItems={app.defaultMeaningItems}
+        locale={app.locale}
+        onClose={() => setMeditativeDrawerOpen(false)}
+        open={app.meditativeMode && meditativeDrawerOpen}
+        personalMeaningItems={app.personalMeaningItems}
+        symbol={app.currentSymbol}
       />
     </div>
   );

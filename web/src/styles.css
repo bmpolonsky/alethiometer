@@ -85,6 +85,22 @@ button {
   margin: 0 auto 0.65rem;
 }
 
+.topbar.is-meditative {
+  max-width: none;
+  margin: 0;
+  justify-content: end;
+  position: absolute;
+  top: calc(0.7rem + env(safe-area-inset-top));
+  right: calc(0.9rem + env(safe-area-inset-right));
+  left: calc(0.9rem + env(safe-area-inset-left));
+  z-index: 6;
+  pointer-events: none;
+}
+
+.topbar.is-meditative .menu-dropdown {
+  pointer-events: auto;
+}
+
 .topbar-title {
   margin: 0;
   font-family: "Avenir Next Condensed", "Bahnschrift Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
@@ -193,6 +209,12 @@ button {
   width: 100%;
 }
 
+.workspace.is-meditative {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: none;
+  height: 100%;
+}
+
 .instrument-column,
 .sidebar-column {
   display: grid;
@@ -202,6 +224,10 @@ button {
 
 .instrument-column {
   grid-template-rows: auto minmax(0, 1fr);
+}
+
+.workspace.is-meditative .instrument-column {
+  grid-template-rows: minmax(0, 1fr);
 }
 
 .sidebar-column {
@@ -240,6 +266,14 @@ button {
   overflow: hidden;
 }
 
+.instrument-panel.is-meditative {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
 .control-panel,
 .symbol-panel,
 .reference-panel {
@@ -274,6 +308,10 @@ button {
   padding: 0.6rem 0.6rem 0.2rem;
 }
 
+.workspace.is-meditative .dial-shell {
+  padding: 0;
+}
+
 .dial {
   display: block;
   width: auto;
@@ -281,6 +319,13 @@ button {
   max-width: min(100%, 540px);
   max-height: 100%;
   overflow: visible;
+}
+
+.workspace.is-meditative .dial {
+  width: min(100%, 78vh);
+  height: auto;
+  max-width: min(100%, 78vh);
+  max-height: min(100dvh - 2rem, 92vw);
 }
 
 .dial-slice-hit {
@@ -1040,6 +1085,10 @@ button {
 
 .drawer-panel-narrow {
   width: min(100%, 34rem);
+}
+
+.meditative-drawer {
+  width: min(100%, 30rem);
 }
 
 .drawer-panel-medium {
