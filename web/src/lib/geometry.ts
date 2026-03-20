@@ -1,8 +1,8 @@
 export const DIAL_GEOMETRY = {
   width: 549,
   height: 593,
-  centerX: 274.5,
-  centerY: 313.15,
+  centerX: 275,
+  centerY: 315,
   ringInnerRadius: 179,
   ringOuterRadius: 229,
   progressRadius: 156,

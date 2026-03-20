@@ -76,8 +76,8 @@ const wheelConfigs: Array<{
   rotationDeg: number;
 }> = [
   { handId: "first", offsetX: -245, offsetY: 145, rotationDeg: -120 },
-  { handId: "second", offsetX: 3, offsetY: -289, rotationDeg: 0 },
-  { handId: "third", offsetX: 243, offsetY: 148, rotationDeg: 120 },
+  { handId: "second", offsetX: 2, offsetY: -290, rotationDeg: 0 },
+  { handId: "third", offsetX: 241, offsetY: 146, rotationDeg: 120 },
 ];
 
 function renderSpritesheetCrop(
@@ -330,9 +330,6 @@ export function Dial({
           <filter id="hand-shadow" x="-50%" y="-50%" width="200%" height="200%">
             <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="rgba(0,0,0,0.34)" />
           </filter>
-          <filter id="answer-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="rgba(255, 236, 169, 0.78)" />
-          </filter>
         </defs>
 
         <g clipPath="url(#dial-device-clip)">
@@ -386,7 +383,7 @@ export function Dial({
 
         <g
           transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${answerHandAngle})`}
-          filter="url(#answer-glow)"
+          filter="url(#hand-shadow)"
           opacity={0.98}
         >
           <svg
