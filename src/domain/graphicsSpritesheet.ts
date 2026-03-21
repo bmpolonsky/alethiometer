@@ -12,7 +12,7 @@ export const graphicsSpritesheetSize = {
   height: 1024,
 } as const;
 
-export const graphicsSpritesheetHref = "/assets/graphics-spritesheet.webp";
+export const graphicsSpritesheetHref = `${import.meta.env.BASE_URL}assets/graphics-spritesheet.webp`;
 
 // The dial body keeps the same visible crop, but lives deeper inside the spritesheet so the
 // source file has breathing room for repainting. Moving parts are grouped into a denser right-side

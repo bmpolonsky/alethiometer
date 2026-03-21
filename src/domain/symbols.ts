@@ -308,7 +308,7 @@ function slugify(input: string) {
 export const symbolCatalog: SymbolEntry[] = symbolSeeds.map((symbol, index) => ({
   id: index,
   slug: slugify(symbol.title.en),
-  imageSrc: `/assets/symbols/${symbol.imageFile}`,
+  imageSrc: `${import.meta.env.BASE_URL}assets/symbols/${symbol.imageFile}`,
   title: symbol.title,
   meanings: symbol.meanings,
 }));
