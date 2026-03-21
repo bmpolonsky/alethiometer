@@ -41,7 +41,7 @@ const handAssets: Record<
     height: spritesheetFrames.arrow1.height,
     pivotX: spritesheetFrames.arrow1.pivotX,
     pivotY: spritesheetFrames.arrow1.pivotY,
-    scale: 0.94,
+    scale: 1,
   },
   second: {
     frame: spritesheetFrames.arrow2,
@@ -49,7 +49,7 @@ const handAssets: Record<
     height: spritesheetFrames.arrow2.height,
     pivotX: spritesheetFrames.arrow2.pivotX,
     pivotY: spritesheetFrames.arrow2.pivotY,
-    scale: 0.94,
+    scale: 1,
   },
   third: {
     frame: spritesheetFrames.arrow3,
@@ -57,7 +57,7 @@ const handAssets: Record<
     height: spritesheetFrames.arrow3.height,
     pivotX: spritesheetFrames.arrow3.pivotX,
     pivotY: spritesheetFrames.arrow3.pivotY,
-    scale: 0.96,
+    scale: 1,
   },
   answer: {
     frame: spritesheetFrames.arrow4,
@@ -65,7 +65,7 @@ const handAssets: Record<
     height: spritesheetFrames.arrow4.height,
     pivotX: spritesheetFrames.arrow4.pivotX,
     pivotY: spritesheetFrames.arrow4.pivotY,
-    scale: 0.96,
+    scale: 1,
   },
 };
 
