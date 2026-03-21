@@ -13,6 +13,10 @@ export interface ReadingMotion {
   stops: ReadingStop[];
 }
 
+export interface ReadingMotionOptions {
+  startAngle?: number;
+}
+
 export interface ReadingFrameInput {
   motion: ReadingMotion;
   elapsedMs: number;
@@ -45,8 +49,16 @@ function getTimestamp() {
 }
 
 export function buildReadingMotion(startSymbol: number, answerSymbols: number[]): ReadingMotion {
+  return buildReadingMotionWithOptions(startSymbol, answerSymbols, {});
+}
+
+export function buildReadingMotionWithOptions(
+  startSymbol: number,
+  answerSymbols: number[],
+  options: ReadingMotionOptions,
+): ReadingMotion {
   let currentSymbol = startSymbol;
-  let currentAngle = startSymbol * 10;
+  let currentAngle = options.startAngle ?? startSymbol * 10;
   let currentTimeMs = 0;
 
   const stops = answerSymbols.map((symbolId) => {
@@ -76,6 +88,10 @@ export function buildReadingMotion(startSymbol: number, answerSymbols: number[])
     totalDurationMs: currentTimeMs,
     stops,
   };
+}
+
+export function getAnswerHandSymbolId(angle: number) {
+  return wrapSymbolId(Math.round(angle / 10));
 }
 
 export function getMotionTimestamp() {

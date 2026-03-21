@@ -5,7 +5,8 @@ import { questionStore } from "../store/questionStore";
 import { readingStore } from "../store/readingStore";
 import { symbolStore } from "../store/symbolStore";
 import {
-  buildReadingMotion,
+  buildReadingMotionWithOptions,
+  getAnswerHandSymbolId,
   getReadingFrameState,
   getMotionTimestamp,
   type ReadingMotion,
@@ -99,14 +100,19 @@ class ReadingService {
       question.hands.third,
     ];
     const generated = createReading(questionSymbols);
-    const motion = buildReadingMotion(questionSymbols[2], generated.answerSymbols);
+    const startAngle = reading.answerHandAngle;
+    const motion = buildReadingMotionWithOptions(
+      getAnswerHandSymbolId(startAngle),
+      generated.answerSymbols,
+      { startAngle },
+    );
 
     this.revealedStopCount = 0;
     this.readingMotion = motion;
     readingStore.update((current) => ({
       ...current,
       answerSymbols: [],
-      answerHandAngle: questionSymbols[2] * 10,
+      answerHandAngle: startAngle,
       status: "listening",
     }));
     journalStore.update((current) => ({

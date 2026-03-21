@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   buildReadingMotion,
+  buildReadingMotionWithOptions,
   getReadingFrameState,
 } from "./readingMotion.ts";
 
@@ -61,4 +62,13 @@ test("reading motion finishes in done state after the last stop", () => {
   });
 
   assert.equal(frame.done, true);
+});
+
+test("reading motion can continue from the current answer hand angle", () => {
+  const motion = buildReadingMotionWithOptions(28, [31], { startAngle: 280 });
+  const firstStop = motion.stops[0];
+
+  assert.ok(firstStop, "expected first stop to exist");
+  assert.equal(firstStop.startAngle, 280);
+  assert.equal(firstStop.stopAngle, 310);
 });
