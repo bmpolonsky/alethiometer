@@ -34,6 +34,50 @@ export interface ReadingFrameState {
   revealedStopCount: number;
 }
 
+const STOP_SETTLE_WINDOW_MS = 70;
+
+function easeOutCubic(value: number) {
+  return 1 - (1 - value) ** 3;
+}
+
+function clamp01(value: number) {
+  return Math.min(Math.max(value, 0), 1);
+}
+
+function interpolate(start: number, end: number, progress: number) {
+  return start + (end - start) * progress;
+}
+
+function getSegmentProgress(startMs: number, endMs: number, currentMs: number) {
+  if (endMs === startMs) {
+    return 1;
+  }
+
+  return clamp01((currentMs - startMs) / (endMs - startMs));
+}
+
+function getLinearTravelAngle(stop: ReadingStop, elapsedMs: number) {
+  const progress = getSegmentProgress(stop.startTimeMs, stop.arriveTimeMs, elapsedMs);
+
+  return interpolate(stop.startAngle, stop.stopAngle, progress);
+}
+
+function getSettleStartTimestamp(stop: ReadingStop) {
+  return Math.max(stop.startTimeMs, stop.arriveTimeMs - STOP_SETTLE_WINDOW_MS);
+}
+
+function getSettledTravelAngle(stop: ReadingStop, elapsedMs: number) {
+  const settleStartMs = getSettleStartTimestamp(stop);
+  const settleStartAngle = getLinearTravelAngle(stop, settleStartMs);
+  const settleProgress = getSegmentProgress(settleStartMs, stop.arriveTimeMs, elapsedMs);
+
+  return interpolate(
+    settleStartAngle,
+    stop.stopAngle,
+    easeOutCubic(settleProgress),
+  );
+}
+
 function wrapSymbolId(value: number) {
   return ((value % 36) + 36) % 36;
 }
@@ -126,21 +170,21 @@ export function getReadingFrameState({
   let nextRevealedStopCount = revealedStopCount;
 
   if (elapsedMs < currentStop.arriveTimeMs) {
-    const moveProgress =
-      currentStop.arriveTimeMs === currentStop.startTimeMs
-        ? 1
-        : Math.min(
-            Math.max(
-              (elapsedMs - currentStop.startTimeMs) /
-                (currentStop.arriveTimeMs - currentStop.startTimeMs),
-              0,
-            ),
-            1,
-          );
+    const settleStartMs = getSettleStartTimestamp(currentStop);
 
-    nextAnswerHandAngle =
-      currentStop.startAngle +
-      (currentStop.stopAngle - currentStop.startAngle) * moveProgress;
+    if (elapsedMs >= settleStartMs) {
+      nextAnswerHandAngle = getSettledTravelAngle(currentStop, elapsedMs);
+
+      return {
+        done: elapsedMs >= motion.totalDurationMs,
+        answerHandAngle: nextAnswerHandAngle,
+        selectedSymbolId,
+        answerSymbols,
+        revealedStopCount,
+      };
+    }
+
+    nextAnswerHandAngle = getLinearTravelAngle(currentStop, elapsedMs);
   } else {
     nextAnswerHandAngle = currentStop.stopAngle;
 

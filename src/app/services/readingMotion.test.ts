@@ -72,3 +72,33 @@ test("reading motion can continue from the current answer hand angle", () => {
   assert.equal(firstStop.startAngle, 280);
   assert.equal(firstStop.stopAngle, 310);
 });
+
+test("reading motion eases into the stop angle shortly before the hold begins", () => {
+  const motion = buildReadingMotion(0, [5]);
+  const firstStop = motion.stops[0];
+
+  assert.ok(firstStop, "expected first stop to exist");
+
+  const earlySettleFrame = getReadingFrameState({
+    motion,
+    elapsedMs: firstStop.arriveTimeMs - 40,
+    revealedStopCount: 0,
+    answerHandAngle: 0,
+    selectedSymbolId: 0,
+    answerSymbols: [],
+  });
+  const frame = getReadingFrameState({
+    motion,
+    elapsedMs: firstStop.arriveTimeMs - 1,
+    revealedStopCount: 0,
+    answerHandAngle: 0,
+    selectedSymbolId: 0,
+    answerSymbols: [],
+  });
+
+  assert.ok(earlySettleFrame.answerHandAngle < firstStop.stopAngle);
+  assert.ok(frame.answerHandAngle > earlySettleFrame.answerHandAngle);
+  assert.ok(frame.answerHandAngle < firstStop.stopAngle);
+  assert.deepEqual(frame.answerSymbols, []);
+  assert.equal(frame.revealedStopCount, 0);
+});
