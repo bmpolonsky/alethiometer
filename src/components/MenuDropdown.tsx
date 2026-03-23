@@ -44,6 +44,7 @@ export function MenuDropdown({
         <div className="menu-dropdown-panel">
           <button
             className="menu-dropdown-item"
+            data-menu-section="meditative-toggle"
             onClick={onToggleMeditativeMode}
             type="button"
           >
@@ -52,6 +53,7 @@ export function MenuDropdown({
           {sections.map((section) => (
             <button
               className="menu-dropdown-item"
+              data-menu-section={section}
               key={section}
               onClick={() => onSelect(section)}
               type="button"
