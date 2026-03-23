@@ -304,6 +304,11 @@ button {
   height: 100%;
   min-height: 0;
   padding: 0.6rem 0.6rem 0.2rem;
+  transform-origin: center center;
+  transform: scale(var(--dial-hold-scale, 1));
+  filter: brightness(var(--dial-hold-brightness, 1));
+  transition: transform 120ms linear, filter 160ms ease;
+  will-change: transform, filter;
 }
 
 .workspace.is-meditative .dial-shell {
@@ -516,15 +521,6 @@ button {
 
 .reference-flow {
   margin-top: 0.22rem;
-}
-
-.dial-center-progress {
-  fill: rgba(255, 236, 169, 0.08);
-  stroke: rgba(255, 236, 169, 0.78);
-  stroke-width: 2;
-  pointer-events: none;
-  transform-origin: center;
-  transition: opacity 180ms ease, r 180ms ease;
 }
 
 .primary-action,
@@ -1549,5 +1545,26 @@ button {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.dial-shell.is-asking {
+  animation: dial-breath 620ms cubic-bezier(0.22, 0.7, 0.24, 1);
+}
+
+@keyframes dial-breath {
+  0% {
+    transform: scale(var(--dial-hold-scale, 1));
+    filter: brightness(var(--dial-hold-brightness, 1));
+  }
+
+  45% {
+    transform: scale(calc(var(--dial-hold-scale, 1) + 0.02));
+    filter: brightness(calc(var(--dial-hold-brightness, 1) + 0.04));
+  }
+
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
   }
 }
