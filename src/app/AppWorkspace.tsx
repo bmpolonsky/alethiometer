@@ -70,29 +70,6 @@ export function AppWorkspace() {
           />
         </div>
 
-        <div className="mobile-reference-actions">
-          <button
-            className="ghost-action small-action"
-            onClick={() => appController.openDrawer("archive")}
-            type="button"
-          >
-            {copy.archiveSection}
-          </button>
-          <button
-            className="ghost-action small-action"
-            onClick={() => appController.openDrawer("help")}
-            type="button"
-          >
-            {copy.helpSection}
-          </button>
-          <button
-            className="ghost-action small-action"
-            onClick={() => appController.openDrawer("symbols")}
-            type="button"
-          >
-            {copy.symbolsSection}
-          </button>
-        </div>
       </section>
 
       {meditativeMode ? null : (

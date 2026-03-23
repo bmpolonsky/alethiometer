@@ -61,6 +61,7 @@ interface SettingsDrawerProps {
     helpIntro: string;
     helpSections: Array<{
       title: string;
+      intro?: string;
       items: string[];
     }>;
   };
