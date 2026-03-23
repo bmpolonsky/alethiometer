@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   graphicsSpritesheetFrames,
   graphicsSpritesheetHref,
@@ -80,6 +80,10 @@ const wheelConfigs: Array<{
   { handId: "third", offsetX: 241, offsetY: 146, rotationDeg: 120 },
 ];
 
+const MEDITATIVE_ASK_RADIUS = 146;
+const MEDITATIVE_ASK_HOLD_MS = 1600;
+const MEDITATIVE_ASK_ANIMATION_MS = 620;
+
 function renderSpritesheetCrop(
   frame: { x: number; y: number; width: number; height: number },
   offsetX: number,
@@ -108,6 +112,14 @@ export function Dial({
   onAsk,
 }: DialProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const askHoldTimeoutRef = useRef<number | null>(null);
+  const askAnimationTimeoutRef = useRef<number | null>(null);
+  const askHoldRef = useRef<{
+    pointerId: number;
+    triggered: boolean;
+    startedAt: number;
+    frame: number;
+  } | null>(null);
   const dragStateRef = useRef<{
     handId: HandId;
     pointerId: number;
@@ -127,13 +139,8 @@ export function Dial({
     second: hands.second * 10,
     third: hands.third * 10,
   });
-  const [centerHoldProgress, setCenterHoldProgress] = useState(0);
-  const holdStateRef = useRef<{
-    pointerId: number;
-    startedAt: number;
-    frame: number;
-    completed: boolean;
-  } | null>(null);
+  const [holdProgress, setHoldProgress] = useState(0);
+  const [isAskAnimating, setIsAskAnimating] = useState(false);
   const glareX = Math.round(DIAL_GEOMETRY.centerX - spritesheetFrames.glare.pivotX);
   const glareY = Math.round(DIAL_GEOMETRY.centerY - spritesheetFrames.glare.pivotY);
   const targetAngles = useMemo(
@@ -149,64 +156,139 @@ export function Dial({
     setDisplayAngles(targetAngles);
   }, [targetAngles]);
 
-  function cancelCenterHold() {
-    const holdState = holdStateRef.current;
-
-    if (holdState?.frame) {
-      window.cancelAnimationFrame(holdState.frame);
-    }
-
-    holdStateRef.current = null;
-    setCenterHoldProgress(0);
-  }
-
-  function startCenterHold(pointerId: number, target: SVGCircleElement) {
-    if (!meditativeMode || !interactive || !onAsk) {
-      return;
-    }
-
-    const durationMs = 1200;
-
-    const holdState = {
-      pointerId,
-      startedAt: performance.now(),
-      frame: 0,
-      completed: false,
-    };
-
-    const tick = () => {
-      const nextProgress = Math.min((performance.now() - holdState.startedAt) / durationMs, 1);
-
-      setCenterHoldProgress(nextProgress);
-
-      if (nextProgress >= 1) {
-        holdState.completed = true;
-        holdStateRef.current = holdState;
-        onAsk();
-        return;
+  useEffect(() => {
+    return () => {
+      if (askHoldTimeoutRef.current) {
+        window.clearTimeout(askHoldTimeoutRef.current);
       }
 
-      holdState.frame = window.requestAnimationFrame(tick);
-      holdStateRef.current = holdState;
+      if (askAnimationTimeoutRef.current) {
+        window.clearTimeout(askAnimationTimeoutRef.current);
+      }
+
+      if (askHoldRef.current?.frame) {
+        window.cancelAnimationFrame(askHoldRef.current.frame);
+      }
     };
+  }, []);
 
-    cancelCenterHold();
-    holdStateRef.current = holdState;
-    target.setPointerCapture(pointerId);
-    holdState.frame = window.requestAnimationFrame(tick);
-  }
-
-  function inspectByPointer(clientX: number, clientY: number) {
+  function getLocalPoint(clientX: number, clientY: number) {
     const svg = svgRef.current;
 
     if (!svg) {
-      return;
+      return null;
     }
 
     const rect = svg.getBoundingClientRect();
-    const x = ((clientX - rect.left) / rect.width) * DIAL_GEOMETRY.width;
-    const y = ((clientY - rect.top) / rect.height) * DIAL_GEOMETRY.height;
-    const nextSymbol = pointToSymbolIndex(x, y);
+
+    return {
+      x: ((clientX - rect.left) / rect.width) * DIAL_GEOMETRY.width,
+      y: ((clientY - rect.top) / rect.height) * DIAL_GEOMETRY.height,
+    };
+  }
+
+  function isWithinMeditativeAskZone(clientX: number, clientY: number) {
+    const point = getLocalPoint(clientX, clientY);
+
+    if (!point) {
+      return false;
+    }
+
+    return (
+      Math.hypot(point.x - DIAL_GEOMETRY.centerX, point.y - DIAL_GEOMETRY.centerY) <=
+      MEDITATIVE_ASK_RADIUS
+    );
+  }
+
+  function cancelMeditativeAskHold() {
+    if (askHoldTimeoutRef.current) {
+      window.clearTimeout(askHoldTimeoutRef.current);
+      askHoldTimeoutRef.current = null;
+    }
+
+    if (askHoldRef.current?.frame) {
+      window.cancelAnimationFrame(askHoldRef.current.frame);
+    }
+
+    askHoldRef.current = null;
+    setHoldProgress(0);
+  }
+
+  function startMeditativeAsk() {
+    if (!meditativeMode || !interactive || !onAsk || isAskAnimating) {
+      return;
+    }
+
+    setIsAskAnimating(true);
+    askAnimationTimeoutRef.current = window.setTimeout(() => {
+      askAnimationTimeoutRef.current = null;
+      setHoldProgress(0);
+      setIsAskAnimating(false);
+      onAsk();
+    }, MEDITATIVE_ASK_ANIMATION_MS);
+  }
+
+  function beginMeditativeAskHold(pointerId: number, target: SVGCircleElement) {
+    if (!meditativeMode || !interactive || !onAsk || isAskAnimating) {
+      return;
+    }
+
+    cancelMeditativeAskHold();
+    askHoldRef.current = {
+      pointerId,
+      triggered: false,
+      startedAt: performance.now(),
+      frame: 0,
+    };
+    setHoldProgress(0);
+    target.setPointerCapture(pointerId);
+    const tick = () => {
+      const holdState = askHoldRef.current;
+
+      if (!holdState || holdState.pointerId !== pointerId || holdState.triggered) {
+        return;
+      }
+
+      const nextProgress = Math.min(
+        (performance.now() - holdState.startedAt) / MEDITATIVE_ASK_HOLD_MS,
+        1,
+      );
+
+      setHoldProgress(nextProgress);
+      holdState.frame = window.requestAnimationFrame(tick);
+      askHoldRef.current = holdState;
+    };
+
+    askHoldRef.current.frame = window.requestAnimationFrame(tick);
+    askHoldTimeoutRef.current = window.setTimeout(() => {
+      if (askHoldRef.current?.pointerId !== pointerId) {
+        return;
+      }
+
+      if (askHoldRef.current.frame) {
+        window.cancelAnimationFrame(askHoldRef.current.frame);
+      }
+
+      askHoldRef.current = {
+        pointerId,
+        triggered: true,
+        startedAt: performance.now(),
+        frame: 0,
+      };
+      askHoldTimeoutRef.current = null;
+      setHoldProgress(1);
+      startMeditativeAsk();
+    }, MEDITATIVE_ASK_HOLD_MS);
+  }
+
+  function inspectByPointer(clientX: number, clientY: number) {
+    const point = getLocalPoint(clientX, clientY);
+
+    if (!point) {
+      return;
+    }
+
+    const nextSymbol = pointToSymbolIndex(point.x, point.y);
 
     if (nextSymbol != null) {
       onInspectSymbol(nextSymbol);
@@ -221,7 +303,7 @@ export function Dial({
     clientY: number,
     target: SVGRectElement,
   ) {
-    if (!interactive) {
+    if (!interactive || isAskAnimating) {
       return;
     }
 
@@ -290,8 +372,13 @@ export function Dial({
     });
   }
 
+  const dialShellStyle = {
+    "--dial-hold-scale": String(1 + holdProgress * 0.07),
+    "--dial-hold-brightness": String(1 + holdProgress * 0.08),
+  } as CSSProperties;
+
   return (
-    <div className="dial-shell">
+    <div className={`dial-shell ${isAskAnimating ? "is-asking" : ""}`} style={dialShellStyle}>
       <svg
         ref={svgRef}
         className="dial"
@@ -397,58 +484,6 @@ export function Dial({
           </svg>
         </g>
 
-        {meditativeMode ? (
-          <g className="dial-center-trigger">
-            <circle
-              className={`dial-center-hold ${centerHoldProgress > 0 ? "is-holding" : ""}`}
-              cx={DIAL_GEOMETRY.centerX}
-              cy={DIAL_GEOMETRY.centerY}
-              r={56}
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onPointerCancel={(event) => {
-                if (holdStateRef.current?.pointerId === event.pointerId) {
-                  event.stopPropagation();
-                  cancelCenterHold();
-                }
-              }}
-              onPointerDown={(event) => {
-                event.stopPropagation();
-                startCenterHold(event.pointerId, event.currentTarget);
-              }}
-              onPointerLeave={(event) => {
-                if (holdStateRef.current?.pointerId === event.pointerId) {
-                  event.stopPropagation();
-                  cancelCenterHold();
-                }
-              }}
-              onPointerUp={(event) => {
-                if (holdStateRef.current?.pointerId === event.pointerId) {
-                  event.stopPropagation();
-                  if (holdStateRef.current?.completed) {
-                    holdStateRef.current = null;
-                    setCenterHoldProgress(0);
-                  } else {
-                    cancelCenterHold();
-                  }
-                }
-              }}
-              opacity={0.001}
-            />
-            <circle
-              className="dial-center-progress"
-              cx={DIAL_GEOMETRY.centerX}
-              cy={DIAL_GEOMETRY.centerY}
-              r={52}
-              style={{
-                opacity: centerHoldProgress > 0 ? 0.85 : 0.16,
-                transform: `translate(${DIAL_GEOMETRY.centerX}px, ${DIAL_GEOMETRY.centerY}px) scale(${0.92 + centerHoldProgress * 0.1}) translate(${-DIAL_GEOMETRY.centerX}px, ${-DIAL_GEOMETRY.centerY}px)`,
-              }}
-            />
-          </g>
-        ) : null}
-
         {wheelConfigs.map(({ handId, offsetX, offsetY, rotationDeg }) => {
           const frame =
             draggingHand === handId && wheelFramePhase[handId] === 1
@@ -475,6 +510,10 @@ export function Dial({
                 rx="12"
                 ry="12"
                 onClick={(event) => {
+                  if (isAskAnimating) {
+                    return;
+                  }
+
                   event.stopPropagation();
                   onFocusHand(handId);
                 }}
@@ -516,6 +555,52 @@ export function Dial({
         <g clipPath="url(#dial-glare-clip)" opacity="1">
           {renderSpritesheetCrop(spritesheetFrames.glare, glareX, glareY)}
         </g>
+
+        {meditativeMode ? (
+          <g className="dial-center-trigger">
+            <circle
+              cx={DIAL_GEOMETRY.centerX}
+              cy={DIAL_GEOMETRY.centerY}
+              r={MEDITATIVE_ASK_RADIUS}
+              fill="transparent"
+              pointerEvents="all"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+              onPointerCancel={(event) => {
+                if (askHoldRef.current?.pointerId === event.pointerId) {
+                  event.stopPropagation();
+                  cancelMeditativeAskHold();
+                }
+              }}
+              onPointerDown={(event) => {
+                event.stopPropagation();
+                beginMeditativeAskHold(event.pointerId, event.currentTarget);
+              }}
+              onPointerMove={(event) => {
+                if (
+                  askHoldRef.current?.pointerId === event.pointerId &&
+                  !askHoldRef.current.triggered &&
+                  !isWithinMeditativeAskZone(event.clientX, event.clientY)
+                ) {
+                  event.stopPropagation();
+                  cancelMeditativeAskHold();
+                }
+              }}
+              onPointerUp={(event) => {
+                if (askHoldRef.current?.pointerId === event.pointerId) {
+                  event.stopPropagation();
+                  if (!askHoldRef.current.triggered) {
+                    cancelMeditativeAskHold();
+                  }
+                }
+              }}
+              onLostPointerCapture={() => {
+                cancelMeditativeAskHold();
+              }}
+            />
+          </g>
+        ) : null}
       </svg>
     </div>
   );
