@@ -156,12 +156,11 @@ function OpenQuestionSymbolPicker({
 
 function QuestionSymbolPickerContainer() {
   const { pickerHand } = useStore(uiStore);
+  const { locale } = useStore(preferencesStore);
 
   if (pickerHand == null) {
     return null;
   }
-
-  const { locale } = useStore(preferencesStore);
 
   return <OpenQuestionSymbolPicker locale={locale} pickerHand={pickerHand} />;
 }

@@ -1,7 +1,7 @@
 import type { HandId } from "../../domain/types";
 import { journalStore } from "../store/journalStore";
 import { questionStore } from "../store/questionStore";
-import { getReadingState, updateReadingState } from "../store/readingStore";
+import { answerSymbolsStore, readingStatusStore } from "../store/readingStore";
 import { symbolStore } from "../store/symbolStore";
 
 function wrapSymbolId(value: number) {
@@ -12,11 +12,8 @@ class SessionService {
   clearCurrentAnswer = () => {
     const { hands, activeHand } = questionStore.getState();
 
-    updateReadingState((current) => ({
-      ...current,
-      answerSymbols: [],
-      status: "idle",
-    }));
+    answerSymbolsStore.update(() => []);
+    readingStatusStore.update(() => "idle");
     symbolStore.update(() => ({
       selectedSymbolId: hands[activeHand],
     }));
@@ -47,12 +44,13 @@ class SessionService {
   };
 
   setHandSymbol = (handId: HandId, symbolId: number) => {
-    const reading = getReadingState();
+    const status = readingStatusStore.getState();
+    const answerSymbols = answerSymbolsStore.getState();
     const nextSymbol = wrapSymbolId(symbolId);
 
     if (
-      reading.status === "idle" &&
-      (reading.answerSymbols.length > 0 || journalStore.getState().openedReadingId != null)
+      status === "idle" &&
+      (answerSymbols.length > 0 || journalStore.getState().openedReadingId != null)
     ) {
       this.clearCurrentAnswer();
     }
@@ -72,11 +70,12 @@ class SessionService {
 
   nudgeHand = (handId: HandId, direction: number) => {
     const question = questionStore.getState();
-    const reading = getReadingState();
+    const status = readingStatusStore.getState();
+    const answerSymbols = answerSymbolsStore.getState();
 
     if (
-      reading.status === "idle" &&
-      (reading.answerSymbols.length > 0 || journalStore.getState().openedReadingId != null)
+      status === "idle" &&
+      (answerSymbols.length > 0 || journalStore.getState().openedReadingId != null)
     ) {
       this.clearCurrentAnswer();
     }

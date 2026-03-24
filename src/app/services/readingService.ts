@@ -2,7 +2,11 @@ import { createReading } from "../../domain/engine";
 import type { SavedReading } from "../../domain/types";
 import { journalStore } from "../store/journalStore";
 import { questionStore } from "../store/questionStore";
-import { getReadingState, updateReadingState } from "../store/readingStore";
+import {
+  answerHandAngleStore,
+  answerSymbolsStore,
+  readingStatusStore,
+} from "../store/readingStore";
 import { symbolStore } from "../store/symbolStore";
 import {
   buildReadingMotionWithOptions,
@@ -36,11 +40,11 @@ class ReadingService {
 
     this.stop();
     this.revealedStopCount = 0;
-    updateReadingState((current) => ({
-      ...current,
-      answerHandAngle: finalStop ? finalStop.stopAngle : current.answerHandAngle,
-      status: "idle",
-    }));
+    if (finalStop) {
+      answerHandAngleStore.update(() => finalStop.stopAngle);
+    }
+
+    readingStatusStore.update(() => "idle");
   }
 
   private runReadingMotion() {
@@ -51,25 +55,21 @@ class ReadingService {
         return;
       }
 
-      const reading = getReadingState();
       const symbol = symbolStore.getState();
       const elapsedMs = getMotionTimestamp() - motion.startedAt;
       const frameState = getReadingFrameState({
         motion,
         elapsedMs,
         revealedStopCount: this.revealedStopCount,
-        answerHandAngle: reading.answerHandAngle,
+        answerHandAngle: answerHandAngleStore.getState(),
         selectedSymbolId: symbol.selectedSymbolId,
-        answerSymbols: reading.answerSymbols,
+        answerSymbols: answerSymbolsStore.getState(),
       });
 
       this.revealedStopCount = frameState.revealedStopCount;
 
-      updateReadingState((current) => ({
-        ...current,
-        answerHandAngle: frameState.answerHandAngle,
-        answerSymbols: frameState.answerSymbols,
-      }));
+      answerHandAngleStore.update(() => frameState.answerHandAngle);
+      answerSymbolsStore.update(() => frameState.answerSymbols);
       symbolStore.update(() => ({
         selectedSymbolId: frameState.selectedSymbolId,
       }));
@@ -87,10 +87,10 @@ class ReadingService {
   }
 
   ask = () => {
-    const reading = getReadingState();
+    const status = readingStatusStore.getState();
     const question = questionStore.getState();
 
-    if (reading.status !== "idle") {
+    if (status !== "idle") {
       return;
     }
 
@@ -100,7 +100,7 @@ class ReadingService {
       question.hands.third,
     ];
     const generated = createReading(questionSymbols);
-    const startAngle = reading.answerHandAngle;
+    const startAngle = answerHandAngleStore.getState();
     const motion = buildReadingMotionWithOptions(
       getAnswerHandSymbolId(startAngle),
       generated.answerSymbols,
@@ -109,12 +109,9 @@ class ReadingService {
 
     this.revealedStopCount = 0;
     this.readingMotion = motion;
-    updateReadingState((current) => ({
-      ...current,
-      answerSymbols: [],
-      answerHandAngle: startAngle,
-      status: "listening",
-    }));
+    answerSymbolsStore.update(() => []);
+    answerHandAngleStore.update(() => startAngle);
+    readingStatusStore.update(() => "listening");
     journalStore.update((current) => ({
       ...current,
       openedReadingId: null,
@@ -135,13 +132,11 @@ class ReadingService {
         third: entry.questionSymbols[2] ?? question.hands.third,
       },
     }));
-    updateReadingState((current) => ({
-      ...current,
-      answerSymbols: entry.answerSymbols,
-      answerHandAngle:
-        (entry.answerSymbols.at(-1) ?? entry.questionSymbols[2] ?? 0) * 10,
-      status: "idle",
-    }));
+    answerSymbolsStore.update(() => entry.answerSymbols);
+    answerHandAngleStore.update(
+      () => (entry.answerSymbols.at(-1) ?? entry.questionSymbols[2] ?? 0) * 10,
+    );
+    readingStatusStore.update(() => "idle");
     symbolStore.update(() => ({
       selectedSymbolId: entry.answerSymbols[0] ?? entry.questionSymbols[0] ?? 0,
     }));

@@ -3,7 +3,7 @@ import type { SavedReading } from "../../domain/types";
 import { journalStore } from "../store/journalStore";
 import { preferencesStore } from "../store/preferencesStore";
 import { questionStore } from "../store/questionStore";
-import { getReadingState } from "../store/readingStore";
+import { answerSymbolsStore, readingStatusStore } from "../store/readingStore";
 
 export interface SaveReadingDraft {
   questionText?: string;
@@ -27,10 +27,11 @@ function normalizeOptionalText(value?: string) {
 class JournalService {
   saveCurrentReading = (draft: SaveReadingDraft) => {
     const question = questionStore.getState();
-    const reading = getReadingState();
     const preferences = preferencesStore.getState();
+    const status = readingStatusStore.getState();
+    const answerSymbols = answerSymbolsStore.getState();
 
-    if (reading.status !== "idle" || reading.answerSymbols.length === 0) {
+    if (status !== "idle" || answerSymbols.length === 0) {
       return;
     }
 
@@ -39,7 +40,7 @@ class JournalService {
       createdAt: new Date().toISOString(),
       locale: preferences.locale,
       questionSymbols: HAND_ORDER.map((handId) => question.hands[handId]),
-      answerSymbols: [...reading.answerSymbols],
+      answerSymbols: [...answerSymbols],
       questionText: normalizeOptionalText(draft.questionText),
       answerText: normalizeOptionalText(draft.answerText),
     };
