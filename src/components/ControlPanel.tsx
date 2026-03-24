@@ -107,7 +107,11 @@ export function ControlPanel({
             ) : null}
 
             {showSaveAction ? (
-              <button className="secondary-action answer-inline-action" onClick={onSaveReading} type="button">
+              <button
+                className="secondary-action answer-inline-action answer-inline-action-save"
+                onClick={onSaveReading}
+                type="button"
+              >
                 {copy.saveReading}
               </button>
             ) : null}

@@ -3,7 +3,7 @@ import type { SavedReading } from "../../domain/types";
 import { journalStore } from "../store/journalStore";
 import { preferencesStore } from "../store/preferencesStore";
 import { questionStore } from "../store/questionStore";
-import { readingStore } from "../store/readingStore";
+import { getReadingState } from "../store/readingStore";
 
 export interface SaveReadingDraft {
   questionText?: string;
@@ -27,7 +27,7 @@ function normalizeOptionalText(value?: string) {
 class JournalService {
   saveCurrentReading = (draft: SaveReadingDraft) => {
     const question = questionStore.getState();
-    const reading = readingStore.getState();
+    const reading = getReadingState();
     const preferences = preferencesStore.getState();
 
     if (reading.status !== "idle" || reading.answerSymbols.length === 0) {

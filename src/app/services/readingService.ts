@@ -2,7 +2,7 @@ import { createReading } from "../../domain/engine";
 import type { SavedReading } from "../../domain/types";
 import { journalStore } from "../store/journalStore";
 import { questionStore } from "../store/questionStore";
-import { readingStore } from "../store/readingStore";
+import { getReadingState, updateReadingState } from "../store/readingStore";
 import { symbolStore } from "../store/symbolStore";
 import {
   buildReadingMotionWithOptions,
@@ -36,7 +36,7 @@ class ReadingService {
 
     this.stop();
     this.revealedStopCount = 0;
-    readingStore.update((current) => ({
+    updateReadingState((current) => ({
       ...current,
       answerHandAngle: finalStop ? finalStop.stopAngle : current.answerHandAngle,
       status: "idle",
@@ -51,7 +51,7 @@ class ReadingService {
         return;
       }
 
-      const reading = readingStore.getState();
+      const reading = getReadingState();
       const symbol = symbolStore.getState();
       const elapsedMs = getMotionTimestamp() - motion.startedAt;
       const frameState = getReadingFrameState({
@@ -65,7 +65,7 @@ class ReadingService {
 
       this.revealedStopCount = frameState.revealedStopCount;
 
-      readingStore.update((current) => ({
+      updateReadingState((current) => ({
         ...current,
         answerHandAngle: frameState.answerHandAngle,
         answerSymbols: frameState.answerSymbols,
@@ -87,7 +87,7 @@ class ReadingService {
   }
 
   ask = () => {
-    const reading = readingStore.getState();
+    const reading = getReadingState();
     const question = questionStore.getState();
 
     if (reading.status !== "idle") {
@@ -109,7 +109,7 @@ class ReadingService {
 
     this.revealedStopCount = 0;
     this.readingMotion = motion;
-    readingStore.update((current) => ({
+    updateReadingState((current) => ({
       ...current,
       answerSymbols: [],
       answerHandAngle: startAngle,
@@ -135,7 +135,7 @@ class ReadingService {
         third: entry.questionSymbols[2] ?? question.hands.third,
       },
     }));
-    readingStore.update((current) => ({
+    updateReadingState((current) => ({
       ...current,
       answerSymbols: entry.answerSymbols,
       answerHandAngle:

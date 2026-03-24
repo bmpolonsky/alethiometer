@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   graphicsSpritesheetFrames,
   graphicsSpritesheetHref,
@@ -113,6 +113,7 @@ export function Dial({
   onNudgeHand,
   onAsk,
 }: DialProps) {
+  const dialShellRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const askHoldTimeoutRef = useRef<number | null>(null);
   const askAnimationTimeoutRef = useRef<number | null>(null);
@@ -141,7 +142,6 @@ export function Dial({
     second: hands.second * 10,
     third: hands.third * 10,
   });
-  const [holdProgress, setHoldProgress] = useState(0);
   const [isAskAnimating, setIsAskAnimating] = useState(false);
   const glareX = Math.round(DIAL_GEOMETRY.centerX - spritesheetFrames.glare.pivotX);
   const glareY = Math.round(DIAL_GEOMETRY.centerY - spritesheetFrames.glare.pivotY);
@@ -171,6 +171,8 @@ export function Dial({
       if (askHoldRef.current?.frame) {
         window.cancelAnimationFrame(askHoldRef.current.frame);
       }
+
+      setDialHoldProgress(0);
     };
   }, []);
 
@@ -238,6 +240,17 @@ export function Dial({
     );
   }
 
+  function setDialHoldProgress(progress: number) {
+    dialShellRef.current?.style.setProperty(
+      "--dial-hold-scale",
+      String(1 + progress * 0.07),
+    );
+    dialShellRef.current?.style.setProperty(
+      "--dial-hold-glow-opacity",
+      String(Math.min(progress * 0.48, 0.48)),
+    );
+  }
+
   function cancelMeditativeAskHold() {
     if (askHoldTimeoutRef.current) {
       window.clearTimeout(askHoldTimeoutRef.current);
@@ -249,7 +262,7 @@ export function Dial({
     }
 
     askHoldRef.current = null;
-    setHoldProgress(0);
+    setDialHoldProgress(0);
   }
 
   function startMeditativeAsk() {
@@ -260,7 +273,7 @@ export function Dial({
     setIsAskAnimating(true);
     askAnimationTimeoutRef.current = window.setTimeout(() => {
       askAnimationTimeoutRef.current = null;
-      setHoldProgress(0);
+      setDialHoldProgress(0);
       setIsAskAnimating(false);
       onAsk();
     }, MEDITATIVE_ASK_ANIMATION_MS);
@@ -278,7 +291,7 @@ export function Dial({
       startedAt: performance.now(),
       frame: 0,
     };
-    setHoldProgress(0);
+    setDialHoldProgress(0);
     target.setPointerCapture(pointerId);
     const tick = () => {
       const holdState = askHoldRef.current;
@@ -292,7 +305,7 @@ export function Dial({
         1,
       );
 
-      setHoldProgress(nextProgress);
+      setDialHoldProgress(nextProgress);
       holdState.frame = window.requestAnimationFrame(tick);
       askHoldRef.current = holdState;
     };
@@ -314,7 +327,7 @@ export function Dial({
         frame: 0,
       };
       askHoldTimeoutRef.current = null;
-      setHoldProgress(1);
+      setDialHoldProgress(1);
       startMeditativeAsk();
     }, MEDITATIVE_ASK_HOLD_MS);
   }
@@ -426,19 +439,15 @@ export function Dial({
     });
   }
 
-  const dialShellStyle = {
-    "--dial-hold-scale": String(1 + holdProgress * 0.07),
-    "--dial-hold-brightness": String(1 + holdProgress * 0.08),
-  } as CSSProperties;
-
   return (
-    <div className={`dial-shell ${isAskAnimating ? "is-asking" : ""}`} style={dialShellStyle}>
-      <svg
-        ref={svgRef}
-        className="dial"
-        viewBox={`0 0 ${DIAL_GEOMETRY.width} ${DIAL_GEOMETRY.height}`}
-        onClick={(event) => inspectByPointer(event.clientX, event.clientY)}
-      >
+    <div className={`dial-shell ${isAskAnimating ? "is-asking" : ""}`} ref={dialShellRef}>
+      <div className="dial-stage">
+        <svg
+          ref={svgRef}
+          className="dial"
+          viewBox={`0 0 ${DIAL_GEOMETRY.width} ${DIAL_GEOMETRY.height}`}
+          onClick={(event) => inspectByPointer(event.clientX, event.clientY)}
+        >
         <defs>
           <clipPath id="dial-device-clip">
             <rect
@@ -659,7 +668,8 @@ export function Dial({
             />
           </g>
         ) : null}
-      </svg>
+        </svg>
+      </div>
     </div>
   );
 }
