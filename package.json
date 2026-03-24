@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json && vite build",
-    "assets:spritesheet": "node scripts/update-spritesheet-webp.mjs",
+    "assets:webp": "node scripts/update-webp-assets.mjs",
     "test": "node --test --experimental-strip-types src/**/*.test.ts",
     "preview": "vite preview"
   },

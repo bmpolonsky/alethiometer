@@ -8,7 +8,7 @@ interface SymbolSeed {
 
 const symbolSeeds: SymbolSeed[] = [
   {
-    imageFile: "Hourglass.jpg",
+    imageFile: "Hourglass.webp",
     title: { ru: "Песочные часы", en: "Hourglass" },
     meanings: {
       ru: ["Время", "Смерть", "Изменения"],
@@ -16,7 +16,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Sun.jpg",
+    imageFile: "Sun.webp",
     title: { ru: "Солнце", en: "Sun" },
     meanings: {
       ru: ["День", "Власть", "Истина"],
@@ -24,7 +24,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Alpha_and_Omega.jpg",
+    imageFile: "Alpha_and_Omega.webp",
     title: { ru: "Альфа и Омега", en: "Alpha and Omega" },
     meanings: {
       ru: ["Завершённость", "Процесс", "Неизбежное"],
@@ -32,7 +32,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Marionette.jpg",
+    imageFile: "Marionette.webp",
     title: { ru: "Марионетка", en: "Marionette" },
     meanings: {
       ru: ["Повиновение", "Покорность", "Грация"],
@@ -40,7 +40,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Serpent.jpg",
+    imageFile: "Serpent.webp",
     title: { ru: "Змея", en: "Serpent" },
     meanings: {
       ru: ["Зло", "Вероломство", "Врождённая мудрость"],
@@ -48,7 +48,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Caidron_crucible.jpg",
+    imageFile: "Caidron_crucible.webp",
     title: { ru: "Тигель", en: "Crucible" },
     meanings: {
       ru: ["Алхимия", "Ремесло", "Приобретённая мудрость"],
@@ -56,7 +56,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Anchor.jpg",
+    imageFile: "Anchor.webp",
     title: { ru: "Якорь", en: "Anchor" },
     meanings: {
       ru: ["Надежда", "Устойчивость", "Предотвращение"],
@@ -64,7 +64,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Angel.jpg",
+    imageFile: "Angel.webp",
     title: { ru: "Ангел", en: "Angel" },
     meanings: {
       ru: ["Посланник", "Иерархия", "Непослушание"],
@@ -72,7 +72,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Helmet.jpg",
+    imageFile: "Helmet.webp",
     title: { ru: "Шлем", en: "Helmet" },
     meanings: {
       ru: ["Война", "Защита", "Узость взглядов"],
@@ -80,7 +80,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Beehive.jpg",
+    imageFile: "Beehive.webp",
     title: { ru: "Улей", en: "Beehive" },
     meanings: {
       ru: ["Плодотворный труд", "Сладость", "Свет"],
@@ -88,7 +88,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Moon.jpg",
+    imageFile: "Moon.webp",
     title: { ru: "Луна", en: "Moon" },
     meanings: {
       ru: ["Целомудрие", "Тайна", "Сверхъестественное"],
@@ -96,7 +96,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Madonna.jpg",
+    imageFile: "Madonna.webp",
     title: { ru: "Богоматерь", en: "Madonna" },
     meanings: {
       ru: ["Материнство", "Женское начало", "Поклонение"],
@@ -104,7 +104,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Apple.jpg",
+    imageFile: "Apple.webp",
     title: { ru: "Яблоко", en: "Apple" },
     meanings: {
       ru: ["Грех", "Знание", "Тщеславие"],
@@ -112,7 +112,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Bird.jpg",
+    imageFile: "Bird.webp",
     title: { ru: "Птица", en: "Bird" },
     meanings: {
       ru: ["Душа (деймон)", "Весна", "Брак"],
@@ -120,7 +120,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Bread.jpg",
+    imageFile: "Bread.webp",
     title: { ru: "Хлеб", en: "Bread" },
     meanings: {
       ru: ["Пища", "Христос", "Жертва"],
@@ -128,7 +128,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Ant.jpg",
+    imageFile: "Ant.webp",
     title: { ru: "Муравей", en: "Ant" },
     meanings: {
       ru: ["Однообразный труд", "Прилежание", "Скука"],
@@ -136,7 +136,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Bull.jpg",
+    imageFile: "Bull.webp",
     title: { ru: "Бык", en: "Bull" },
     meanings: {
       ru: ["Земля", "Мощь", "Честность"],
@@ -144,7 +144,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Candle.jpg",
+    imageFile: "Candle.webp",
     title: { ru: "Свеча", en: "Candle" },
     meanings: {
       ru: ["Огонь", "Вера", "Обучение"],
@@ -152,7 +152,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Cornucopia.jpg",
+    imageFile: "Cornucopia.webp",
     title: { ru: "Рог изобилия", en: "Cornucopia" },
     meanings: {
       ru: ["Богатство", "Осень", "Радушие"],
@@ -160,7 +160,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Chameleon.jpg",
+    imageFile: "Chameleon.webp",
     title: { ru: "Хамелеон", en: "Chameleon" },
     meanings: {
       ru: ["Воздух", "Жадность", "Терпение"],
@@ -168,7 +168,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Thunderbolt.jpg",
+    imageFile: "Thunderbolt.webp",
     title: { ru: "Молния", en: "Thunderbolt" },
     meanings: {
       ru: ["Вдохновение", "Судьба", "Шанс"],
@@ -176,7 +176,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Dolphin.jpg",
+    imageFile: "Dolphin.webp",
     title: { ru: "Дельфин", en: "Dolphin" },
     meanings: {
       ru: ["Вода", "Возрождение", "Поддержка"],
@@ -184,7 +184,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Walled_Garden.jpg",
+    imageFile: "Walled_Garden.webp",
     title: { ru: "Сад за стеной", en: "Walled Garden" },
     meanings: {
       ru: ["Природа", "Невинность", "Порядок"],
@@ -192,7 +192,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Globe.jpg",
+    imageFile: "Globe.webp",
     title: { ru: "Глобус", en: "Globe" },
     meanings: {
       ru: ["Политика", "Независимость", "Слава"],
@@ -200,7 +200,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Sword.jpg",
+    imageFile: "Sword.webp",
     title: { ru: "Меч", en: "Sword" },
     meanings: {
       ru: ["Правосудие", "Сила духа", "Церковь"],
@@ -208,7 +208,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Griffin.jpg",
+    imageFile: "Griffin.webp",
     title: { ru: "Грифон", en: "Griffin" },
     meanings: {
       ru: ["Сокровище", "Бдительность", "Храбрость"],
@@ -216,7 +216,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Horse.jpg",
+    imageFile: "Horse.webp",
     title: { ru: "Лошадь", en: "Horse" },
     meanings: {
       ru: ["Европа", "Путешествия", "Верность"],
@@ -224,7 +224,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Camel.jpg",
+    imageFile: "Camel.webp",
     title: { ru: "Верблюд", en: "Camel" },
     meanings: {
       ru: ["Азия", "Лето", "Упорство"],
@@ -232,7 +232,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Elephant.jpg",
+    imageFile: "Elephant.webp",
     title: { ru: "Слон", en: "Elephant" },
     meanings: {
       ru: ["Африка", "Милосердие", "Сдержанность"],
@@ -240,7 +240,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Crocodile_caiman.jpg",
+    imageFile: "Crocodile_caiman.webp",
     title: { ru: "Крокодил", en: "Crocodile" },
     meanings: {
       ru: ["Америка", "Ненасытность", "Предприимчивость"],
@@ -248,7 +248,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Baby.jpg",
+    imageFile: "Baby.webp",
     title: { ru: "Ребёнок", en: "Baby" },
     meanings: {
       ru: ["Будущее", "Податливость", "Беспомощность"],
@@ -256,7 +256,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Compass.jpg",
+    imageFile: "Compass.webp",
     title: { ru: "Циркуль", en: "Compass" },
     meanings: {
       ru: ["Измерение", "Математика", "Наука"],
@@ -264,7 +264,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Lute.jpg",
+    imageFile: "Lute.webp",
     title: { ru: "Лютня", en: "Lute" },
     meanings: {
       ru: ["Поэзия", "Ораторство", "Философия"],
@@ -272,7 +272,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Tree.jpg",
+    imageFile: "Tree.webp",
     title: { ru: "Дерево", en: "Tree" },
     meanings: {
       ru: ["Стойкость", "Укрытие", "Плодородие"],
@@ -280,7 +280,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Wild_man.jpg",
+    imageFile: "Wild_man.webp",
     title: { ru: "Дикарь", en: "Wild Man" },
     meanings: {
       ru: ["Варвар", "Мужское начало", "Похоть"],
@@ -288,7 +288,7 @@ const symbolSeeds: SymbolSeed[] = [
     },
   },
   {
-    imageFile: "Owl.jpg",
+    imageFile: "Owl.webp",
     title: { ru: "Сова", en: "Owl" },
     meanings: {
       ru: ["Ночь", "Зима", "Страх"],
