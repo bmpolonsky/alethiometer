@@ -17,21 +17,21 @@
   --panel-radius: 1.45rem;
 }
 
-:root[data-theme="night"] {
+:root[data-theme="dark"] {
   color-scheme: dark;
-  --bg-main: #24201c;
-  --bg-muted: #342b23;
-  --surface: rgba(58, 47, 37, 0.54);
-  --surface-strong: rgba(72, 59, 46, 0.64);
-  --surface-glass: rgba(255, 247, 228, 0.05);
-  --text-main: #f5eee2;
-  --text-soft: rgba(245, 239, 228, 0.72);
-  --line-soft: rgba(255, 227, 177, 0.08);
-  --line-strong: rgba(255, 227, 177, 0.17);
-  --accent: #d2aa66;
-  --accent-strong: #f0cf95;
-  --shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
-  --chip-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+  --bg-main: #11161d;
+  --bg-muted: #1b2430;
+  --surface: rgba(27, 33, 41, 0.72);
+  --surface-strong: rgba(41, 49, 60, 0.84);
+  --surface-glass: rgba(210, 224, 244, 0.08);
+  --text-main: #eff3f8;
+  --text-soft: rgba(221, 229, 239, 0.74);
+  --line-soft: rgba(190, 206, 225, 0.1);
+  --line-strong: rgba(190, 206, 225, 0.2);
+  --accent: #c6aa78;
+  --accent-strong: #e7cf9f;
+  --shadow: 0 18px 42px rgba(3, 6, 10, 0.34);
+  --chip-shadow: 0 10px 20px rgba(3, 6, 10, 0.2);
 }
 
 * {
@@ -52,6 +52,13 @@ body {
     linear-gradient(160deg, var(--bg-main), var(--bg-muted));
   color: var(--text-main);
   overflow: hidden;
+}
+
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at top left, rgba(99, 123, 154, 0.14), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(68, 86, 108, 0.1), transparent 24%),
+    linear-gradient(160deg, var(--bg-main), var(--bg-muted));
 }
 
 button,
@@ -140,9 +147,9 @@ button {
   backdrop-filter: blur(12px);
 }
 
-:root[data-theme="night"] .menu-dropdown-panel {
+:root[data-theme="dark"] .menu-dropdown-panel {
   background:
-    linear-gradient(180deg, rgba(79, 63, 49, 0.96), rgba(55, 46, 37, 0.92)),
+    linear-gradient(180deg, rgba(35, 43, 53, 0.96), rgba(24, 30, 38, 0.92)),
     var(--surface);
 }
 
@@ -215,6 +222,7 @@ button {
   grid-template-columns: minmax(0, 1fr);
   max-width: none;
   height: 100%;
+  background: transparent;
 }
 
 .instrument-column,
@@ -230,6 +238,17 @@ button {
 
 .workspace.is-meditative .instrument-column {
   grid-template-rows: minmax(0, 1fr);
+  background: transparent;
+}
+
+.workspace.is-meditative .instrument-panel {
+  border: none;
+  border-radius: 0;
+  background: none;
+  background-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  overflow: visible;
 }
 
 .sidebar-column {
@@ -248,9 +267,9 @@ button {
   backdrop-filter: blur(10px);
 }
 
-:root[data-theme="night"] .panel {
+:root[data-theme="dark"] .panel {
   background:
-    linear-gradient(180deg, rgba(83, 67, 52, 0.72), rgba(55, 45, 36, 0.64)),
+    linear-gradient(180deg, rgba(43, 52, 63, 0.82), rgba(24, 31, 39, 0.72)),
     var(--surface);
 }
 
@@ -302,10 +321,10 @@ button {
     rgba(255, 250, 241, 0.26);
 }
 
-:root[data-theme="night"] .meditative-answer-card {
+:root[data-theme="dark"] .meditative-answer-card {
   background:
-    linear-gradient(180deg, rgba(255, 250, 241, 0.08), rgba(255, 250, 241, 0.02)),
-    rgba(58, 47, 37, 0.22);
+    linear-gradient(180deg, rgba(255, 247, 229, 0.08), rgba(255, 247, 229, 0.02)),
+    rgba(27, 33, 41, 0.32);
 }
 
 .control-panel,
@@ -341,6 +360,7 @@ button {
   min-height: 0;
   padding: 0.6rem 0.6rem 0.2rem;
   isolation: isolate;
+  background: transparent;
 }
 
 .dial-shell::before {
@@ -369,6 +389,7 @@ button {
   width: 100%;
   height: 100%;
   min-height: 0;
+  background: transparent;
   transform-origin: center center;
   transform: translateZ(0) scale(var(--dial-hold-scale, 1));
   transition: transform 120ms linear;
@@ -469,6 +490,11 @@ button {
   min-width: 0;
 }
 
+.answer-strip-body.is-empty {
+  grid-template-columns: auto;
+  justify-content: start;
+}
+
 .answer-inline-action {
   min-width: 10.75rem;
   min-height: 2.7rem;
@@ -481,6 +507,13 @@ button {
   min-width: 110px;
   white-space: normal;
   line-height: 1.2;
+}
+
+.answer-inline-action-status {
+  min-width: 14rem;
+  white-space: normal;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .answer-row.is-empty {
@@ -533,6 +566,15 @@ button {
 
 .selection-card.answer-card {
   animation: chip-rise 320ms ease both;
+}
+
+:root[data-theme="dark"] .selection-card.is-active,
+:root[data-theme="dark"] .catalog-item.is-active,
+:root[data-theme="dark"] .archive-item.is-active {
+  border-color: rgba(198, 170, 120, 0.46);
+  background:
+    linear-gradient(135deg, rgba(231, 207, 159, 0.16), rgba(255, 255, 255, 0)),
+    var(--surface-glass);
 }
 
 .selection-card-image {
@@ -635,6 +677,15 @@ button {
   border-color: rgba(185, 135, 67, 0.4);
 }
 
+:root[data-theme="dark"] .primary-action:hover,
+:root[data-theme="dark"] .secondary-action:hover,
+:root[data-theme="dark"] .ghost-action:hover,
+:root[data-theme="dark"] .saved-symbol-chip:hover,
+:root[data-theme="dark"] .catalog-item:hover,
+:root[data-theme="dark"] .selection-card:hover {
+  border-color: rgba(198, 170, 120, 0.42);
+}
+
 .secondary-action:hover,
 .ghost-action:hover,
 .saved-reading-item button:hover,
@@ -645,9 +696,25 @@ button {
     var(--surface-strong);
 }
 
+:root[data-theme="dark"] .secondary-action:hover,
+:root[data-theme="dark"] .ghost-action:hover,
+:root[data-theme="dark"] .saved-reading-item button:hover,
+:root[data-theme="dark"] .saved-symbol-chip:hover,
+:root[data-theme="dark"] .catalog-item:hover {
+  background:
+    linear-gradient(135deg, rgba(231, 207, 159, 0.12), rgba(255, 255, 255, 0)),
+    var(--surface-strong);
+}
+
 .selection-card:hover {
   background:
     linear-gradient(135deg, rgba(248, 219, 171, 0.16), rgba(255, 255, 255, 0)),
+    var(--surface-glass);
+}
+
+:root[data-theme="dark"] .selection-card:hover {
+  background:
+    linear-gradient(135deg, rgba(231, 207, 159, 0.12), rgba(255, 255, 255, 0)),
     var(--surface-glass);
 }
 
@@ -656,6 +723,14 @@ button {
   background:
     linear-gradient(135deg, rgba(255, 238, 196, 0.62), rgba(255, 238, 196, 0.08)),
     linear-gradient(180deg, rgba(213, 172, 104, 0.16), rgba(167, 121, 61, 0.22)),
+    var(--surface-strong);
+}
+
+:root[data-theme="dark"] .primary-action:hover {
+  border-color: rgba(198, 170, 120, 0.48);
+  background:
+    linear-gradient(135deg, rgba(239, 223, 188, 0.34), rgba(239, 223, 188, 0.04)),
+    linear-gradient(180deg, rgba(198, 170, 120, 0.18), rgba(122, 101, 69, 0.14)),
     var(--surface-strong);
 }
 
@@ -668,6 +743,14 @@ button {
     var(--surface-strong);
   border-color: rgba(186, 133, 66, 0.36);
   font-size: 1rem;
+}
+
+:root[data-theme="dark"] .primary-action {
+  background:
+    linear-gradient(135deg, rgba(239, 223, 188, 0.28), rgba(239, 223, 188, 0.02)),
+    linear-gradient(180deg, rgba(198, 170, 120, 0.14), rgba(122, 101, 69, 0.12)),
+    var(--surface-strong);
+  border-color: rgba(198, 170, 120, 0.38);
 }
 
 .secondary-action,
@@ -710,9 +793,9 @@ button {
   overflow: auto;
 }
 
-:root[data-theme="night"] .picker-panel {
+:root[data-theme="dark"] .picker-panel {
   background:
-    linear-gradient(180deg, rgba(79, 63, 49, 0.96), rgba(56, 46, 37, 0.92)),
+    linear-gradient(180deg, rgba(38, 46, 56, 0.96), rgba(24, 31, 39, 0.92)),
     var(--surface);
 }
 
@@ -939,19 +1022,6 @@ button {
     min-height: auto;
   }
 
-  .control-band {
-    grid-template-columns: 1fr;
-    gap: 0.62rem;
-  }
-
-  .control-flow-divider {
-    display: none;
-  }
-
-  .question-row {
-    width: auto;
-  }
-
   .answer-row {
     min-height: 4.8rem;
   }
@@ -1173,9 +1243,9 @@ button {
   overflow: auto;
 }
 
-:root[data-theme="night"] .drawer-panel {
+:root[data-theme="dark"] .drawer-panel {
   background:
-    linear-gradient(180deg, rgba(79, 63, 49, 0.94), rgba(56, 46, 37, 0.9)),
+    linear-gradient(180deg, rgba(39, 47, 57, 0.94), rgba(24, 31, 39, 0.9)),
     var(--surface);
 }
 
@@ -1318,7 +1388,7 @@ button {
   color: #8b4331;
 }
 
-:root[data-theme="night"] .destructive-action {
+:root[data-theme="dark"] .destructive-action {
   color: #f0aa97;
 }
 
@@ -1344,9 +1414,9 @@ button {
   box-shadow: 0 24px 58px rgba(30, 21, 12, 0.16);
 }
 
-:root[data-theme="night"] .modal-card {
+:root[data-theme="dark"] .modal-card {
   background:
-    linear-gradient(180deg, rgba(79, 63, 49, 0.96), rgba(55, 46, 37, 0.92)),
+    linear-gradient(180deg, rgba(38, 46, 56, 0.96), rgba(24, 31, 39, 0.92)),
     var(--surface);
 }
 
@@ -1457,10 +1527,22 @@ button {
     gap: 0.58rem;
   }
 
+  .control-flow-divider {
+    display: none;
+  }
+
+  .question-row {
+    width: auto;
+  }
+
   .answer-strip-body {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 0.42rem;
     align-items: end;
+  }
+
+  .answer-strip-body.is-empty {
+    grid-template-columns: 1fr;
   }
 
   .answer-inline-action {
@@ -1473,6 +1555,11 @@ button {
   .answer-inline-action-save {
     width: 110px;
     min-width: 110px;
+  }
+
+  .answer-inline-action-status {
+    min-width: 0;
+    width: 100%;
   }
 
   .selection-group {
@@ -1661,6 +1748,12 @@ button {
     padding: 0;
     display: grid;
     align-items: center;
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    overflow: visible;
   }
 
   .workspace.is-meditative .dial-shell {

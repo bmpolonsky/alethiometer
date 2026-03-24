@@ -5,6 +5,7 @@ import type {
   Locale,
   PersistedState,
   SavedReading,
+  ThemeMode,
 } from "./types";
 
 const STORAGE_KEY = "alethiometer-web-state-v1";
@@ -44,6 +45,14 @@ function sanitizeOptionalText(value: unknown) {
   const normalized = value.trim();
 
   return normalized || undefined;
+}
+
+function sanitizeTheme(value: unknown, fallback: ThemeMode): ThemeMode {
+  return value === "dark" || value === "night"
+    ? "dark"
+    : value === "light" || value === "dawn"
+      ? "light"
+      : fallback;
 }
 
 function sanitizeActiveReading(value: unknown, fallbackHands: Record<HandId, number>): ActiveReadingSnapshot {
@@ -96,10 +105,22 @@ export function resolveBrowserLocale(input?: string): Locale {
   return input?.toLowerCase().startsWith("ru") ? "ru" : "en";
 }
 
+export function resolvePreferredTheme(): ThemeMode {
+  if (
+    typeof window !== "undefined"
+    && typeof window.matchMedia === "function"
+    && window.matchMedia("(prefers-color-scheme: dark)").matches
+  ) {
+    return "dark";
+  }
+
+  return "light";
+}
+
 export function createDefaultState(locale: Locale): PersistedState {
   return {
     locale,
-    theme: "dawn",
+    theme: resolvePreferredTheme(),
     meditativeMode: false,
     hands: {
       first: 5,
@@ -163,7 +184,7 @@ export function loadState(locale: Locale): PersistedState {
 
     return {
       locale: isLocale(parsed.locale ?? "") ? parsed.locale! : fallback.locale,
-      theme: parsed.theme === "night" ? "night" : fallback.theme,
+      theme: sanitizeTheme(parsed.theme, fallback.theme),
       meditativeMode:
         typeof parsed.meditativeMode === "boolean"
           ? parsed.meditativeMode

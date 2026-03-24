@@ -154,6 +154,9 @@ export function AppWorkspace() {
   } = preferences;
   const copy = uiText[locale];
   const help = helpText[locale];
+  const instrumentPanelClassName = meditativeMode
+    ? "instrument-panel is-meditative"
+    : "panel instrument-panel";
 
   return (
     <main className={`workspace ${meditativeMode ? "is-meditative" : ""}`}>
@@ -162,7 +165,7 @@ export function AppWorkspace() {
           <WorkspaceControlPanel copy={copy} locale={locale} />
         )}
 
-        <div className={`panel instrument-panel ${meditativeMode ? "is-meditative" : ""}`}>
+        <div className={instrumentPanelClassName}>
           <WorkspaceDial meditativeMode={meditativeMode} />
 
           {meditativeMode ? <MeditativeAnswerStrip locale={locale} /> : null}
@@ -170,7 +173,7 @@ export function AppWorkspace() {
 
       </section>
 
-      {meditativeMode ? null : (
+      {meditativeMode || isCompactLayout ? null : (
         <WorkspaceSidebar
           copy={copy}
           help={help}

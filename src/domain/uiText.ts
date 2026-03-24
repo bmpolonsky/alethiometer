@@ -34,8 +34,8 @@ interface UiText {
   helpSection: string;
   language: string;
   theme: string;
-  dawn: string;
-  night: string;
+  light: string;
+  dark: string;
   journalTitle: string;
   catalogTitle: string;
   catalogHint: string;
@@ -89,8 +89,8 @@ export const uiText: Record<Locale, UiText> = {
     helpSection: "Справка",
     language: "Язык",
     theme: "Тема",
-    dawn: "Светлая",
-    night: "Ночная",
+    light: "Светлая",
+    dark: "Темная",
     journalTitle: "Архив",
     catalogTitle: "Все символы",
     catalogHint:
@@ -144,8 +144,8 @@ export const uiText: Record<Locale, UiText> = {
     helpSection: "Help",
     language: "Language",
     theme: "Theme",
-    dawn: "Dawn",
-    night: "Night",
+    light: "Light",
+    dark: "Dark",
     journalTitle: "Archive",
     catalogTitle: "All symbols",
     catalogHint:
