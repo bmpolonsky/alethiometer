@@ -263,7 +263,6 @@ button {
   background:
     linear-gradient(180deg, rgba(255, 248, 238, 0.9), rgba(245, 238, 229, 0.68)),
     var(--surface);
-  box-shadow: var(--shadow);
   backdrop-filter: blur(10px);
 }
 
