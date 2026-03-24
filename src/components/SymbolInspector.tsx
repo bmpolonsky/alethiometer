@@ -12,7 +12,7 @@ interface SymbolInspectorProps {
   symbol: SymbolEntry;
   defaultMeaningItems: string[];
   personalMeaningItems: string[];
-  onOpenLexicon: () => void;
+  onOpenSymbolEditor: () => void;
 }
 
 export function SymbolInspector({
@@ -21,7 +21,7 @@ export function SymbolInspector({
   symbol,
   defaultMeaningItems,
   personalMeaningItems,
-  onOpenLexicon,
+  onOpenSymbolEditor,
 }: SymbolInspectorProps) {
   return (
     <section className="panel symbol-panel">
@@ -42,7 +42,7 @@ export function SymbolInspector({
             <button
               aria-label={copy.editMeaning}
               className="ghost-action symbol-edit-icon"
-              onClick={onOpenLexicon}
+              onClick={onOpenSymbolEditor}
               title={copy.editMeaning}
               type="button"
             >

@@ -211,6 +211,26 @@ button {
   margin: 0;
 }
 
+.inline-note {
+  margin-top: 0.2rem;
+}
+
+.text-link-button {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent-strong);
+  font: inherit;
+  line-height: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.text-link-button:hover {
+  color: var(--accent);
+}
+
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(18.5rem, 23rem);
@@ -415,6 +435,8 @@ button {
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
 }
 
 .workspace.is-meditative .dial {
@@ -1236,6 +1258,27 @@ button {
 .settings-panel {
   display: grid;
   gap: 0.95rem;
+}
+
+.settings-block {
+  display: grid;
+  gap: 0.6rem;
+  padding-top: 0.3rem;
+}
+
+.settings-copy {
+  display: grid;
+  gap: 0.24rem;
+}
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.hidden-file-input {
+  display: none;
 }
 
 .select-row {

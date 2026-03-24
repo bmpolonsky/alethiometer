@@ -1,4 +1,11 @@
+import { InlineTemplateLink } from "./InlineTemplateLink";
+import { appController } from "../app/services/appController";
+
 interface HelpPanelProps {
+  copy: {
+    backupShortcutTemplate: string;
+    openBackupSettings: string;
+  };
   help: {
     guidanceTitle: string;
     helpIntro: string;
@@ -10,7 +17,7 @@ interface HelpPanelProps {
   };
 }
 
-export function HelpPanel({ help }: HelpPanelProps) {
+export function HelpPanel({ copy, help }: HelpPanelProps) {
   return (
     <section className="help-panel">
       <div className="panel-heading compact">
@@ -31,6 +38,14 @@ export function HelpPanel({ help }: HelpPanelProps) {
           </section>
         ))}
       </div>
+
+      <InlineTemplateLink
+        className="subtle inline-note"
+        label={copy.openBackupSettings}
+        onClick={() => appController.openDrawer("settings")}
+        template={copy.backupShortcutTemplate}
+        token="{backup}"
+      />
     </section>
   );
 }

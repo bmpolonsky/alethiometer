@@ -447,6 +447,7 @@ export function Dial({
           className="dial"
           viewBox={`0 0 ${DIAL_GEOMETRY.width} ${DIAL_GEOMETRY.height}`}
           onClick={(event) => inspectByPointer(event.clientX, event.clientY)}
+          onContextMenu={(event) => event.preventDefault()}
         >
         <defs>
           <clipPath id="dial-device-clip">

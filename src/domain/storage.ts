@@ -10,6 +10,13 @@ import type {
 
 const STORAGE_KEY = "alethiometer-web-state-v1";
 
+interface ExportedBackup {
+  format?: string;
+  version?: number;
+  exportedAt?: string;
+  state?: unknown;
+}
+
 function isLocale(value: string): value is Locale {
   return value === "ru" || value === "en";
 }
@@ -141,66 +148,89 @@ export function createDefaultState(locale: Locale): PersistedState {
   };
 }
 
-export function loadState(locale: Locale): PersistedState {
+export function sanitizePersistedState(value: unknown, locale: Locale): PersistedState {
   const fallback = createDefaultState(locale);
 
-  if (typeof window === "undefined") {
+  if (!value || typeof value !== "object") {
     return fallback;
+  }
+
+  const parsed = value as Partial<PersistedState>;
+  const nextHands = { ...fallback.hands };
+
+  Object.entries(parsed.hands ?? {}).forEach(([handId, symbolId]) => {
+    if (isHandId(handId)) {
+      nextHands[handId] = sanitizeSymbolId(
+        symbolId,
+        fallback.hands[handId],
+      );
+    }
+  });
+
+  const nextCustomMeanings = {
+    ru: Object.fromEntries(
+      Object.entries(parsed.customMeanings?.ru ?? {}).map(([symbolId, items]) => [
+        symbolId,
+        sanitizeMeaningItems(items),
+      ]),
+    ),
+    en: Object.fromEntries(
+      Object.entries(parsed.customMeanings?.en ?? {}).map(([symbolId, items]) => [
+        symbolId,
+        sanitizeMeaningItems(items),
+      ]),
+    ),
+  };
+
+  return {
+    locale: isLocale(parsed.locale ?? "") ? parsed.locale! : fallback.locale,
+    theme: sanitizeTheme(parsed.theme, fallback.theme),
+    meditativeMode:
+      typeof parsed.meditativeMode === "boolean"
+        ? parsed.meditativeMode
+        : fallback.meditativeMode,
+    hands: nextHands,
+    customMeanings: nextCustomMeanings,
+    journal: Array.isArray(parsed.journal)
+      ? parsed.journal
+          .map((entry) => sanitizeJournalEntry(entry))
+          .filter((entry): entry is SavedReading => entry != null)
+          .slice(0, 16)
+      : [],
+    activeReading: sanitizeActiveReading(parsed.activeReading, nextHands),
+  };
+}
+
+export function sanitizeImportedState(value: unknown, locale: Locale): PersistedState {
+  const maybeBackup = value as ExportedBackup | null;
+
+  if (
+    maybeBackup
+    && typeof maybeBackup === "object"
+    && maybeBackup.format === "alethiometer-backup"
+    && "state" in maybeBackup
+  ) {
+    return sanitizePersistedState(maybeBackup.state, locale);
+  }
+
+  return sanitizePersistedState(value, locale);
+}
+
+export function loadState(locale: Locale): PersistedState {
+  if (typeof window === "undefined") {
+    return createDefaultState(locale);
   }
 
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
 
     if (!raw) {
-      return fallback;
+      return createDefaultState(locale);
     }
 
-    const parsed = JSON.parse(raw) as Partial<PersistedState>;
-    const nextHands = { ...fallback.hands };
-
-    Object.entries(parsed.hands ?? {}).forEach(([handId, symbolId]) => {
-      if (isHandId(handId)) {
-        nextHands[handId] = sanitizeSymbolId(
-          symbolId,
-          fallback.hands[handId],
-        );
-      }
-    });
-
-    const nextCustomMeanings = {
-      ru: Object.fromEntries(
-        Object.entries(parsed.customMeanings?.ru ?? {}).map(([symbolId, items]) => [
-          symbolId,
-          sanitizeMeaningItems(items),
-        ]),
-      ),
-      en: Object.fromEntries(
-        Object.entries(parsed.customMeanings?.en ?? {}).map(([symbolId, items]) => [
-          symbolId,
-          sanitizeMeaningItems(items),
-        ]),
-      ),
-    };
-
-    return {
-      locale: isLocale(parsed.locale ?? "") ? parsed.locale! : fallback.locale,
-      theme: sanitizeTheme(parsed.theme, fallback.theme),
-      meditativeMode:
-        typeof parsed.meditativeMode === "boolean"
-          ? parsed.meditativeMode
-          : fallback.meditativeMode,
-      hands: nextHands,
-      customMeanings: nextCustomMeanings,
-      journal: Array.isArray(parsed.journal)
-        ? parsed.journal
-            .map((entry) => sanitizeJournalEntry(entry))
-            .filter((entry): entry is SavedReading => entry != null)
-            .slice(0, 16)
-        : [],
-      activeReading: sanitizeActiveReading(parsed.activeReading, nextHands),
-    };
+    return sanitizePersistedState(JSON.parse(raw), locale);
   } catch {
-    return fallback;
+    return createDefaultState(locale);
   }
 }
 

@@ -1,3 +1,5 @@
+import { appController } from "../app/services/appController";
+
 interface ReferencePanelProps {
   help: {
     guidanceTitle: string;
@@ -7,10 +9,9 @@ interface ReferencePanelProps {
   copy: {
     helpSection: string;
   };
-  onOpenHelp: () => void;
 }
 
-export function ReferencePanel({ help, copy, onOpenHelp }: ReferencePanelProps) {
+export function ReferencePanel({ help, copy }: ReferencePanelProps) {
   return (
     <section className="panel reference-panel">
       <div className="reference-block">
@@ -22,7 +23,7 @@ export function ReferencePanel({ help, copy, onOpenHelp }: ReferencePanelProps) 
           </div>
           <button
             className="ghost-action small-action inline-action"
-            onClick={onOpenHelp}
+            onClick={() => appController.openDrawer("help")}
             type="button"
           >
             {copy.helpSection}

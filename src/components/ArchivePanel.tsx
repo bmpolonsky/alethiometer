@@ -1,3 +1,5 @@
+import { InlineTemplateLink } from "./InlineTemplateLink";
+import { appController } from "../app/services/appController";
 import type { Locale, SavedReading, SymbolEntry } from "../domain/types";
 
 interface ArchivePanelProps {
@@ -8,6 +10,8 @@ interface ArchivePanelProps {
   copy: {
     journalTitle: string;
     archiveHint: string;
+    backupShortcutTemplate: string;
+    openBackupSettings: string;
     emptyJournal: string;
     openSaved: string;
     deleteSaved: string;
@@ -41,6 +45,13 @@ export function ArchivePanel({
       <div className="panel-heading compact">
         <p className="panel-kicker">{copy.journalTitle}</p>
         <p className="panel-copy">{copy.archiveHint}</p>
+        <InlineTemplateLink
+          className="subtle inline-note"
+          label={copy.openBackupSettings}
+          onClick={() => appController.openDrawer("settings")}
+          template={copy.backupShortcutTemplate}
+          token="{backup}"
+        />
       </div>
 
       {journal.length > 0 ? (

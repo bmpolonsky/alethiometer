@@ -10,6 +10,7 @@ import {
   readingStatusStore,
 } from "../store/readingStore";
 import { symbolStore } from "../store/symbolStore";
+import { uiStore } from "../store/uiStore";
 
 export function buildPersistedSnapshot(): PersistedState {
   const preferences = preferencesStore.getState();
@@ -72,4 +73,53 @@ export function initializePersistence() {
   meaningsStore.subscribe(persist);
   journalStore.subscribe(persist);
   window.addEventListener("pagehide", flushPersist);
+}
+
+export function replacePersistedSnapshot(snapshot: PersistedState) {
+  preferencesStore.update(() => ({
+    locale: snapshot.locale,
+    theme: snapshot.theme,
+    meditativeMode: snapshot.meditativeMode,
+  }));
+
+  if (typeof document !== "undefined") {
+    document.documentElement.dataset.theme = snapshot.theme;
+  }
+
+  questionStore.update((current) => ({
+    ...current,
+    hands: snapshot.hands,
+    activeHand: "first",
+  }));
+
+  answerSymbolsStore.update(() => snapshot.activeReading.answerSymbols);
+  answerHandAngleStore.update(() => snapshot.activeReading.answerHandAngle);
+  readingStatusStore.update(() => "idle");
+
+  symbolStore.update(() => ({
+    selectedSymbolId: snapshot.activeReading.selectedSymbolId,
+  }));
+
+  meaningsStore.update((current) => ({
+    ...current,
+    customMeanings: snapshot.customMeanings,
+    newMeaningDraft: "",
+    isEditingMeanings: false,
+  }));
+
+  journalStore.update(() => ({
+    journal: snapshot.journal,
+    openedReadingId: snapshot.activeReading.openedReadingId,
+  }));
+
+  uiStore.update((current) => ({
+    ...current,
+    menuExpanded: false,
+    drawerSection: current.drawerSection,
+    saveDialogOpen: false,
+    saveQuestionText: "",
+    saveAnswerText: "",
+    pickerHand: null,
+    meditativeDrawerOpen: false,
+  }));
 }

@@ -36,6 +36,16 @@ interface UiText {
   theme: string;
   light: string;
   dark: string;
+  backupTitle: string;
+  backupHint: string;
+  backupShortcutTemplate: string;
+  openBackupSettings: string;
+  exportData: string;
+  importData: string;
+  exportDone: string;
+  importDone: string;
+  importFailed: string;
+  importConfirm: string;
   journalTitle: string;
   catalogTitle: string;
   catalogHint: string;
@@ -91,6 +101,17 @@ export const uiText: Record<Locale, UiText> = {
     theme: "Тема",
     light: "Светлая",
     dark: "Темная",
+    backupTitle: "Резервная копия",
+    backupHint:
+      "Данные хранятся в браузере и могут исчезнуть при чистке кэша или данных сайта. Экспорт сохраняет архив и личные трактовки в JSON-файл, а импорт заменяет текущие данные в браузере.",
+    backupShortcutTemplate: "Если не хочешь потерять данные, сохрани {backup}.",
+    openBackupSettings: "резервную копию",
+    exportData: "Экспортировать",
+    importData: "Импортировать",
+    exportDone: "Файл выгружен.",
+    importDone: "Данные импортированы.",
+    importFailed: "Не удалось импортировать файл.",
+    importConfirm: "Импорт заменит текущие данные в браузере. Продолжить?",
     journalTitle: "Архив",
     catalogTitle: "Все символы",
     catalogHint:
@@ -146,6 +167,17 @@ export const uiText: Record<Locale, UiText> = {
     theme: "Theme",
     light: "Light",
     dark: "Dark",
+    backupTitle: "Backup",
+    backupHint:
+      "Your data lives in the browser and can disappear if site data or cache is cleared. Export saves your archive and personal interpretations to a JSON file, and import replaces the current browser data.",
+    backupShortcutTemplate: "If you do not want to lose your data, save {backup}.",
+    openBackupSettings: "a backup",
+    exportData: "Export",
+    importData: "Import",
+    exportDone: "File downloaded.",
+    importDone: "Data imported.",
+    importFailed: "Could not import the file.",
+    importConfirm: "Import will replace the current browser data. Continue?",
     journalTitle: "Archive",
     catalogTitle: "All symbols",
     catalogHint:

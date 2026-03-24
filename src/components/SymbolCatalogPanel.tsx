@@ -1,3 +1,5 @@
+import { InlineTemplateLink } from "./InlineTemplateLink";
+import { appController } from "../app/services/appController";
 import type { Locale, SymbolEntry } from "../domain/types";
 
 interface SymbolCatalogPanelProps {
@@ -12,6 +14,8 @@ interface SymbolCatalogPanelProps {
   copy: {
     catalogTitle: string;
     catalogHint: string;
+    backupShortcutTemplate: string;
+    openBackupSettings: string;
     defaultMeaning: string;
     personalMeaning: string;
     emptyPersonalMeaning: string;
@@ -22,8 +26,8 @@ interface SymbolCatalogPanelProps {
     doneEditing: string;
   };
   onInspectSymbol: (symbolId: number) => void;
-  onOpenLexicon: () => void;
-  onCloseLexicon: () => void;
+  onStartEditingMeanings: () => void;
+  onStopEditingMeanings: () => void;
   onMeaningChange: (index: number, value: string) => void;
   onNewMeaningDraftChange: (value: string) => void;
   onAddMeaning: () => void;
@@ -41,8 +45,8 @@ export function SymbolCatalogPanel({
   isEditingMeanings,
   copy,
   onInspectSymbol,
-  onOpenLexicon,
-  onCloseLexicon,
+  onStartEditingMeanings,
+  onStopEditingMeanings,
   onMeaningChange,
   onNewMeaningDraftChange,
   onAddMeaning,
@@ -53,6 +57,13 @@ export function SymbolCatalogPanel({
       <div className="panel-heading compact">
         <p className="panel-kicker">{copy.catalogTitle}</p>
         <p className="panel-copy">{copy.catalogHint}</p>
+        <InlineTemplateLink
+          className="subtle inline-note"
+          label={copy.openBackupSettings}
+          onClick={() => appController.openDrawer("settings")}
+          template={copy.backupShortcutTemplate}
+          token="{backup}"
+        />
       </div>
 
       <div className="catalog-layout">
@@ -87,7 +98,9 @@ export function SymbolCatalogPanel({
               <h3 className="drawer-symbol-title">{symbol.title[locale]}</h3>
               <button
                 className="ghost-action small-action inline-action"
-                onClick={isEditingMeanings ? onCloseLexicon : onOpenLexicon}
+                onClick={
+                  isEditingMeanings ? onStopEditingMeanings : onStartEditingMeanings
+                }
                 type="button"
               >
                 {isEditingMeanings ? copy.doneEditing : copy.editMeaning}
