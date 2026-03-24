@@ -880,6 +880,8 @@ button {
   color: inherit;
   text-align: left;
   transition: border-color 160ms ease, background 160ms ease;
+  content-visibility: auto;
+  contain-intrinsic-size: 88px;
 }
 
 .picker-item:hover,

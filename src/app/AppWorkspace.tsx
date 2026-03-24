@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { ControlPanel } from "../components/ControlPanel";
 import { Dial } from "../components/Dial";
 import { ReferencePanel } from "../components/ReferencePanel";
@@ -11,16 +12,12 @@ import { getPersonalMeaningItems } from "./services/meaningsService";
 import { meaningsStore } from "./store/meaningsStore";
 import { preferencesStore } from "./store/preferencesStore";
 import { questionStore } from "./store/questionStore";
-import {
-  answerHandAngleStore,
-  answerSymbolsStore,
-  readingStatusStore,
-} from "./store/readingStore";
+import { answerSymbolsStore, readingStatusStore } from "./store/readingStore";
 import { symbolStore } from "./store/symbolStore";
 import { useCompactLayout } from "./useCompactLayout";
 import { useStore } from "./store/useStore";
 
-function WorkspaceControlPanel({
+const WorkspaceControlPanel = memo(function WorkspaceControlPanel({
   copy,
   locale,
 }: {
@@ -43,27 +40,17 @@ function WorkspaceControlPanel({
       symbols={symbolCatalog}
     />
   );
-}
+});
 
-function WorkspaceDial({ meditativeMode }: { meditativeMode: boolean }) {
-  const { hands } = useStore(questionStore);
-  const answerHandAngle = useStore(answerHandAngleStore);
-  const status = useStore(readingStatusStore);
-  const answerSymbols = useStore(answerSymbolsStore);
-  const interactive = status === "idle";
-  const askEnabled = status === "idle" && answerSymbols.length === 0;
+const WorkspaceDial = memo(function WorkspaceDial() {
+  return <Dial />;
+});
 
-  return (
-    <Dial
-      answerHandAngle={answerHandAngle}
-      askEnabled={askEnabled}
-      hands={hands}
-      interactive={interactive}
-    />
-  );
-}
-
-function MeditativeAnswerStrip({ locale }: { locale: Locale }) {
+const MeditativeAnswerStrip = memo(function MeditativeAnswerStrip({
+  locale,
+}: {
+  locale: Locale;
+}) {
   const answerSymbols = useStore(answerSymbolsStore);
   const meditativeAnswerSymbols = answerSymbols.flatMap((symbolId) => {
     const symbol = symbolCatalog[symbolId];
@@ -93,9 +80,9 @@ function MeditativeAnswerStrip({ locale }: { locale: Locale }) {
       ))}
     </div>
   );
-}
+});
 
-function WorkspaceSidebar({
+const WorkspaceSidebar = memo(function WorkspaceSidebar({
   copy,
   help,
   isCompactLayout,
@@ -131,7 +118,7 @@ function WorkspaceSidebar({
       )}
     </aside>
   );
-}
+});
 
 export function AppWorkspace() {
   const preferences = useStore(preferencesStore);
@@ -154,7 +141,7 @@ export function AppWorkspace() {
         )}
 
         <div className={instrumentPanelClassName}>
-          <WorkspaceDial meditativeMode={meditativeMode} />
+          <WorkspaceDial />
 
           {meditativeMode ? <MeditativeAnswerStrip locale={locale} /> : null}
         </div>
