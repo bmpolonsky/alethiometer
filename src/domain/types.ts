@@ -1,5 +1,5 @@
 export type Locale = "ru" | "en";
-export type ThemeMode = "dawn" | "night";
+export type ThemeMode = "light" | "dark";
 export type HandId = "first" | "second" | "third";
 export type MenuSection =
   | "settings"

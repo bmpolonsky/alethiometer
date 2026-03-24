@@ -34,8 +34,8 @@ interface SettingsDrawerProps {
     helpSection: string;
     language: string;
     theme: string;
-    dawn: string;
-    night: string;
+    light: string;
+    dark: string;
     defaultMeaning: string;
     personalMeaning: string;
     emptyPersonalMeaning: string;

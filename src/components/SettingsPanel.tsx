@@ -7,8 +7,8 @@ interface SettingsPanelProps {
     settingsTitle: string;
     language: string;
     theme: string;
-    dawn: string;
-    night: string;
+    light: string;
+    dark: string;
   };
   onSetLocale: (locale: Locale) => void;
   onSetTheme: (theme: ThemeMode) => void;
@@ -34,8 +34,8 @@ export function SettingsPanel({
       <label className="select-row">
         <span>{copy.theme}</span>
         <select value={theme} onChange={(event) => onSetTheme(event.target.value as ThemeMode)}>
-          <option value="dawn">{copy.dawn}</option>
-          <option value="night">{copy.night}</option>
+          <option value="light">{copy.light}</option>
+          <option value="dark">{copy.dark}</option>
         </select>
       </label>
     </section>
