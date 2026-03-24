@@ -82,6 +82,12 @@ const MEDITATIVE_ASK_RADIUS = 146;
 const MEDITATIVE_ASK_HOLD_MS = 1600;
 const MEDITATIVE_ASK_ANIMATION_MS = 620;
 
+function formatRotationAngle(angle: number) {
+  const normalized = ((angle % 360) + 360) % 360;
+
+  return Math.round(normalized);
+}
+
 function renderSpritesheetCrop(
   frame: { x: number; y: number; width: number; height: number },
   offsetX: number,
@@ -175,14 +181,14 @@ export function Dial() {
   function setQuestionHandTransform(handId: HandId, angle: number) {
     questionHandRefs.current[handId]?.setAttribute(
       "transform",
-      `translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${angle})`,
+      `translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${formatRotationAngle(angle)})`,
     );
   }
 
   function setAnswerHandTransform(angle: number) {
     answerHandRef.current?.setAttribute(
       "transform",
-      `translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${angle})`,
+      `translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${formatRotationAngle(angle)})`,
     );
   }
 
@@ -567,9 +573,6 @@ export function Dial() {
               />
             </clipPath>
           ))}
-          <filter id="hand-shadow" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="rgba(0,0,0,0.34)" />
-          </filter>
         </defs>
 
         <g clipPath="url(#dial-device-clip)">
@@ -607,8 +610,7 @@ export function Dial() {
               ref={(node) => {
                 questionHandRefs.current[handId] = node;
               }}
-              transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${initialDisplayAngles[handId]})`}
-              filter="url(#hand-shadow)"
+              transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${formatRotationAngle(initialDisplayAngles[handId])})`}
               opacity={1}
             >
               <svg
@@ -626,8 +628,7 @@ export function Dial() {
 
         <g
           ref={answerHandRef}
-          transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${initialAnswerHandAngle})`}
-          filter="url(#hand-shadow)"
+          transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${formatRotationAngle(initialAnswerHandAngle)})`}
           opacity={1}
         >
           <svg
