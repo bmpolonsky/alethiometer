@@ -69,7 +69,7 @@ export const uiText: Record<Locale, UiText> = {
     symbolTitle: "Значение символа",
     defaultMeaning: "Базовые значения",
     personalMeaning: "Личные трактовки",
-    emptyPersonalMeaning: "Пока нет личных трактовок.",
+    emptyPersonalMeaning: "Пока пусто.",
     editMeaning: "Редактировать",
     doneEditing: "Готово",
     personalHint:
@@ -124,7 +124,7 @@ export const uiText: Record<Locale, UiText> = {
     symbolTitle: "Symbol meaning",
     defaultMeaning: "Default meanings",
     personalMeaning: "Personal interpretations",
-    emptyPersonalMeaning: "No personal meanings yet.",
+    emptyPersonalMeaning: "Nothing yet.",
     editMeaning: "Edit",
     doneEditing: "Done",
     personalHint:

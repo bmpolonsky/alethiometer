@@ -207,6 +207,10 @@ button {
   line-height: 1.35;
 }
 
+.subtle {
+  margin: 0;
+}
+
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(18.5rem, 23rem);
@@ -471,10 +475,7 @@ button {
 }
 
 .question-row .selection-card {
-  flex: 1 1 0;
-  width: auto;
-  min-width: 4.7rem;
-  max-width: 5.6rem;
+  flex: 0 0 4.7rem;
 }
 
 .answer-row {
@@ -536,11 +537,13 @@ button {
 
 .selection-card {
   display: grid;
+  flex: 0 0 4.7rem;
   grid-template-rows: auto 1fr;
   align-content: start;
   gap: 0.22rem;
   width: 4.7rem;
   min-width: 4.7rem;
+  max-width: 4.7rem;
   height: 6.35rem;
   padding: 0.36rem 0.3rem 0.32rem;
   border: 1px solid var(--line-soft);
@@ -979,6 +982,7 @@ button {
 .symbol-name {
   font-size: clamp(1.4rem, 1.9vw, 1.85rem);
   line-height: 0.98;
+  min-height: calc(2 * 0.98em);
   overflow-wrap: anywhere;
   word-break: normal;
 }
@@ -1643,15 +1647,16 @@ button {
   }
 
   .selection-card {
+    flex-basis: 3.8rem;
     width: 3.8rem;
     min-width: 3.8rem;
+    max-width: 3.8rem;
     height: 5.3rem;
     padding: 0.3rem 0.26rem 0.28rem;
   }
 
   .question-row .selection-card {
-    min-width: 0;
-    max-width: none;
+    flex-basis: 3.8rem;
   }
 
   .selection-card-image {
