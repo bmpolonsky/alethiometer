@@ -1,7 +1,7 @@
 {
   "name": "Alethiometer",
   "short_name": "Alethiometer",
-  "description": "A symbolic alethiometer for asking, reading, and keeping your own lexicon of meanings.",
+  "description": "A symbolic alethiometer for asking questions, reading answers, and keeping a personal lexicon of meanings.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ece6dc",

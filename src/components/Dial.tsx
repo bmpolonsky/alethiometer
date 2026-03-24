@@ -15,6 +15,7 @@ interface DialProps {
   hands: Record<HandId, number>;
   answerHandAngle: number;
   interactive: boolean;
+  askEnabled?: boolean;
   meditativeMode?: boolean;
   onInspectSymbol: (symbolId: number) => void;
   onFocusHand: (handId: HandId) => void;
@@ -105,6 +106,7 @@ export function Dial({
   hands,
   answerHandAngle,
   interactive,
+  askEnabled = false,
   meditativeMode = false,
   onInspectSymbol,
   onFocusHand,
@@ -215,7 +217,7 @@ export function Dial({
   }
 
   function startMeditativeAsk() {
-    if (!meditativeMode || !interactive || !onAsk || isAskAnimating) {
+    if (!askEnabled || !interactive || !onAsk || isAskAnimating) {
       return;
     }
 
@@ -229,7 +231,7 @@ export function Dial({
   }
 
   function beginMeditativeAskHold(pointerId: number, target: SVGCircleElement) {
-    if (!meditativeMode || !interactive || !onAsk || isAskAnimating) {
+    if (!askEnabled || !interactive || !onAsk || isAskAnimating) {
       return;
     }
 
@@ -556,7 +558,7 @@ export function Dial({
           {renderSpritesheetCrop(spritesheetFrames.glare, glareX, glareY)}
         </g>
 
-        {meditativeMode ? (
+        {askEnabled ? (
           <g className="dial-center-trigger">
             <circle
               cx={DIAL_GEOMETRY.centerX}
