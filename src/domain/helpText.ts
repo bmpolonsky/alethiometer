@@ -73,6 +73,14 @@ export const helpText: Record<Locale, HelpText> = {
           "Сова — мудрость.",
         ],
       },
+      {
+        title: "Как не потерять данные",
+        items: [
+          "Архив и личные трактовки хранятся прямо в браузере на этом устройстве.",
+          "Если очистить кэш или данные сайта, они могут исчезнуть.",
+          "Чтобы сохранить их отдельно, открой настройки и сделай экспорт резервной копии в JSON-файл.",
+        ],
+      },
     ],
   },
   en: {
@@ -131,6 +139,14 @@ export const helpText: Record<Locale, HelpText> = {
           "Sword — fight, injury, pain.",
           "Horse — distance.",
           "Owl — wisdom.",
+        ],
+      },
+      {
+        title: "How to keep your data safe",
+        items: [
+          "Your archive and personal interpretations are stored in the browser on this device.",
+          "If you clear cache or site data, they may disappear.",
+          "To keep a separate copy, open Settings and export a JSON backup.",
         ],
       },
     ],

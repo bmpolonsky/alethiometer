@@ -132,14 +132,14 @@ function WorkspaceSidebar({
           copy={copy}
           defaultMeaningItems={defaultMeaningItems}
           locale={locale}
-          onOpenLexicon={appController.openSymbolEditor}
+          onOpenSymbolEditor={appController.openSymbolEditor}
           personalMeaningItems={personalMeaningItems}
           symbol={currentSymbol}
         />
       )}
 
       {isCompactLayout ? null : (
-        <ReferencePanel copy={copy} help={help} onOpenHelp={() => appController.openDrawer("help")} />
+        <ReferencePanel copy={copy} help={help} />
       )}
     </aside>
   );

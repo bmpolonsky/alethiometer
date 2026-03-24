@@ -7,6 +7,7 @@ import { helpText } from "../domain/helpText";
 import { symbolCatalog } from "../domain/symbols";
 import { uiText } from "../domain/uiText";
 import { appController } from "./services/appController";
+import { backupService } from "./services/backupService";
 import { journalService } from "./services/journalService";
 import { getPersonalMeaningItems, meaningsService } from "./services/meaningsService";
 import { preferencesService } from "./services/preferencesService";
@@ -54,13 +55,14 @@ function OpenSettingsDrawer({
       locale={locale}
       newMeaningDraft={newMeaningDraft}
       onAddMeaning={meaningsService.addDraftMeaningItem}
-      onCloseLexicon={() => meaningsService.closeEditor()}
       onClose={appController.closeDrawer}
       onDeleteReading={journalService.deleteReading}
+      onExportData={backupService.exportData}
+      onImportData={backupService.importData}
       onMeaningChange={meaningsService.updateMeaningItem}
       onInspectSymbol={appController.inspectSymbolFromDrawer}
       onNewMeaningDraftChange={meaningsService.updateNewMeaningDraft}
-      onOpenLexicon={() => meaningsService.openEditor()}
+      onStartEditingMeanings={() => meaningsService.openEditor()}
       onOpenReading={appController.openReadingFromDrawer}
       onRemoveMeaning={meaningsService.removeMeaningItem}
       onSetLocale={preferencesService.setLocale}
@@ -69,6 +71,7 @@ function OpenSettingsDrawer({
       open
       personalMeaningItems={personalMeaningItems}
       section={drawerSection}
+      onStopEditingMeanings={() => meaningsService.closeEditor()}
       symbol={currentSymbol}
       symbols={symbolCatalog}
       theme={theme}
@@ -181,7 +184,6 @@ function OpenSymbolMeaningDrawer({ locale }: { locale: Locale }) {
       defaultMeaningItems={symbol.meanings[locale]}
       locale={locale}
       onClose={() => uiStoreActions.setMeditativeDrawerOpen(false)}
-      onOpenLexicon={appController.openSymbolEditor}
       open
       personalMeaningItems={personalMeaningItems}
       symbol={symbol}

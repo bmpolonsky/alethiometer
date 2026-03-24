@@ -1,3 +1,4 @@
+import { appController } from "../app/services/appController";
 import type { Locale, SymbolEntry } from "../domain/types";
 
 interface SymbolMeaningDrawerProps {
@@ -14,7 +15,6 @@ interface SymbolMeaningDrawerProps {
     editMeaning: string;
     close: string;
   };
-  onOpenLexicon: () => void;
   onClose: () => void;
 }
 
@@ -25,7 +25,6 @@ export function SymbolMeaningDrawer({
   defaultMeaningItems,
   personalMeaningItems,
   copy,
-  onOpenLexicon,
   onClose,
 }: SymbolMeaningDrawerProps) {
   if (!open) {
@@ -55,7 +54,7 @@ export function SymbolMeaningDrawer({
                 <button
                   aria-label={copy.editMeaning}
                   className="ghost-action symbol-edit-icon"
-                  onClick={onOpenLexicon}
+                  onClick={appController.openSymbolEditor}
                   title={copy.editMeaning}
                   type="button"
                 >

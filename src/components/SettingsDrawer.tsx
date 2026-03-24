@@ -36,6 +36,16 @@ interface SettingsDrawerProps {
     theme: string;
     light: string;
     dark: string;
+    backupTitle: string;
+    backupHint: string;
+    backupShortcutTemplate: string;
+    openBackupSettings: string;
+    exportData: string;
+    importData: string;
+    exportDone: string;
+    importDone: string;
+    importFailed: string;
+    importConfirm: string;
     defaultMeaning: string;
     personalMeaning: string;
     emptyPersonalMeaning: string;
@@ -69,8 +79,10 @@ interface SettingsDrawerProps {
   onInspectSymbol: (symbolId: number) => void;
   onSetLocale: (locale: Locale) => void;
   onSetTheme: (theme: ThemeMode) => void;
-  onOpenLexicon: () => void;
-  onCloseLexicon: () => void;
+  onExportData: () => void;
+  onImportData: (file: File) => Promise<void>;
+  onStartEditingMeanings: () => void;
+  onStopEditingMeanings: () => void;
   onOpenReading: (entry: SavedReading) => void;
   onDeleteReading: (readingId: string) => void;
   onMeaningChange: (index: number, value: string) => void;
@@ -99,8 +111,10 @@ export function SettingsDrawer({
   onInspectSymbol,
   onSetLocale,
   onSetTheme,
-  onOpenLexicon,
-  onCloseLexicon,
+  onExportData,
+  onImportData,
+  onStartEditingMeanings,
+  onStopEditingMeanings,
   onOpenReading,
   onDeleteReading,
   onMeaningChange,
@@ -145,24 +159,26 @@ export function SettingsDrawer({
               locale={locale}
               onSetLocale={onSetLocale}
               onSetTheme={onSetTheme}
+              onExportData={onExportData}
+              onImportData={onImportData}
               theme={theme}
             />
           ) : null}
 
           {section === "symbols" ? (
             <SymbolCatalogPanel
+              allMeaningItemsBySymbol={allMeaningItemsBySymbol}
               copy={copy}
               defaultMeaningItems={defaultMeaningItems}
               isEditingMeanings={isEditingMeanings}
               locale={locale}
               newMeaningDraft={newMeaningDraft}
-              allMeaningItemsBySymbol={allMeaningItemsBySymbol}
               onAddMeaning={onAddMeaning}
-              onCloseLexicon={onCloseLexicon}
+              onStopEditingMeanings={onStopEditingMeanings}
               onMeaningChange={onMeaningChange}
               onInspectSymbol={onInspectSymbol}
               onNewMeaningDraftChange={onNewMeaningDraftChange}
-              onOpenLexicon={onOpenLexicon}
+              onStartEditingMeanings={onStartEditingMeanings}
               onRemoveMeaning={onRemoveMeaning}
               personalMeaningItems={personalMeaningItems}
               symbol={symbol}
@@ -182,7 +198,9 @@ export function SettingsDrawer({
             />
           ) : null}
 
-          {section === "help" ? <HelpPanel help={help} /> : null}
+          {section === "help" ? (
+            <HelpPanel copy={copy} help={help} />
+          ) : null}
         </div>
 
         <div className="drawer-footer">
