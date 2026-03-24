@@ -7,7 +7,6 @@ import { questionStore } from "../store/questionStore";
 import {
   answerHandAngleStore,
   answerSymbolsStore,
-  getReadingState,
   readingStatusStore,
 } from "../store/readingStore";
 import { symbolStore } from "../store/symbolStore";
@@ -15,7 +14,6 @@ import { symbolStore } from "../store/symbolStore";
 export function buildPersistedSnapshot(): PersistedState {
   const preferences = preferencesStore.getState();
   const question = questionStore.getState();
-  const reading = getReadingState();
   const symbol = symbolStore.getState();
   const meanings = meaningsStore.getState();
   const journal = journalStore.getState();
@@ -28,8 +26,8 @@ export function buildPersistedSnapshot(): PersistedState {
     customMeanings: meanings.customMeanings,
     journal: journal.journal,
     activeReading: {
-      answerSymbols: reading.answerSymbols,
-      answerHandAngle: reading.answerHandAngle,
+      answerSymbols: answerSymbolsStore.getState(),
+      answerHandAngle: answerHandAngleStore.getState(),
       selectedSymbolId: symbol.selectedSymbolId,
       openedReadingId: journal.openedReadingId,
     },
