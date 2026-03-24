@@ -1,4 +1,3 @@
-import { formatBaseMeaningItem } from "../domain/meanings";
 import type { HandId, Locale, SymbolEntry } from "../domain/types";
 
 interface QuestionSymbolPickerProps {
@@ -63,7 +62,7 @@ export function QuestionSymbolPicker({
                 <strong>{symbol.title[locale]}</strong>
                 <span>
                   {[
-                    ...symbol.meanings[locale].map(formatBaseMeaningItem),
+                    ...symbol.meanings[locale],
                     ...(personalMeaningItemsBySymbol[String(symbol.id)] ?? []),
                   ].join(", ")}
                 </span>

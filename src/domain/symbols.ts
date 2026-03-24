@@ -27,7 +27,7 @@ const symbolSeeds: SymbolSeed[] = [
     imageFile: "Alpha_and_Omega.jpg",
     title: { ru: "Альфа и Омега", en: "Alpha and Omega" },
     meanings: {
-      ru: ["Завершенность", "Процесс", "Неизбежное"],
+      ru: ["Завершённость", "Процесс", "Неизбежное"],
       en: ["Finality", "Process", "Inevitability"],
     },
   },
@@ -43,7 +43,7 @@ const symbolSeeds: SymbolSeed[] = [
     imageFile: "Serpent.jpg",
     title: { ru: "Змея", en: "Serpent" },
     meanings: {
-      ru: ["Зло", "Вероломство", "Врожденная мудрость"],
+      ru: ["Зло", "Вероломство", "Врождённая мудрость"],
       en: ["Evil", "Guile", "Natural wisdom"],
     },
   },
@@ -51,8 +51,8 @@ const symbolSeeds: SymbolSeed[] = [
     imageFile: "Caidron_crucible.jpg",
     title: { ru: "Тигель", en: "Crucible" },
     meanings: {
-      ru: ["Алхимия", "Ремесло", "Приобретенная мудрость"],
-      en: ["Alchemy", "Craft", "Achieved wisdom"],
+      ru: ["Алхимия", "Ремесло", "Приобретённая мудрость"],
+      en: ["Alchemy", "Craft", "Acquired wisdom"],
     },
   },
   {
@@ -116,7 +116,7 @@ const symbolSeeds: SymbolSeed[] = [
     title: { ru: "Птица", en: "Bird" },
     meanings: {
       ru: ["Душа (деймон)", "Весна", "Брак"],
-      en: ["The soul (the daemon)", "Spring", "Marriage"],
+      en: ["The soul (daemon)", "Spring", "Marriage"],
     },
   },
   {
@@ -252,7 +252,7 @@ const symbolSeeds: SymbolSeed[] = [
     title: { ru: "Ребёнок", en: "Baby" },
     meanings: {
       ru: ["Будущее", "Податливость", "Беспомощность"],
-      en: ["The future", "Malleability", "Helplessness"],
+      en: ["Future", "Malleability", "Helplessness"],
     },
   },
   {
@@ -281,7 +281,7 @@ const symbolSeeds: SymbolSeed[] = [
   },
   {
     imageFile: "Wild_man.jpg",
-    title: { ru: "Дикарь", en: "Wild man" },
+    title: { ru: "Дикарь", en: "Wild Man" },
     meanings: {
       ru: ["Варвар", "Мужское начало", "Похоть"],
       en: ["Wild man", "The masculine", "Lust"],

@@ -36,6 +36,12 @@ export function AppWorkspace() {
     getPersonalMeaningItems(selectedSymbolId);
   const copy = uiText[locale];
   const help = helpText[locale];
+  const meditativeAnswerSymbols = answerSymbols.flatMap((symbolId) => {
+    const symbol = symbolCatalog[symbolId];
+
+    return symbol ? [symbol] : [];
+  });
+  const canAskFromDial = status === "idle" && answerSymbols.length === 0;
 
   return (
     <main className={`workspace ${meditativeMode ? "is-meditative" : ""}`}>
@@ -60,6 +66,7 @@ export function AppWorkspace() {
         <div className={`panel instrument-panel ${meditativeMode ? "is-meditative" : ""}`}>
           <Dial
             answerHandAngle={answerHandAngle}
+            askEnabled={canAskFromDial}
             hands={hands}
             interactive={status === "idle"}
             meditativeMode={meditativeMode}
@@ -68,6 +75,25 @@ export function AppWorkspace() {
             onInspectSymbol={appController.inspectSymbolFromDial}
             onNudgeHand={sessionService.nudgeHand}
           />
+
+          {meditativeMode && meditativeAnswerSymbols.length > 0 ? (
+            <div className="meditative-answer-strip" aria-live="polite">
+              {meditativeAnswerSymbols.map((symbol, index) => (
+                <button
+                  className="selection-card answer-card meditative-answer-card"
+                  key={`${symbol.id}-${index}`}
+                  onClick={() => appController.inspectSymbolFromDial(symbol.id)}
+                  style={{ animationDelay: `${index * 120}ms` }}
+                  type="button"
+                >
+                  <img alt="" className="selection-card-image" src={symbol.imageSrc} />
+                  <span className="selection-card-meta">
+                    <span className="selection-card-title">{symbol.title[locale]}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
 
       </section>

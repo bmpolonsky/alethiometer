@@ -39,6 +39,8 @@ export function ControlPanel({
 }: ControlPanelProps) {
   const statusText = status === "listening" ? copy.listeningStatus : null;
   const hasAnswer = answerSymbols.length > 0;
+  const showAskAction = status === "idle" && !hasAnswer;
+  const showSaveAction = hasAnswer && canSaveReading;
 
   return (
     <section className="panel control-panel compact-panel">
@@ -70,49 +72,46 @@ export function ControlPanel({
 
         <div className="selection-group answer-strip">
           <p className="panel-kicker">{copy.answerTitle}</p>
-          <div className={`selection-card-row answer-row ${hasAnswer ? "" : "is-empty"}`}>
-            {hasAnswer ? (
-              answerSymbols.map((symbolId, index) => {
-                const symbol = symbols[symbolId];
+          <div className="answer-strip-body">
+            <div className={`selection-card-row answer-row ${hasAnswer ? "" : "is-empty"}`}>
+              {hasAnswer ? (
+                answerSymbols.map((symbolId, index) => {
+                  const symbol = symbols[symbolId];
 
-                return (
-                  <button
-                    key={`${symbolId}-${index}`}
-                    className="selection-card answer-card"
-                    onClick={() => onInspectSymbol(symbolId)}
-                    style={{ animationDelay: `${index * 120}ms` }}
-                    type="button"
-                  >
-                    <img alt="" className="selection-card-image" src={symbol?.imageSrc} />
-                    <span className="selection-card-meta">
-                      <span className="selection-card-title">{symbol?.title[locale]}</span>
-                    </span>
-                  </button>
-                );
-              })
-            ) : (
-              <div className="answer-placeholder">
-                {statusText ?? copy.answerPlaceholder}
-              </div>
-            )}
+                  return (
+                    <button
+                      key={`${symbolId}-${index}`}
+                      className="selection-card answer-card"
+                      onClick={() => onInspectSymbol(symbolId)}
+                      style={{ animationDelay: `${index * 120}ms` }}
+                      type="button"
+                    >
+                      <img alt="" className="selection-card-image" src={symbol?.imageSrc} />
+                      <span className="selection-card-meta">
+                        <span className="selection-card-title">{symbol?.title[locale]}</span>
+                      </span>
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="answer-placeholder">
+                  {statusText ?? copy.answerPlaceholder}
+                </div>
+              )}
+            </div>
+
+            {showAskAction ? (
+              <button className="primary-action answer-inline-action" onClick={onAsk} type="button">
+                {copy.ask}
+              </button>
+            ) : null}
+
+            {showSaveAction ? (
+              <button className="secondary-action answer-inline-action" onClick={onSaveReading} type="button">
+                {copy.saveReading}
+              </button>
+            ) : null}
           </div>
-        </div>
-
-        <div className="control-actions compact band-actions">
-          <p className="panel-kicker action-kicker" aria-hidden="true">
-            actions
-          </p>
-          <button className="primary-action" disabled={status !== "idle"} onClick={onAsk} type="button">
-            {copy.ask}
-          </button>
-          <button
-            className={`ghost-action small-action save-answer-button ${hasAnswer && canSaveReading ? "" : "is-hidden"}`}
-            disabled={!canSaveReading}
-            onClick={onSaveReading}
-            type="button"
-          >
-            {copy.saveReading}
-          </button>
         </div>
       </div>
     </section>

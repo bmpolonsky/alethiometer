@@ -1,4 +1,3 @@
-import { formatBaseMeaningItem } from "../domain/meanings";
 import type { Locale, SymbolEntry } from "../domain/types";
 
 interface SymbolCatalogPanelProps {
@@ -70,7 +69,7 @@ export function SymbolCatalogPanel({
                 <strong>{entry.title[locale]}</strong>
                 <span>
                   {[
-                    ...entry.meanings[locale].map(formatBaseMeaningItem),
+                    ...entry.meanings[locale],
                     ...(allMeaningItemsBySymbol[String(entry.id)] ?? []),
                   ].join(", ")}
                 </span>
@@ -100,7 +99,7 @@ export function SymbolCatalogPanel({
             <p className="meaning-label">{copy.defaultMeaning}</p>
             <ul className="meaning-list">
               {defaultMeaningItems.map((item) => (
-                <li key={item}>{formatBaseMeaningItem(item)}</li>
+                <li key={item}>{item}</li>
               ))}
             </ul>
           </div>
