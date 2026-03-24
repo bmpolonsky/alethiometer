@@ -1,7 +1,7 @@
 import type { HandId } from "../../domain/types";
 import { journalStore } from "../store/journalStore";
 import { questionStore } from "../store/questionStore";
-import { readingStore } from "../store/readingStore";
+import { getReadingState, updateReadingState } from "../store/readingStore";
 import { symbolStore } from "../store/symbolStore";
 
 function wrapSymbolId(value: number) {
@@ -12,7 +12,7 @@ class SessionService {
   clearCurrentAnswer = () => {
     const { hands, activeHand } = questionStore.getState();
 
-    readingStore.update((current) => ({
+    updateReadingState((current) => ({
       ...current,
       answerSymbols: [],
       status: "idle",
@@ -47,7 +47,7 @@ class SessionService {
   };
 
   setHandSymbol = (handId: HandId, symbolId: number) => {
-    const reading = readingStore.getState();
+    const reading = getReadingState();
     const nextSymbol = wrapSymbolId(symbolId);
 
     if (
@@ -72,7 +72,7 @@ class SessionService {
 
   nudgeHand = (handId: HandId, direction: number) => {
     const question = questionStore.getState();
-    const reading = readingStore.getState();
+    const reading = getReadingState();
 
     if (
       reading.status === "idle" &&

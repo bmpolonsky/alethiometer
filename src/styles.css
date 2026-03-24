@@ -201,7 +201,7 @@ button {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(21rem, 25rem);
+  grid-template-columns: minmax(0, 1fr) minmax(18.5rem, 23rem);
   gap: 1.1rem;
   align-items: stretch;
   max-width: 1380px;
@@ -340,11 +340,40 @@ button {
   height: 100%;
   min-height: 0;
   padding: 0.6rem 0.6rem 0.2rem;
+  isolation: isolate;
+}
+
+.dial-shell::before {
+  content: "";
+  position: absolute;
+  inset: max(0.45rem, 2%);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle,
+      rgba(251, 231, 182, 0.24) 0%,
+      rgba(241, 198, 117, 0.14) 34%,
+      rgba(184, 135, 67, 0.05) 54%,
+      transparent 74%
+    );
+  opacity: var(--dial-hold-glow-opacity, 0);
+  transition: opacity 120ms linear;
+  pointer-events: none;
+}
+
+.dial-stage {
+  display: grid;
+  place-items: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   transform-origin: center center;
-  transform: scale(var(--dial-hold-scale, 1));
-  filter: brightness(var(--dial-hold-brightness, 1));
-  transition: transform 120ms linear, filter 160ms ease;
-  will-change: transform, filter;
+  transform: translateZ(0) scale(var(--dial-hold-scale, 1));
+  transition: transform 120ms linear;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .workspace.is-meditative .dial-shell {
@@ -445,6 +474,13 @@ button {
   min-height: 2.7rem;
   align-self: center;
   white-space: nowrap;
+}
+
+.answer-inline-action-save {
+  width: 110px;
+  min-width: 110px;
+  white-space: normal;
+  line-height: 1.2;
 }
 
 .answer-row.is-empty {
@@ -1336,7 +1372,7 @@ button {
   gap: 0.55rem;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 960px) {
   body {
     overflow: auto;
   }
@@ -1432,6 +1468,11 @@ button {
     width: auto;
     padding-inline: 0.72rem;
     font-size: 0.92rem;
+  }
+
+  .answer-inline-action-save {
+    width: 110px;
+    min-width: 110px;
   }
 
   .selection-group {
@@ -1660,23 +1701,38 @@ button {
   }
 }
 
-.dial-shell.is-asking {
+.dial-shell.is-asking .dial-stage {
   animation: dial-breath 620ms cubic-bezier(0.22, 0.7, 0.24, 1);
+}
+
+.dial-shell.is-asking::before {
+  animation: dial-glow 620ms cubic-bezier(0.22, 0.7, 0.24, 1);
 }
 
 @keyframes dial-breath {
   0% {
-    transform: scale(var(--dial-hold-scale, 1));
-    filter: brightness(var(--dial-hold-brightness, 1));
+    transform: translateZ(0) scale(var(--dial-hold-scale, 1));
   }
 
   45% {
-    transform: scale(calc(var(--dial-hold-scale, 1) + 0.02));
-    filter: brightness(calc(var(--dial-hold-brightness, 1) + 0.04));
+    transform: translateZ(0) scale(calc(var(--dial-hold-scale, 1) + 0.02));
   }
 
   100% {
-    transform: scale(1);
-    filter: brightness(1);
+    transform: translateZ(0) scale(1);
+  }
+}
+
+@keyframes dial-glow {
+  0% {
+    opacity: var(--dial-hold-glow-opacity, 0);
+  }
+
+  45% {
+    opacity: calc(var(--dial-hold-glow-opacity, 0) + 0.18);
+  }
+
+  100% {
+    opacity: 0;
   }
 }
