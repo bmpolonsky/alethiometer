@@ -628,7 +628,7 @@ export function Dial() {
           ref={answerHandRef}
           transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${initialAnswerHandAngle})`}
           filter="url(#hand-shadow)"
-          opacity={0.98}
+          opacity={1}
         >
           <svg
             x={-handAssets.answer.pivotX * handAssets.answer.scale}
