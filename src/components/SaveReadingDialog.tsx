@@ -1,5 +1,7 @@
+import { appController } from "../app/services/appController";
+import { uiStoreActions } from "../app/store/uiStore";
+
 interface SaveReadingDialogProps {
-  open: boolean;
   questionText: string;
   answerText: string;
   copy: {
@@ -11,28 +13,15 @@ interface SaveReadingDialogProps {
     confirmSaveReading: string;
     cancel: string;
   };
-  onClose: () => void;
-  onQuestionTextChange: (value: string) => void;
-  onAnswerTextChange: (value: string) => void;
-  onSave: () => void;
 }
 
 export function SaveReadingDialog({
-  open,
   questionText,
   answerText,
   copy,
-  onClose,
-  onQuestionTextChange,
-  onAnswerTextChange,
-  onSave,
 }: SaveReadingDialogProps) {
-  if (!open) {
-    return null;
-  }
-
   return (
-    <div className="modal-backdrop" onClick={onClose} role="presentation">
+    <div className="modal-backdrop" onClick={uiStoreActions.closeSaveDialog} role="presentation">
       <section
         className="modal-card save-dialog"
         onClick={(event) => event.stopPropagation()}
@@ -42,7 +31,7 @@ export function SaveReadingDialog({
             <p className="panel-kicker">{copy.saveReadingTitle}</p>
             <h2 className="drawer-title">{copy.saveReadingTitle}</h2>
           </div>
-          <button className="ghost-action" onClick={onClose} type="button">
+          <button className="ghost-action" onClick={uiStoreActions.closeSaveDialog} type="button">
             {copy.cancel}
           </button>
         </div>
@@ -51,7 +40,7 @@ export function SaveReadingDialog({
           <span className="meaning-label">{copy.saveReadingQuestionLabel}</span>
           <textarea
             className="modal-textarea"
-            onChange={(event) => onQuestionTextChange(event.target.value)}
+            onChange={(event) => uiStoreActions.setSaveQuestionText(event.target.value)}
             placeholder={copy.saveReadingQuestionPlaceholder}
             rows={3}
             value={questionText}
@@ -62,7 +51,7 @@ export function SaveReadingDialog({
           <span className="meaning-label">{copy.saveReadingAnswerLabel}</span>
           <textarea
             className="modal-textarea"
-            onChange={(event) => onAnswerTextChange(event.target.value)}
+            onChange={(event) => uiStoreActions.setSaveAnswerText(event.target.value)}
             placeholder={copy.saveReadingAnswerPlaceholder}
             rows={4}
             value={answerText}
@@ -70,10 +59,10 @@ export function SaveReadingDialog({
         </label>
 
         <div className="modal-actions">
-          <button className="ghost-action" onClick={onClose} type="button">
+          <button className="ghost-action" onClick={uiStoreActions.closeSaveDialog} type="button">
             {copy.cancel}
           </button>
-          <button className="primary-action" onClick={onSave} type="button">
+          <button className="primary-action" onClick={appController.confirmSaveReading} type="button">
             {copy.confirmSaveReading}
           </button>
         </div>

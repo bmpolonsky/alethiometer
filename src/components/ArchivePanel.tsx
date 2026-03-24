@@ -1,5 +1,6 @@
 import { InlineTemplateLink } from "./InlineTemplateLink";
 import { appController } from "../app/services/appController";
+import { journalService } from "../app/services/journalService";
 import type { Locale, SavedReading, SymbolEntry } from "../domain/types";
 
 interface ArchivePanelProps {
@@ -20,8 +21,6 @@ interface ArchivePanelProps {
     answerTitle: string;
     answerSummaryLabel: string;
   };
-  onOpenReading: (entry: SavedReading) => void;
-  onDeleteReading: (readingId: string) => void;
 }
 
 function formatDate(locale: Locale, value: string) {
@@ -37,8 +36,6 @@ export function ArchivePanel({
   symbols,
   openedReadingId,
   copy,
-  onOpenReading,
-  onDeleteReading,
 }: ArchivePanelProps) {
   return (
     <section className="archive-panel">
@@ -69,14 +66,14 @@ export function ArchivePanel({
                 <div className="archive-item-actions">
                   <button
                     className="ghost-action small-action"
-                    onClick={() => onOpenReading(entry)}
+                    onClick={() => appController.openReadingFromDrawer(entry)}
                     type="button"
                   >
                     {copy.openSaved}
                   </button>
                   <button
                     className="ghost-action small-action destructive-action"
-                    onClick={() => onDeleteReading(entry.id)}
+                    onClick={() => journalService.deleteReading(entry.id)}
                     type="button"
                   >
                     {copy.deleteSaved}
@@ -109,7 +106,7 @@ export function ArchivePanel({
                         <button
                           className="saved-symbol-chip"
                           key={`${entry.id}-question-${symbolId}-${index}`}
-                          onClick={() => onOpenReading(entry)}
+                          onClick={() => appController.openReadingFromDrawer(entry)}
                           type="button"
                         >
                           <img alt="" src={symbol?.imageSrc} />
@@ -130,7 +127,7 @@ export function ArchivePanel({
                         <button
                           className="saved-symbol-chip answer"
                           key={`${entry.id}-answer-${symbolId}-${index}`}
-                          onClick={() => onOpenReading(entry)}
+                          onClick={() => appController.openReadingFromDrawer(entry)}
                           type="button"
                         >
                           <img alt="" src={symbol?.imageSrc} />

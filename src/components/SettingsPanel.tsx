@@ -1,4 +1,6 @@
 import { useRef, useState } from "react";
+import { backupService } from "../app/services/backupService";
+import { preferencesService } from "../app/services/preferencesService";
 import type { Locale, ThemeMode } from "../domain/types";
 
 interface SettingsPanelProps {
@@ -18,26 +20,18 @@ interface SettingsPanelProps {
     importFailed: string;
     importConfirm: string;
   };
-  onSetLocale: (locale: Locale) => void;
-  onSetTheme: (theme: ThemeMode) => void;
-  onExportData: () => void;
-  onImportData: (file: File) => Promise<void>;
 }
 
 export function SettingsPanel({
   locale,
   theme,
   copy,
-  onSetLocale,
-  onSetTheme,
-  onExportData,
-  onImportData,
 }: SettingsPanelProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const handleExport = () => {
-    onExportData();
+    backupService.exportData();
     setFeedback(copy.exportDone);
   };
 
@@ -59,7 +53,7 @@ export function SettingsPanel({
     }
 
     try {
-      await onImportData(file);
+      await backupService.importData(file);
       setFeedback(copy.importDone);
     } catch (error) {
       console.error(error);
@@ -71,7 +65,12 @@ export function SettingsPanel({
     <section className="settings-panel">
       <label className="select-row">
         <span>{copy.language}</span>
-        <select value={locale} onChange={(event) => onSetLocale(event.target.value as Locale)}>
+        <select
+          value={locale}
+          onChange={(event) =>
+            preferencesService.setLocale(event.target.value as Locale)
+          }
+        >
           <option value="ru">Русский</option>
           <option value="en">English</option>
         </select>
@@ -79,7 +78,12 @@ export function SettingsPanel({
 
       <label className="select-row">
         <span>{copy.theme}</span>
-        <select value={theme} onChange={(event) => onSetTheme(event.target.value as ThemeMode)}>
+        <select
+          value={theme}
+          onChange={(event) =>
+            preferencesService.setTheme(event.target.value as ThemeMode)
+          }
+        >
           <option value="light">{copy.light}</option>
           <option value="dark">{copy.dark}</option>
         </select>

@@ -1,3 +1,4 @@
+import { appController } from "../app/services/appController";
 import type { Locale, SymbolEntry } from "../domain/types";
 
 interface SymbolInspectorProps {
@@ -12,7 +13,6 @@ interface SymbolInspectorProps {
   symbol: SymbolEntry;
   defaultMeaningItems: string[];
   personalMeaningItems: string[];
-  onOpenSymbolEditor: () => void;
 }
 
 export function SymbolInspector({
@@ -21,7 +21,6 @@ export function SymbolInspector({
   symbol,
   defaultMeaningItems,
   personalMeaningItems,
-  onOpenSymbolEditor,
 }: SymbolInspectorProps) {
   return (
     <section className="panel symbol-panel">
@@ -42,7 +41,7 @@ export function SymbolInspector({
             <button
               aria-label={copy.editMeaning}
               className="ghost-action symbol-edit-icon"
-              onClick={onOpenSymbolEditor}
+              onClick={appController.openSymbolEditor}
               title={copy.editMeaning}
               type="button"
             >

@@ -8,8 +8,6 @@ import type { Locale } from "../domain/types";
 import { uiText } from "../domain/uiText";
 import { appController } from "./services/appController";
 import { getPersonalMeaningItems } from "./services/meaningsService";
-import { readingService } from "./services/readingService";
-import { sessionService } from "./services/sessionService";
 import { meaningsStore } from "./store/meaningsStore";
 import { preferencesStore } from "./store/preferencesStore";
 import { questionStore } from "./store/questionStore";
@@ -41,10 +39,6 @@ function WorkspaceControlPanel({
       copy={copy}
       hands={hands}
       locale={locale}
-      onAsk={readingService.ask}
-      onOpenPicker={appController.openQuestionPicker}
-      onInspectSymbol={appController.inspectSymbolFromDial}
-      onSaveReading={appController.beginSaveReading}
       status={status}
       symbols={symbolCatalog}
     />
@@ -65,11 +59,6 @@ function WorkspaceDial({ meditativeMode }: { meditativeMode: boolean }) {
       askEnabled={askEnabled}
       hands={hands}
       interactive={interactive}
-      meditativeMode={meditativeMode}
-      onAsk={readingService.ask}
-      onFocusHand={sessionService.focusHand}
-      onInspectSymbol={appController.inspectSymbolFromDial}
-      onNudgeHand={sessionService.nudgeHand}
     />
   );
 }
@@ -132,7 +121,6 @@ function WorkspaceSidebar({
           copy={copy}
           defaultMeaningItems={defaultMeaningItems}
           locale={locale}
-          onOpenSymbolEditor={appController.openSymbolEditor}
           personalMeaningItems={personalMeaningItems}
           symbol={currentSymbol}
         />

@@ -18,7 +18,6 @@ interface UiText {
   emptyPersonalMeaning: string;
   editMeaning: string;
   doneEditing: string;
-  personalHint: string;
   addMeaning: string;
   deleteMeaning: string;
   newMeaningPlaceholder: string;
@@ -54,7 +53,6 @@ interface UiText {
   archiveHint: string;
   emptyJournal: string;
   answerTitle: string;
-  answerPlaceholder: string;
   openSaved: string;
   savedAt: string;
   deleteSaved: string;
@@ -82,8 +80,6 @@ export const uiText: Record<Locale, UiText> = {
     emptyPersonalMeaning: "Пока пусто.",
     editMeaning: "Редактировать",
     doneEditing: "Готово",
-    personalHint:
-      "Базовые значения остаются опорой. Личные трактовки хранятся отдельными пунктами, и каждую из них можно редактировать отдельно.",
     addMeaning: "Добавить",
     deleteMeaning: "Удалить",
     newMeaningPlaceholder: "Новая трактовка",
@@ -122,7 +118,6 @@ export const uiText: Record<Locale, UiText> = {
       "В архиве сохраняются вопрос, ответ и твоя трактовка.",
     emptyJournal: "Пока в архиве ничего нет.",
     answerTitle: "Ответ",
-    answerPlaceholder: "Ответ появится здесь после короткой паузы.",
     openSaved: "Открыть",
     savedAt: "Сохранено",
     deleteSaved: "Удалить",
@@ -148,8 +143,6 @@ export const uiText: Record<Locale, UiText> = {
     emptyPersonalMeaning: "Nothing yet.",
     editMeaning: "Edit",
     doneEditing: "Done",
-    personalHint:
-      "Default meanings remain a reference point. Personal interpretations are stored as separate entries and can be edited one by one.",
     addMeaning: "Add",
     deleteMeaning: "Delete",
     newMeaningPlaceholder: "New meaning",
@@ -188,7 +181,6 @@ export const uiText: Record<Locale, UiText> = {
       "The archive keeps the question, the answer, and your interpretation.",
     emptyJournal: "The archive is empty for now.",
     answerTitle: "Answer",
-    answerPlaceholder: "The answer will appear here after a short pause.",
     openSaved: "Open",
     savedAt: "Saved",
     deleteSaved: "Delete",

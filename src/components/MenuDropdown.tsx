@@ -1,3 +1,5 @@
+import { appController } from "../app/services/appController";
+import { uiStoreActions } from "../app/store/uiStore";
 import type { MenuSection } from "../domain/types";
 
 interface MenuDropdownProps {
@@ -12,9 +14,6 @@ interface MenuDropdownProps {
     helpSection: string;
   };
   meditativeMode: boolean;
-  onToggle: () => void;
-  onSelect: (section: MenuSection) => void;
-  onToggleMeditativeMode: () => void;
 }
 
 const sections: MenuSection[] = ["settings", "symbols", "archive", "help"];
@@ -23,9 +22,6 @@ export function MenuDropdown({
   open,
   copy,
   meditativeMode,
-  onToggle,
-  onSelect,
-  onToggleMeditativeMode,
 }: MenuDropdownProps) {
   const labels: Record<MenuSection, string> = {
     settings: copy.settingsSection,
@@ -36,7 +32,11 @@ export function MenuDropdown({
 
   return (
     <div className={`menu-dropdown ${open ? "is-open" : ""}`}>
-      <button className="ghost-action topbar-action" onClick={onToggle} type="button">
+      <button
+        className="ghost-action topbar-action"
+        onClick={uiStoreActions.toggleMenu}
+        type="button"
+      >
         {copy.settingsButton}
       </button>
 
@@ -45,7 +45,7 @@ export function MenuDropdown({
           <button
             className="menu-dropdown-item"
             data-menu-section="meditative-toggle"
-            onClick={onToggleMeditativeMode}
+            onClick={appController.toggleMeditativeMode}
             type="button"
           >
             {meditativeMode ? copy.immersiveModeOff : copy.meditativeMode}
@@ -55,7 +55,7 @@ export function MenuDropdown({
               className="menu-dropdown-item"
               data-menu-section={section}
               key={section}
-              onClick={() => onSelect(section)}
+              onClick={() => appController.openDrawer(section)}
               type="button"
             >
               {labels[section]}
