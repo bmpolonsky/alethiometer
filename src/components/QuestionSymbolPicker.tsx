@@ -50,7 +50,13 @@ export function QuestionSymbolPicker({
                 onClick={() => appController.applyQuestionSymbol(symbol.id)}
                 type="button"
               >
-                <img alt="" className="picker-item-image" src={symbol.imageSrc} />
+                <img
+                  alt=""
+                  className="picker-item-image"
+                  decoding="async"
+                  loading="lazy"
+                  src={symbol.imageSrc}
+                />
                 <span className="picker-item-copy">
                   <strong>{symbol.title[locale]}</strong>
                   <span>

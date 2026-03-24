@@ -2,6 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { appController } from "../app/services/appController";
 import { readingService } from "../app/services/readingService";
 import { sessionService } from "../app/services/sessionService";
+import { questionStore } from "../app/store/questionStore";
+import {
+  answerHandAngleStore,
+  answerSymbolsStore,
+  readingStatusStore,
+} from "../app/store/readingStore";
 import {
   graphicsSpritesheetFrames,
   graphicsSpritesheetHref,
@@ -13,13 +19,6 @@ import {
   describeRingSlice,
   pointToSymbolIndex,
 } from "../lib/geometry";
-
-interface DialProps {
-  hands: Record<HandId, number>;
-  answerHandAngle: number;
-  interactive: boolean;
-  askEnabled?: boolean;
-}
 
 const spritesheetFrames = graphicsSpritesheetFrames;
 
@@ -100,14 +99,37 @@ function renderSpritesheetCrop(
   );
 }
 
-export function Dial({
-  hands,
-  answerHandAngle,
-  interactive,
-  askEnabled = false,
-}: DialProps) {
+export function Dial() {
+  const initialHands = questionStore.getState().hands;
+  const initialAnswerHandAngle = answerHandAngleStore.getState();
+  const initialReadingStatus = readingStatusStore.getState();
+  const initialAnswerSymbols = answerSymbolsStore.getState();
   const dialShellRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const questionHandRefs = useRef<Record<HandId, SVGGElement | null>>({
+    first: null,
+    second: null,
+    third: null,
+  });
+  const wheelGroupRefs = useRef<Record<HandId, SVGGElement | null>>({
+    first: null,
+    second: null,
+    third: null,
+  });
+  const wheelVisualRefs = useRef<
+    Record<
+      HandId,
+      {
+        idle: SVGGElement | null;
+        active: SVGGElement | null;
+      }
+    >
+  >({
+    first: { idle: null, active: null },
+    second: { idle: null, active: null },
+    third: { idle: null, active: null },
+  });
+  const answerHandRef = useRef<SVGGElement | null>(null);
   const askHoldTimeoutRef = useRef<number | null>(null);
   const askAnimationTimeoutRef = useRef<number | null>(null);
   const askHoldRef = useRef<{
@@ -124,32 +146,76 @@ export function Dial({
     lastLocalY: number;
     wheelRotationRad: number;
   } | null>(null);
-  const [draggingHand, setDraggingHand] = useState<HandId | null>(null);
-  const [wheelFramePhase, setWheelFramePhase] = useState<Record<HandId, 0 | 1>>({
+  const handsRef = useRef<Record<HandId, number>>(initialHands);
+  const answerHandAngleRef = useRef(initialAnswerHandAngle);
+  const interactiveRef = useRef(initialReadingStatus === "idle");
+  const askEnabledRef = useRef(
+    initialReadingStatus === "idle" && initialAnswerSymbols.length === 0,
+  );
+  const draggingHandRef = useRef<HandId | null>(null);
+  const wheelFramePhaseRef = useRef<Record<HandId, 0 | 1>>({
     first: 0,
     second: 0,
     third: 0,
   });
-  const [displayAngles, setDisplayAngles] = useState<Record<HandId, number>>({
-    first: hands.first * 10,
-    second: hands.second * 10,
-    third: hands.third * 10,
-  });
   const [isAskAnimating, setIsAskAnimating] = useState(false);
+  const [showAskTrigger, setShowAskTrigger] = useState(askEnabledRef.current);
   const glareX = Math.round(DIAL_GEOMETRY.centerX - spritesheetFrames.glare.pivotX);
   const glareY = Math.round(DIAL_GEOMETRY.centerY - spritesheetFrames.glare.pivotY);
-  const targetAngles = useMemo(
+
+  const initialDisplayAngles = useMemo(
     () => ({
-      first: hands.first * 10,
-      second: hands.second * 10,
-      third: hands.third * 10,
+      first: initialHands.first * 10,
+      second: initialHands.second * 10,
+      third: initialHands.third * 10,
     }),
-    [hands],
+    [initialHands.first, initialHands.second, initialHands.third],
   );
 
-  useEffect(() => {
-    setDisplayAngles(targetAngles);
-  }, [targetAngles]);
+  function setQuestionHandTransform(handId: HandId, angle: number) {
+    questionHandRefs.current[handId]?.setAttribute(
+      "transform",
+      `translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${angle})`,
+    );
+  }
+
+  function setAnswerHandTransform(angle: number) {
+    answerHandRef.current?.setAttribute(
+      "transform",
+      `translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${angle})`,
+    );
+  }
+
+  function setWheelFramePhase(handId: HandId, phase: 0 | 1) {
+    const visualRefs = wheelVisualRefs.current[handId];
+
+    visualRefs.idle?.setAttribute("opacity", phase === 0 ? "1" : "0");
+    visualRefs.active?.setAttribute("opacity", phase === 1 ? "1" : "0");
+  }
+
+  function setWheelDragging(handId: HandId, isDragging: boolean) {
+    wheelGroupRefs.current[handId]?.classList.toggle("is-dragging", isDragging);
+  }
+
+  function resetWheelVisuals() {
+    for (const handId of ["first", "second", "third"] as HandId[]) {
+      setWheelDragging(handId, false);
+      setWheelFramePhase(handId, 0);
+      wheelFramePhaseRef.current[handId] = 0;
+    }
+
+    draggingHandRef.current = null;
+  }
+
+  function syncInteractionState() {
+    const nextInteractive = readingStatusStore.getState() === "idle";
+    const nextAskEnabled =
+      nextInteractive && answerSymbolsStore.getState().length === 0;
+
+    interactiveRef.current = nextInteractive;
+    askEnabledRef.current = nextAskEnabled;
+    setShowAskTrigger(nextAskEnabled);
+  }
 
   useEffect(() => {
     return () => {
@@ -165,7 +231,43 @@ export function Dial({
         window.cancelAnimationFrame(askHoldRef.current.frame);
       }
 
+      resetWheelVisuals();
       setDialHoldProgress(0);
+    };
+  }, []);
+
+  useEffect(() => {
+    setQuestionHandTransform("first", handsRef.current.first * 10);
+    setQuestionHandTransform("second", handsRef.current.second * 10);
+    setQuestionHandTransform("third", handsRef.current.third * 10);
+    setAnswerHandTransform(answerHandAngleRef.current);
+    syncInteractionState();
+
+    const unsubscribeQuestion = questionStore.subscribe(({ hands }) => {
+      handsRef.current = hands;
+      setQuestionHandTransform("first", hands.first * 10);
+      setQuestionHandTransform("second", hands.second * 10);
+      setQuestionHandTransform("third", hands.third * 10);
+    });
+
+    const unsubscribeAnswerHandAngle = answerHandAngleStore.subscribe((nextAngle) => {
+      answerHandAngleRef.current = nextAngle;
+      setAnswerHandTransform(nextAngle);
+    });
+
+    const unsubscribeReadingStatus = readingStatusStore.subscribe(() => {
+      syncInteractionState();
+    });
+
+    const unsubscribeAnswerSymbols = answerSymbolsStore.subscribe(() => {
+      syncInteractionState();
+    });
+
+    return () => {
+      unsubscribeQuestion();
+      unsubscribeAnswerHandAngle();
+      unsubscribeReadingStatus();
+      unsubscribeAnswerSymbols();
     };
   }, []);
 
@@ -259,7 +361,7 @@ export function Dial({
   }
 
   function startMeditativeAsk() {
-    if (!askEnabled || !interactive || isAskAnimating) {
+    if (!askEnabledRef.current || !interactiveRef.current || isAskAnimating) {
       return;
     }
 
@@ -273,7 +375,7 @@ export function Dial({
   }
 
   function beginMeditativeAskHold(pointerId: number, target: SVGCircleElement) {
-    if (!askEnabled || !interactive || isAskAnimating) {
+    if (!askEnabledRef.current || !interactiveRef.current || isAskAnimating) {
       return;
     }
 
@@ -347,7 +449,7 @@ export function Dial({
     clientY: number,
     target: SVGRectElement,
   ) {
-    if (!interactive || isAskAnimating) {
+    if (!interactiveRef.current || isAskAnimating) {
       return;
     }
 
@@ -366,11 +468,10 @@ export function Dial({
       lastLocalY: localPoint.y,
       wheelRotationRad: (wheelRotationDeg * Math.PI) / 180,
     };
-    setDraggingHand(handId);
-    setWheelFramePhase((current) => ({
-      ...current,
-      [handId]: 1,
-    }));
+    draggingHandRef.current = handId;
+    setWheelDragging(handId, true);
+    wheelFramePhaseRef.current[handId] = 1;
+    setWheelFramePhase(handId, 1);
     try {
       target.setPointerCapture(pointerId);
     } catch {
@@ -398,10 +499,10 @@ export function Dial({
       Math.sin(dragState.wheelRotationRad) * dy;
 
     if (Math.abs(delta) > 0.3) {
-      setWheelFramePhase((current) => ({
-        ...current,
-        [dragState.handId]: current[dragState.handId] === 0 ? 1 : 0,
-      }));
+      const nextPhase = wheelFramePhaseRef.current[dragState.handId] === 0 ? 1 : 0;
+
+      wheelFramePhaseRef.current[dragState.handId] = nextPhase;
+      setWheelFramePhase(dragState.handId, nextPhase);
     }
 
     const totalPixels = dragState.residuePixels + delta;
@@ -424,12 +525,7 @@ export function Dial({
 
   function stopWheelDrag() {
     dragStateRef.current = null;
-    setDraggingHand(null);
-    setWheelFramePhase({
-      first: 0,
-      second: 0,
-      third: 0,
-    });
+    resetWheelVisuals();
   }
 
   return (
@@ -508,7 +604,10 @@ export function Dial({
           return (
             <g
               key={handId}
-              transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${displayAngles[handId]})`}
+              ref={(node) => {
+                questionHandRefs.current[handId] = node;
+              }}
+              transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${initialDisplayAngles[handId]})`}
               filter="url(#hand-shadow)"
               opacity={1}
             >
@@ -526,7 +625,8 @@ export function Dial({
         })}
 
         <g
-          transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${answerHandAngle})`}
+          ref={answerHandRef}
+          transform={`translate(${DIAL_GEOMETRY.centerX} ${DIAL_GEOMETRY.centerY}) rotate(${initialAnswerHandAngle})`}
           filter="url(#hand-shadow)"
           opacity={0.98}
         >
@@ -542,28 +642,49 @@ export function Dial({
         </g>
 
         {wheelConfigs.map(({ handId, offsetX, offsetY, rotationDeg }) => {
-          const frame =
-            draggingHand === handId && wheelFramePhase[handId] === 1
-              ? spritesheetFrames.wheelActive
-              : spritesheetFrames.wheelIdle;
           const wheelX = DIAL_GEOMETRY.centerX + offsetX;
           const wheelY = DIAL_GEOMETRY.centerY + offsetY;
 
           return (
             <g
               key={handId}
-              className={`dial-wheel ${draggingHand === handId ? "is-dragging" : ""}`}
+              className="dial-wheel"
+              ref={(node) => {
+                wheelGroupRefs.current[handId] = node;
+              }}
               transform={`translate(${wheelX} ${wheelY}) rotate(${rotationDeg})`}
             >
-              <g clipPath={`url(#dial-wheel-clip-${handId})`}>
-                {renderSpritesheetCrop(frame, -frame.pivotX, -frame.pivotY)}
+              <g
+                clipPath={`url(#dial-wheel-clip-${handId})`}
+                ref={(node) => {
+                  wheelVisualRefs.current[handId].idle = node;
+                }}
+              >
+                {renderSpritesheetCrop(
+                  spritesheetFrames.wheelIdle,
+                  -spritesheetFrames.wheelIdle.pivotX,
+                  -spritesheetFrames.wheelIdle.pivotY,
+                )}
+              </g>
+              <g
+                clipPath={`url(#dial-wheel-clip-${handId})`}
+                opacity="0"
+                ref={(node) => {
+                  wheelVisualRefs.current[handId].active = node;
+                }}
+              >
+                {renderSpritesheetCrop(
+                  spritesheetFrames.wheelActive,
+                  -spritesheetFrames.wheelActive.pivotX,
+                  -spritesheetFrames.wheelActive.pivotY,
+                )}
               </g>
               <rect
                 className="dial-wheel-hit"
-                x={-frame.pivotX}
-                y={-frame.pivotY}
-                width={frame.width}
-                height={frame.height}
+                x={-spritesheetFrames.wheelIdle.pivotX}
+                y={-spritesheetFrames.wheelIdle.pivotY}
+                width={spritesheetFrames.wheelIdle.width}
+                height={spritesheetFrames.wheelIdle.height}
                 rx="12"
                 ry="12"
                 onClick={(event) => {
@@ -617,7 +738,7 @@ export function Dial({
           {renderSpritesheetCrop(spritesheetFrames.glare, glareX, glareY)}
         </g>
 
-        {askEnabled ? (
+        {showAskTrigger ? (
           <g className="dial-center-trigger">
             <circle
               cx={DIAL_GEOMETRY.centerX}
