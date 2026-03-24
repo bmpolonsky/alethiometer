@@ -1,50 +1,42 @@
 # Alethiometer
 
-Browser rebuild of the old Alethiometer app, with the original archive kept in the repo for reference.
+`Alethiometer` — это веб-приложение с образом алетиометра из мира `His Dark Materials`: символического прибора, который отвечает не фразой, а цепочкой знаков.
 
-## Project Layout
+Здесь можно собрать вопрос из трёх символов, запустить чтение, получить ответ как последовательность образов и трактовать его через базовые и личные значения.
 
-- `src/` - React app, stores, services, domain logic, and UI
-- `public/` - icons, symbol images, and dial spritesheet assets
-- `scripts/` - asset maintenance scripts
-- `archive/` - original Flash/AIR materials and references
+## Что умеет приложение
 
-## Stack
+- задавать вопрос тремя символами
+- выбирать символы стрелками или через удобный список
+- показывать ответ четвёртой стрелкой на приборе
+- читать базовые значения каждого символа
+- добавлять свои личные трактовки
+- сохранять чтения в архив
+- возвращаться к старым ответам и заметкам
+- открывать отдельную справку
+- включать медитативный режим почти без интерфейса
 
-- Vite
-- React
-- TypeScript
-- SVG dial interaction and motion
+## Как пользоваться
 
-## Development
+1. Выбери три символа, которые лучше всего описывают сам вопрос или ситуацию.
+2. Нажми `Спросить`.
+3. Дождись, пока четвёртая стрелка пройдёт по символам ответа.
+4. Прочитай ответ через базовые значения, личные трактовки и контекст вопроса.
+5. Если чтение оказалось важным, сохрани его в архив со своей формулировкой смысла.
 
-```bash
-npm install
-npm run dev
-```
+## Что важно про трактовку
 
-## Scripts
+Алетиометр в приложении говорит образами, а не буквальными предложениями.
 
-```bash
-npm run build
-npm test
-npm run assets:spritesheet
-```
+- Важен не только каждый символ, но и порядок их появления.
+- Один и тот же знак может значить разное в разных вопросах.
+- Со временем у тебя появляется собственный язык символов, поэтому в приложении есть личные трактовки.
+- Базовые значения остаются опорой, а личные помогают сделать чтение живым и твоим.
 
-`npm run assets:spritesheet` rebuilds `public/assets/graphics-spritesheet.webp` from the `2048x2048` master PNG.
+## Что есть внутри
 
-## Publishing
-
-The repo includes a GitHub Pages workflow in `.github/workflows/deploy-pages.yml`.
-
-Pages notes:
-
-- Vite automatically uses the repository name as `base` when building on GitHub Actions.
-- Public asset paths are base-aware, so the app can be served from `/<repo>/`.
-- The web app is static and does not require a server runtime.
-
-## Notes
-
-- Meanings, settings, and saved readings live in browser `localStorage`.
-- The original dial art, symbol images, and archive materials are reused from the old project.
-- The current dial spritesheet uses a `2048x2048` master PNG plus an optimized WebP runtime asset.
+- раздел `Символы` со всеми 36 знаками
+- отдельный просмотр значений выбранного символа
+- редактирование личных трактовок
+- архив чтений с вопросом, цепочкой ответа и твоей формулировкой
+- справка с кратким объяснением процесса и расширенными подсказками
