@@ -156,7 +156,7 @@ export function AppWorkspace() {
   const help = helpText[locale];
   const instrumentPanelClassName = meditativeMode
     ? "instrument-panel is-meditative"
-    : "panel instrument-panel";
+    : "instrument-panel";
 
   return (
     <main className={`workspace ${meditativeMode ? "is-meditative" : ""}`}>

@@ -136,55 +136,60 @@ export function SettingsDrawer({
             <p className="panel-kicker">{copy.settingsTitle}</p>
             <h2 className="drawer-title">{title}</h2>
           </div>
-          <button className="ghost-action" onClick={onClose} type="button">
+        </div>
+
+        <div className="drawer-scroll-body">
+          {section === "settings" ? (
+            <SettingsPanel
+              copy={copy}
+              locale={locale}
+              onSetLocale={onSetLocale}
+              onSetTheme={onSetTheme}
+              theme={theme}
+            />
+          ) : null}
+
+          {section === "symbols" ? (
+            <SymbolCatalogPanel
+              copy={copy}
+              defaultMeaningItems={defaultMeaningItems}
+              isEditingMeanings={isEditingMeanings}
+              locale={locale}
+              newMeaningDraft={newMeaningDraft}
+              allMeaningItemsBySymbol={allMeaningItemsBySymbol}
+              onAddMeaning={onAddMeaning}
+              onCloseLexicon={onCloseLexicon}
+              onMeaningChange={onMeaningChange}
+              onInspectSymbol={onInspectSymbol}
+              onNewMeaningDraftChange={onNewMeaningDraftChange}
+              onOpenLexicon={onOpenLexicon}
+              onRemoveMeaning={onRemoveMeaning}
+              personalMeaningItems={personalMeaningItems}
+              symbol={symbol}
+              symbols={symbols}
+            />
+          ) : null}
+
+          {section === "archive" ? (
+            <ArchivePanel
+              copy={copy}
+              journal={journal}
+              locale={locale}
+              onDeleteReading={onDeleteReading}
+              onOpenReading={onOpenReading}
+              openedReadingId={openedReadingId}
+              symbols={symbols}
+            />
+          ) : null}
+
+          {section === "help" ? <HelpPanel help={help} /> : null}
+        </div>
+
+        <div className="drawer-footer">
+          <button className="ghost-action drawer-footer-action" onClick={onClose} type="button">
             {copy.close}
           </button>
         </div>
-
-        {section === "settings" ? (
-          <SettingsPanel
-            copy={copy}
-            locale={locale}
-            onSetLocale={onSetLocale}
-            onSetTheme={onSetTheme}
-            theme={theme}
-          />
-        ) : null}
-
-        {section === "symbols" ? (
-          <SymbolCatalogPanel
-            copy={copy}
-            defaultMeaningItems={defaultMeaningItems}
-            isEditingMeanings={isEditingMeanings}
-            locale={locale}
-            newMeaningDraft={newMeaningDraft}
-            allMeaningItemsBySymbol={allMeaningItemsBySymbol}
-            onAddMeaning={onAddMeaning}
-            onCloseLexicon={onCloseLexicon}
-            onMeaningChange={onMeaningChange}
-            onInspectSymbol={onInspectSymbol}
-            onNewMeaningDraftChange={onNewMeaningDraftChange}
-            onOpenLexicon={onOpenLexicon}
-            onRemoveMeaning={onRemoveMeaning}
-            personalMeaningItems={personalMeaningItems}
-            symbol={symbol}
-            symbols={symbols}
-          />
-        ) : null}
-
-        {section === "archive" ? (
-          <ArchivePanel
-            copy={copy}
-            journal={journal}
-            locale={locale}
-            onDeleteReading={onDeleteReading}
-            onOpenReading={onOpenReading}
-            openedReadingId={openedReadingId}
-            symbols={symbols}
-          />
-        ) : null}
-
-        {section === "help" ? <HelpPanel help={help} /> : null}
       </aside>
     </div>
   );

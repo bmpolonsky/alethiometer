@@ -181,6 +181,7 @@ function OpenSymbolMeaningDrawer({ locale }: { locale: Locale }) {
       defaultMeaningItems={symbol.meanings[locale]}
       locale={locale}
       onClose={() => uiStoreActions.setMeditativeDrawerOpen(false)}
+      onOpenLexicon={appController.openSymbolEditor}
       open
       personalMeaningItems={personalMeaningItems}
       symbol={symbol}
