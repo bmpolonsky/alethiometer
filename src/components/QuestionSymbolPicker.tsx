@@ -39,36 +39,41 @@ export function QuestionSymbolPicker({
         onClick={(event) => event.stopPropagation()}
         role="dialog"
       >
-        <div className="picker-header">
-          <div>
-            <p className="panel-kicker">{copy.chooseSymbolTitle}</p>
-            <p className="panel-copy">{copy.chooseSymbolHint}</p>
+        <div className="picker-scroll-body">
+          <div className="picker-header">
+            <div>
+              <p className="panel-kicker">{copy.chooseSymbolTitle}</p>
+              <p className="panel-copy">{copy.chooseSymbolHint}</p>
+            </div>
           </div>
-          <button className="ghost-action" onClick={onClose} type="button">
-            {copy.close}
-          </button>
+
+          <div className="picker-list">
+            {symbols.map((symbol) => (
+              <button
+                className={`picker-item ${symbol.id === currentSymbolId ? "is-active" : ""}`}
+                key={`${handId}-${symbol.id}`}
+                onClick={() => onSelect(symbol.id)}
+                type="button"
+              >
+                <img alt="" className="picker-item-image" src={symbol.imageSrc} />
+                <span className="picker-item-copy">
+                  <strong>{symbol.title[locale]}</strong>
+                  <span>
+                    {[
+                      ...symbol.meanings[locale],
+                      ...(personalMeaningItemsBySymbol[String(symbol.id)] ?? []),
+                    ].join(", ")}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="picker-list">
-          {symbols.map((symbol) => (
-            <button
-              className={`picker-item ${symbol.id === currentSymbolId ? "is-active" : ""}`}
-              key={`${handId}-${symbol.id}`}
-              onClick={() => onSelect(symbol.id)}
-              type="button"
-            >
-              <img alt="" className="picker-item-image" src={symbol.imageSrc} />
-              <span className="picker-item-copy">
-                <strong>{symbol.title[locale]}</strong>
-                <span>
-                  {[
-                    ...symbol.meanings[locale],
-                    ...(personalMeaningItemsBySymbol[String(symbol.id)] ?? []),
-                  ].join(", ")}
-                </span>
-              </span>
-            </button>
-          ))}
+        <div className="picker-footer">
+          <button className="ghost-action drawer-footer-action" onClick={onClose} type="button">
+            {copy.close}
+          </button>
         </div>
       </section>
     </div>
