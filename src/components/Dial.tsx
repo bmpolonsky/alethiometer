@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { appController } from "../app/services/appController";
+import { readingService } from "../app/services/readingService";
+import { sessionService } from "../app/services/sessionService";
 import {
   graphicsSpritesheetFrames,
   graphicsSpritesheetHref,
@@ -16,11 +19,6 @@ interface DialProps {
   answerHandAngle: number;
   interactive: boolean;
   askEnabled?: boolean;
-  meditativeMode?: boolean;
-  onInspectSymbol: (symbolId: number) => void;
-  onFocusHand: (handId: HandId) => void;
-  onNudgeHand: (handId: HandId, direction: number) => void;
-  onAsk?: () => void;
 }
 
 const spritesheetFrames = graphicsSpritesheetFrames;
@@ -107,11 +105,6 @@ export function Dial({
   answerHandAngle,
   interactive,
   askEnabled = false,
-  meditativeMode = false,
-  onInspectSymbol,
-  onFocusHand,
-  onNudgeHand,
-  onAsk,
 }: DialProps) {
   const dialShellRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -266,7 +259,7 @@ export function Dial({
   }
 
   function startMeditativeAsk() {
-    if (!askEnabled || !interactive || !onAsk || isAskAnimating) {
+    if (!askEnabled || !interactive || isAskAnimating) {
       return;
     }
 
@@ -275,12 +268,12 @@ export function Dial({
       askAnimationTimeoutRef.current = null;
       setDialHoldProgress(0);
       setIsAskAnimating(false);
-      onAsk();
+      readingService.ask();
     }, MEDITATIVE_ASK_ANIMATION_MS);
   }
 
   function beginMeditativeAskHold(pointerId: number, target: SVGCircleElement) {
-    if (!askEnabled || !interactive || !onAsk || isAskAnimating) {
+    if (!askEnabled || !interactive || isAskAnimating) {
       return;
     }
 
@@ -342,7 +335,7 @@ export function Dial({
     const nextSymbol = pointToSymbolIndex(point.x, point.y);
 
     if (nextSymbol != null) {
-      onInspectSymbol(nextSymbol);
+      appController.inspectSymbolFromDial(nextSymbol);
     }
   }
 
@@ -364,7 +357,7 @@ export function Dial({
       return;
     }
 
-    onFocusHand(handId);
+    sessionService.focusHand(handId);
     dragStateRef.current = {
       handId,
       pointerId,
@@ -419,7 +412,7 @@ export function Dial({
         : Math.ceil(totalPixels / pixelsPerSymbol);
 
     if (steps !== 0) {
-      onNudgeHand(dragState.handId, steps);
+      sessionService.nudgeHand(dragState.handId, steps);
       dragState.residuePixels = totalPixels - steps * pixelsPerSymbol;
     } else {
       dragState.residuePixels = totalPixels;
@@ -579,7 +572,7 @@ export function Dial({
                   }
 
                   event.stopPropagation();
-                  onFocusHand(handId);
+                  sessionService.focusHand(handId);
                 }}
                 onPointerDown={(event) => {
                   event.stopPropagation();

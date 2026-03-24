@@ -19,7 +19,7 @@ export const appController = {
       ...current,
       drawerSection: section,
       menuExpanded: false,
-      meditativeDrawerOpen: false,
+      symbolMeaningDrawerOpen: false,
     }));
   },
   closeDrawer() {
@@ -31,7 +31,7 @@ export const appController = {
       ...current,
       drawerSection: "symbols",
       menuExpanded: false,
-      meditativeDrawerOpen: false,
+      symbolMeaningDrawerOpen: false,
     }));
     meaningsService.openEditor();
   },
@@ -44,7 +44,7 @@ export const appController = {
       menuExpanded: false,
       drawerSection: null,
       pickerHand: null,
-      meditativeDrawerOpen: false,
+      symbolMeaningDrawerOpen: false,
     }));
   },
   beginSaveReading() {
@@ -72,7 +72,7 @@ export const appController = {
     sessionService.chooseSymbol(symbolId);
 
     if (preferencesStore.getState().meditativeMode || isCompactLayoutViewport()) {
-      uiStoreActions.setMeditativeDrawerOpen(true);
+      uiStoreActions.setSymbolMeaningDrawerOpen(true);
     }
   },
   openQuestionPicker(handId: HandId) {

@@ -1,7 +1,7 @@
+import { appController } from "../app/services/appController";
 import type { HandId, Locale, SymbolEntry } from "../domain/types";
 
 interface QuestionSymbolPickerProps {
-  open: boolean;
   locale: Locale;
   handId: HandId | null;
   currentSymbolId: number | null;
@@ -12,27 +12,22 @@ interface QuestionSymbolPickerProps {
     chooseSymbolHint: string;
     close: string;
   };
-  onClose: () => void;
-  onSelect: (symbolId: number) => void;
 }
 
 export function QuestionSymbolPicker({
-  open,
   locale,
   handId,
   currentSymbolId,
   symbols,
   personalMeaningItemsBySymbol,
   copy,
-  onClose,
-  onSelect,
 }: QuestionSymbolPickerProps) {
-  if (!open || handId == null) {
+  if (handId == null) {
     return null;
   }
 
   return (
-    <div className="picker-backdrop" onClick={onClose} role="presentation">
+    <div className="picker-backdrop" onClick={appController.closeQuestionPicker} role="presentation">
       <section
         aria-modal="true"
         className="picker-panel"
@@ -52,7 +47,7 @@ export function QuestionSymbolPicker({
               <button
                 className={`picker-item ${symbol.id === currentSymbolId ? "is-active" : ""}`}
                 key={`${handId}-${symbol.id}`}
-                onClick={() => onSelect(symbol.id)}
+                onClick={() => appController.applyQuestionSymbol(symbol.id)}
                 type="button"
               >
                 <img alt="" className="picker-item-image" src={symbol.imageSrc} />
@@ -71,7 +66,11 @@ export function QuestionSymbolPicker({
         </div>
 
         <div className="picker-footer">
-          <button className="ghost-action drawer-footer-action" onClick={onClose} type="button">
+          <button
+            className="ghost-action drawer-footer-action"
+            onClick={appController.closeQuestionPicker}
+            type="button"
+          >
             {copy.close}
           </button>
         </div>

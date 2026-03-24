@@ -120,6 +120,6 @@ export function replacePersistedSnapshot(snapshot: PersistedState) {
     saveQuestionText: "",
     saveAnswerText: "",
     pickerHand: null,
-    meditativeDrawerOpen: false,
+    symbolMeaningDrawerOpen: false,
   }));
 }

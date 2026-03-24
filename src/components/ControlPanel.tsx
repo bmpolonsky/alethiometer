@@ -1,3 +1,5 @@
+import { appController } from "../app/services/appController";
+import { readingService } from "../app/services/readingService";
 import { HAND_ORDER } from "../domain/types";
 import type { HandId, Locale, SymbolEntry } from "../domain/types";
 
@@ -9,7 +11,6 @@ interface ControlPanelProps {
     saveReading: string;
     listeningStatus: string;
     answerTitle: string;
-    answerPlaceholder: string;
   };
   symbols: SymbolEntry[];
   hands: Record<HandId, number>;
@@ -17,10 +18,6 @@ interface ControlPanelProps {
   status: "idle" | "listening";
   canSaveReading: boolean;
   answerSymbols: number[];
-  onOpenPicker: (handId: HandId) => void;
-  onAsk: () => void;
-  onSaveReading: () => void;
-  onInspectSymbol: (symbolId: number) => void;
 }
 
 export function ControlPanel({
@@ -32,10 +29,6 @@ export function ControlPanel({
   status,
   canSaveReading,
   answerSymbols,
-  onOpenPicker,
-  onAsk,
-  onSaveReading,
-  onInspectSymbol,
 }: ControlPanelProps) {
   const statusText = status === "listening" ? copy.listeningStatus : null;
   const hasAnswer = answerSymbols.length > 0;
@@ -55,7 +48,7 @@ export function ControlPanel({
                 <button
                   key={handId}
                   className={`selection-card ${activeHand === handId ? "is-active" : ""}`}
-                  onClick={() => onOpenPicker(handId)}
+                  onClick={() => appController.openQuestionPicker(handId)}
                   type="button"
                 >
                   <img alt="" className="selection-card-image" src={symbol?.imageSrc} />
@@ -83,7 +76,7 @@ export function ControlPanel({
                       <button
                         key={`${symbolId}-${index}`}
                         className="selection-card answer-card"
-                        onClick={() => onInspectSymbol(symbolId)}
+                        onClick={() => appController.inspectSymbolFromDial(symbolId)}
                         style={{ animationDelay: `${index * 120}ms` }}
                         type="button"
                       >
@@ -104,7 +97,7 @@ export function ControlPanel({
                 disabled={Boolean(statusText)}
                 onClick={() => {
                   if (!statusText) {
-                    onAsk();
+                    readingService.ask();
                   }
                 }}
                 type="button"
@@ -116,7 +109,7 @@ export function ControlPanel({
             {showSaveAction ? (
               <button
                 className="secondary-action answer-inline-action answer-inline-action-save"
-                onClick={onSaveReading}
+                onClick={appController.beginSaveReading}
                 type="button"
               >
                 {copy.saveReading}

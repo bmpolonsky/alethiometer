@@ -8,7 +8,7 @@ export interface UiStoreState {
   saveQuestionText: string;
   saveAnswerText: string;
   pickerHand: HandId | null;
-  meditativeDrawerOpen: boolean;
+  symbolMeaningDrawerOpen: boolean;
 }
 
 const initialUiState: UiStoreState = {
@@ -18,7 +18,7 @@ const initialUiState: UiStoreState = {
   saveQuestionText: "",
   saveAnswerText: "",
   pickerHand: null,
-  meditativeDrawerOpen: false,
+  symbolMeaningDrawerOpen: false,
 };
 
 export const uiStore = new Store(initialUiState);
@@ -82,10 +82,10 @@ export const uiStoreActions = {
       pickerHand: handId,
     }));
   },
-  setMeditativeDrawerOpen(nextValue: boolean) {
+  setSymbolMeaningDrawerOpen(nextValue: boolean) {
     uiStore.update((current) => ({
       ...current,
-      meditativeDrawerOpen: nextValue,
+      symbolMeaningDrawerOpen: nextValue,
     }));
   },
   resetOverlayState() {
@@ -94,7 +94,7 @@ export const uiStoreActions = {
       menuExpanded: false,
       drawerSection: null,
       pickerHand: null,
-      meditativeDrawerOpen: false,
+      symbolMeaningDrawerOpen: false,
     }));
   },
 };

@@ -1,8 +1,8 @@
 import { appController } from "../app/services/appController";
+import { uiStoreActions } from "../app/store/uiStore";
 import type { Locale, SymbolEntry } from "../domain/types";
 
 interface SymbolMeaningDrawerProps {
-  open: boolean;
   locale: Locale;
   symbol: SymbolEntry;
   defaultMeaningItems: string[];
@@ -15,24 +15,21 @@ interface SymbolMeaningDrawerProps {
     editMeaning: string;
     close: string;
   };
-  onClose: () => void;
 }
 
 export function SymbolMeaningDrawer({
-  open,
   locale,
   symbol,
   defaultMeaningItems,
   personalMeaningItems,
   copy,
-  onClose,
 }: SymbolMeaningDrawerProps) {
-  if (!open) {
-    return null;
-  }
-
   return (
-    <div className="drawer-backdrop" onClick={onClose} role="presentation">
+    <div
+      className="drawer-backdrop"
+      onClick={() => uiStoreActions.setSymbolMeaningDrawerOpen(false)}
+      role="presentation"
+    >
       <aside
         className="drawer-panel drawer-panel-narrow meditative-drawer"
         onClick={(event) => event.stopPropagation()}
@@ -88,7 +85,11 @@ export function SymbolMeaningDrawer({
         </div>
 
         <div className="drawer-footer">
-          <button className="ghost-action drawer-footer-action" onClick={onClose} type="button">
+          <button
+            className="ghost-action drawer-footer-action"
+            onClick={() => uiStoreActions.setSymbolMeaningDrawerOpen(false)}
+            type="button"
+          >
             {copy.close}
           </button>
         </div>

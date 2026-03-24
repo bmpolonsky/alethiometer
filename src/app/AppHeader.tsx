@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { MenuDropdown } from "../components/MenuDropdown";
 import { uiText } from "../domain/uiText";
-import { appController } from "./services/appController";
 import { preferencesStore } from "./store/preferencesStore";
 import { uiStore, uiStoreActions } from "./store/uiStore";
 import { useStore } from "./store/useStore";
@@ -34,14 +33,7 @@ export function AppHeader() {
     <header className={`topbar ${meditativeMode ? "is-meditative" : ""}`}>
       {meditativeMode ? null : <h1 className="topbar-title">ALETHIOMETER</h1>}
       <div ref={menuRef}>
-        <MenuDropdown
-          copy={copy}
-          meditativeMode={meditativeMode}
-          onSelect={appController.openDrawer}
-          onToggle={uiStoreActions.toggleMenu}
-          onToggleMeditativeMode={appController.toggleMeditativeMode}
-          open={menuExpanded}
-        />
+        <MenuDropdown copy={copy} meditativeMode={meditativeMode} open={menuExpanded} />
       </div>
     </header>
   );

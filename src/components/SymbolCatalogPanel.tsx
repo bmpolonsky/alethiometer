@@ -1,5 +1,6 @@
 import { InlineTemplateLink } from "./InlineTemplateLink";
 import { appController } from "../app/services/appController";
+import { meaningsService } from "../app/services/meaningsService";
 import type { Locale, SymbolEntry } from "../domain/types";
 
 interface SymbolCatalogPanelProps {
@@ -25,13 +26,6 @@ interface SymbolCatalogPanelProps {
     newMeaningPlaceholder: string;
     doneEditing: string;
   };
-  onInspectSymbol: (symbolId: number) => void;
-  onStartEditingMeanings: () => void;
-  onStopEditingMeanings: () => void;
-  onMeaningChange: (index: number, value: string) => void;
-  onNewMeaningDraftChange: (value: string) => void;
-  onAddMeaning: () => void;
-  onRemoveMeaning: (index: number) => void;
 }
 
 export function SymbolCatalogPanel({
@@ -44,13 +38,6 @@ export function SymbolCatalogPanel({
   newMeaningDraft,
   isEditingMeanings,
   copy,
-  onInspectSymbol,
-  onStartEditingMeanings,
-  onStopEditingMeanings,
-  onMeaningChange,
-  onNewMeaningDraftChange,
-  onAddMeaning,
-  onRemoveMeaning,
 }: SymbolCatalogPanelProps) {
   return (
     <section className="catalog-panel">
@@ -72,7 +59,7 @@ export function SymbolCatalogPanel({
             <button
               className={`catalog-item ${entry.id === symbol.id ? "is-active" : ""}`}
               key={entry.id}
-              onClick={() => onInspectSymbol(entry.id)}
+              onClick={() => appController.inspectSymbolFromDrawer(entry.id)}
               type="button"
             >
               <img alt="" className="catalog-item-image" src={entry.imageSrc} />
@@ -99,7 +86,9 @@ export function SymbolCatalogPanel({
               <button
                 className="ghost-action small-action inline-action"
                 onClick={
-                  isEditingMeanings ? onStopEditingMeanings : onStartEditingMeanings
+                  isEditingMeanings
+                    ? () => meaningsService.closeEditor()
+                    : () => meaningsService.openEditor()
                 }
                 type="button"
               >
@@ -130,14 +119,14 @@ export function SymbolCatalogPanel({
                       <input
                         className="drawer-item-input"
                         onChange={(event) =>
-                          onMeaningChange(index, event.target.value)
+                          meaningsService.updateMeaningItem(index, event.target.value)
                         }
                         type="text"
                         value={item}
                       />
                       <button
                         className="ghost-action small-action"
-                        onClick={() => onRemoveMeaning(index)}
+                        onClick={() => meaningsService.removeMeaningItem(index)}
                         type="button"
                       >
                         {copy.deleteMeaning}
@@ -149,11 +138,13 @@ export function SymbolCatalogPanel({
                 <div className="drawer-item-row is-new">
                   <input
                     className="drawer-item-input drawer-item-input-new"
-                    onChange={(event) => onNewMeaningDraftChange(event.target.value)}
+                    onChange={(event) =>
+                      meaningsService.updateNewMeaningDraft(event.target.value)
+                    }
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
                         event.preventDefault();
-                        onAddMeaning();
+                        meaningsService.addDraftMeaningItem();
                       }
                     }}
                     placeholder={copy.newMeaningPlaceholder}
@@ -162,7 +153,7 @@ export function SymbolCatalogPanel({
                   />
                   <button
                     className="secondary-action small-action"
-                    onClick={onAddMeaning}
+                    onClick={meaningsService.addDraftMeaningItem}
                     type="button"
                   >
                     {copy.addMeaning}

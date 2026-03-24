@@ -2,6 +2,7 @@ import { ArchivePanel } from "./ArchivePanel";
 import { HelpPanel } from "./HelpPanel";
 import { SettingsPanel } from "./SettingsPanel";
 import { SymbolCatalogPanel } from "./SymbolCatalogPanel";
+import { appController } from "../app/services/appController";
 import type {
   Locale,
   MenuSection,
@@ -11,7 +12,6 @@ import type {
 } from "../domain/types";
 
 interface SettingsDrawerProps {
-  open: boolean;
   locale: Locale;
   theme: ThemeMode;
   section: MenuSection;
@@ -50,7 +50,6 @@ interface SettingsDrawerProps {
     personalMeaning: string;
     emptyPersonalMeaning: string;
     editMeaning: string;
-    personalHint: string;
     addMeaning: string;
     deleteMeaning: string;
     newMeaningPlaceholder: string;
@@ -75,24 +74,9 @@ interface SettingsDrawerProps {
       items: string[];
     }>;
   };
-  onClose: () => void;
-  onInspectSymbol: (symbolId: number) => void;
-  onSetLocale: (locale: Locale) => void;
-  onSetTheme: (theme: ThemeMode) => void;
-  onExportData: () => void;
-  onImportData: (file: File) => Promise<void>;
-  onStartEditingMeanings: () => void;
-  onStopEditingMeanings: () => void;
-  onOpenReading: (entry: SavedReading) => void;
-  onDeleteReading: (readingId: string) => void;
-  onMeaningChange: (index: number, value: string) => void;
-  onNewMeaningDraftChange: (value: string) => void;
-  onAddMeaning: () => void;
-  onRemoveMeaning: (index: number) => void;
 }
 
 export function SettingsDrawer({
-  open,
   locale,
   theme,
   section,
@@ -107,25 +91,7 @@ export function SettingsDrawer({
   openedReadingId,
   copy,
   help,
-  onClose,
-  onInspectSymbol,
-  onSetLocale,
-  onSetTheme,
-  onExportData,
-  onImportData,
-  onStartEditingMeanings,
-  onStopEditingMeanings,
-  onOpenReading,
-  onDeleteReading,
-  onMeaningChange,
-  onNewMeaningDraftChange,
-  onAddMeaning,
-  onRemoveMeaning,
 }: SettingsDrawerProps) {
-  if (!open) {
-    return null;
-  }
-
   const title =
     section === "settings"
       ? copy.settingsSection
@@ -143,7 +109,7 @@ export function SettingsDrawer({
         : "drawer-panel drawer-panel-narrow";
 
   return (
-    <div className="drawer-backdrop" onClick={onClose} role="presentation">
+    <div className="drawer-backdrop" onClick={appController.closeDrawer} role="presentation">
       <aside className={drawerClassName} onClick={(event) => event.stopPropagation()}>
         <div className="drawer-header">
           <div>
@@ -154,15 +120,7 @@ export function SettingsDrawer({
 
         <div className="drawer-scroll-body">
           {section === "settings" ? (
-            <SettingsPanel
-              copy={copy}
-              locale={locale}
-              onSetLocale={onSetLocale}
-              onSetTheme={onSetTheme}
-              onExportData={onExportData}
-              onImportData={onImportData}
-              theme={theme}
-            />
+            <SettingsPanel copy={copy} locale={locale} theme={theme} />
           ) : null}
 
           {section === "symbols" ? (
@@ -173,13 +131,6 @@ export function SettingsDrawer({
               isEditingMeanings={isEditingMeanings}
               locale={locale}
               newMeaningDraft={newMeaningDraft}
-              onAddMeaning={onAddMeaning}
-              onStopEditingMeanings={onStopEditingMeanings}
-              onMeaningChange={onMeaningChange}
-              onInspectSymbol={onInspectSymbol}
-              onNewMeaningDraftChange={onNewMeaningDraftChange}
-              onStartEditingMeanings={onStartEditingMeanings}
-              onRemoveMeaning={onRemoveMeaning}
               personalMeaningItems={personalMeaningItems}
               symbol={symbol}
               symbols={symbols}
@@ -191,8 +142,6 @@ export function SettingsDrawer({
               copy={copy}
               journal={journal}
               locale={locale}
-              onDeleteReading={onDeleteReading}
-              onOpenReading={onOpenReading}
               openedReadingId={openedReadingId}
               symbols={symbols}
             />
@@ -204,7 +153,11 @@ export function SettingsDrawer({
         </div>
 
         <div className="drawer-footer">
-          <button className="ghost-action drawer-footer-action" onClick={onClose} type="button">
+          <button
+            className="ghost-action drawer-footer-action"
+            onClick={appController.closeDrawer}
+            type="button"
+          >
             {copy.close}
           </button>
         </div>
