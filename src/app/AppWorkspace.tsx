@@ -19,6 +19,7 @@ import {
   readingStatusStore,
 } from "./store/readingStore";
 import { symbolStore } from "./store/symbolStore";
+import { useCompactLayout } from "./useCompactLayout";
 import { useStore } from "./store/useStore";
 
 function WorkspaceControlPanel({
@@ -42,7 +43,7 @@ function WorkspaceControlPanel({
       locale={locale}
       onAsk={readingService.ask}
       onOpenPicker={appController.openQuestionPicker}
-      onInspectSymbol={sessionService.inspectSymbol}
+      onInspectSymbol={appController.inspectSymbolFromDial}
       onSaveReading={appController.beginSaveReading}
       status={status}
       symbols={symbolCatalog}
@@ -108,10 +109,12 @@ function MeditativeAnswerStrip({ locale }: { locale: Locale }) {
 function WorkspaceSidebar({
   copy,
   help,
+  isCompactLayout,
   locale,
 }: {
   copy: (typeof uiText)[Locale];
   help: (typeof helpText)[Locale];
+  isCompactLayout: boolean;
   locale: Locale;
 }) {
   const symbolState = useStore(symbolStore);
@@ -124,22 +127,27 @@ function WorkspaceSidebar({
     getPersonalMeaningItems(selectedSymbolId);
   return (
     <aside className="sidebar-column">
-      <SymbolInspector
-        copy={copy}
-        defaultMeaningItems={defaultMeaningItems}
-        locale={locale}
-        onOpenLexicon={appController.openSymbolEditor}
-        personalMeaningItems={personalMeaningItems}
-        symbol={currentSymbol}
-      />
+      {isCompactLayout ? null : (
+        <SymbolInspector
+          copy={copy}
+          defaultMeaningItems={defaultMeaningItems}
+          locale={locale}
+          onOpenLexicon={appController.openSymbolEditor}
+          personalMeaningItems={personalMeaningItems}
+          symbol={currentSymbol}
+        />
+      )}
 
-      <ReferencePanel copy={copy} help={help} onOpenHelp={() => appController.openDrawer("help")} />
+      {isCompactLayout ? null : (
+        <ReferencePanel copy={copy} help={help} onOpenHelp={() => appController.openDrawer("help")} />
+      )}
     </aside>
   );
 }
 
 export function AppWorkspace() {
   const preferences = useStore(preferencesStore);
+  const isCompactLayout = useCompactLayout();
   const {
     locale,
     meditativeMode,
@@ -163,7 +171,12 @@ export function AppWorkspace() {
       </section>
 
       {meditativeMode ? null : (
-        <WorkspaceSidebar copy={copy} help={help} locale={locale} />
+        <WorkspaceSidebar
+          copy={copy}
+          help={help}
+          isCompactLayout={isCompactLayout}
+          locale={locale}
+        />
       )}
     </main>
   );

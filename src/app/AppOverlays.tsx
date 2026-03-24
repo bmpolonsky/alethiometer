@@ -16,6 +16,7 @@ import { preferencesStore } from "./store/preferencesStore";
 import { questionStore } from "./store/questionStore";
 import { symbolStore } from "./store/symbolStore";
 import { uiStore, uiStoreActions } from "./store/uiStore";
+import { useCompactLayout } from "./useCompactLayout";
 import { useStore } from "./store/useStore";
 
 function OpenSettingsDrawer({
@@ -165,7 +166,7 @@ function QuestionSymbolPickerContainer() {
   return <OpenQuestionSymbolPicker locale={locale} pickerHand={pickerHand} />;
 }
 
-function OpenMeditativeMeaningDrawer({ locale }: { locale: Locale }) {
+function OpenSymbolMeaningDrawer({ locale }: { locale: Locale }) {
   const { selectedSymbolId } = useStore(symbolStore);
   const meanings = useStore(meaningsStore);
   const symbol = symbolCatalog[selectedSymbolId] ?? symbolCatalog[0]!;
@@ -187,18 +188,19 @@ function OpenMeditativeMeaningDrawer({ locale }: { locale: Locale }) {
   );
 }
 
-function MeditativeMeaningDrawerContainer() {
+function SymbolMeaningDrawerContainer() {
   const {
     locale,
     meditativeMode,
   } = useStore(preferencesStore);
   const { meditativeDrawerOpen } = useStore(uiStore);
+  const isCompactLayout = useCompactLayout();
 
-  if (!meditativeMode || !meditativeDrawerOpen) {
+  if (!meditativeDrawerOpen || (!meditativeMode && !isCompactLayout)) {
     return null;
   }
 
-  return <OpenMeditativeMeaningDrawer locale={locale} />;
+  return <OpenSymbolMeaningDrawer locale={locale} />;
 }
 
 export function AppOverlays() {
@@ -207,7 +209,7 @@ export function AppOverlays() {
       <SettingsDrawerContainer />
       <SaveReadingDialogContainer />
       <QuestionSymbolPickerContainer />
-      <MeditativeMeaningDrawerContainer />
+      <SymbolMeaningDrawerContainer />
     </>
   );
 }

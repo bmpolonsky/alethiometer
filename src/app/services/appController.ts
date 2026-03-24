@@ -7,6 +7,7 @@ import { readingService } from "./readingService";
 import { sessionService } from "./sessionService";
 import { preferencesStore } from "../store/preferencesStore";
 import { meaningsStore } from "../store/meaningsStore";
+import { isCompactLayoutViewport } from "../useCompactLayout";
 
 export const appController = {
   openDrawer(section: MenuSection) {
@@ -70,7 +71,7 @@ export const appController = {
   inspectSymbolFromDial(symbolId: number) {
     sessionService.chooseSymbol(symbolId);
 
-    if (preferencesStore.getState().meditativeMode) {
+    if (preferencesStore.getState().meditativeMode || isCompactLayoutViewport()) {
       uiStoreActions.setMeditativeDrawerOpen(true);
     }
   },
