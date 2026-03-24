@@ -126,8 +126,8 @@ export function Dial({
     handId: HandId;
     pointerId: number;
     residuePixels: number;
-    lastX: number;
-    lastY: number;
+    lastLocalX: number;
+    lastLocalY: number;
     wheelRotationRad: number;
   } | null>(null);
   const [draggingHand, setDraggingHand] = useState<HandId | null>(null);
@@ -171,6 +171,42 @@ export function Dial({
       if (askHoldRef.current?.frame) {
         window.cancelAnimationFrame(askHoldRef.current.frame);
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    const handlePointerMove = (event: PointerEvent) => {
+      if (dragStateRef.current?.pointerId !== event.pointerId) {
+        return;
+      }
+
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+
+      moveWheelDrag(event.clientX, event.clientY);
+    };
+
+    const handlePointerRelease = (event: PointerEvent) => {
+      if (dragStateRef.current?.pointerId !== event.pointerId) {
+        return;
+      }
+
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+
+      stopWheelDrag();
+    };
+
+    window.addEventListener("pointermove", handlePointerMove, { passive: false });
+    window.addEventListener("pointerup", handlePointerRelease, { passive: false });
+    window.addEventListener("pointercancel", handlePointerRelease, { passive: false });
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerRelease);
+      window.removeEventListener("pointercancel", handlePointerRelease);
     };
   }, []);
 
@@ -309,13 +345,19 @@ export function Dial({
       return;
     }
 
+    const localPoint = getLocalPoint(clientX, clientY);
+
+    if (!localPoint) {
+      return;
+    }
+
     onFocusHand(handId);
     dragStateRef.current = {
       handId,
       pointerId,
       residuePixels: 0,
-      lastX: clientX,
-      lastY: clientY,
+      lastLocalX: localPoint.x,
+      lastLocalY: localPoint.y,
       wheelRotationRad: (wheelRotationDeg * Math.PI) / 180,
     };
     setDraggingHand(handId);
@@ -323,7 +365,11 @@ export function Dial({
       ...current,
       [handId]: 1,
     }));
-    target.setPointerCapture(pointerId);
+    try {
+      target.setPointerCapture(pointerId);
+    } catch {
+      // Some mobile browsers are inconsistent with pointer capture on SVG nodes.
+    }
   }
 
   function moveWheelDrag(clientX: number, clientY: number) {
@@ -333,8 +379,14 @@ export function Dial({
       return;
     }
 
-    const dx = clientX - dragState.lastX;
-    const dy = clientY - dragState.lastY;
+    const localPoint = getLocalPoint(clientX, clientY);
+
+    if (!localPoint) {
+      return;
+    }
+
+    const dx = localPoint.x - dragState.lastLocalX;
+    const dy = localPoint.y - dragState.lastLocalY;
     const delta =
       Math.cos(dragState.wheelRotationRad) * dx +
       Math.sin(dragState.wheelRotationRad) * dy;
@@ -360,8 +412,8 @@ export function Dial({
       dragState.residuePixels = totalPixels;
     }
 
-    dragState.lastX = clientX;
-    dragState.lastY = clientY;
+    dragState.lastLocalX = localPoint.x;
+    dragState.lastLocalY = localPoint.y;
   }
 
   function stopWheelDrag() {
@@ -521,6 +573,7 @@ export function Dial({
                 }}
                 onPointerDown={(event) => {
                   event.stopPropagation();
+                  event.preventDefault();
                   startWheelDrag(
                     handId,
                     rotationDeg,
@@ -532,18 +585,21 @@ export function Dial({
                 }}
                 onPointerMove={(event) => {
                   if (dragStateRef.current?.pointerId === event.pointerId) {
+                    event.preventDefault();
                     moveWheelDrag(event.clientX, event.clientY);
                   }
                 }}
                 onPointerUp={(event) => {
                   if (dragStateRef.current?.pointerId === event.pointerId) {
                     event.stopPropagation();
+                    event.preventDefault();
                     stopWheelDrag();
                   }
                 }}
                 onPointerCancel={(event) => {
                   if (dragStateRef.current?.pointerId === event.pointerId) {
                     event.stopPropagation();
+                    event.preventDefault();
                     stopWheelDrag();
                   }
                 }}
